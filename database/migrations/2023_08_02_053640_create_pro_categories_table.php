@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('pro_categories', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('memo')->nullable();
+            $table->boolean('dock')->default(false);
+            $table->foreignId('color_id')->nullable()->constrained();
             $table->timestamps();
+            
         });
     }
 

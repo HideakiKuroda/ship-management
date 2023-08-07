@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
-            $table->increments('id')->index()->comment('権限ID');
-            $table->char('name', 10)->comment('権限名');
+        Schema::create('ship_owners', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('ship_id')->constrained();
+            $table->string('owner_name');
+            $table->integer('ratio');
+            $table->timestamps();
+
         });
     }
 
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('ship_owners');
     }
 };

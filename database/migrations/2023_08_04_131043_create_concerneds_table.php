@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tsk_attachments', function (Blueprint $table) {
+        Schema::create('concerneds', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id')
+            $table->foreignId('ship_id')
                         ->constrained()
                         ->onUpdate('cascade')
                         ->onDelete('cascade');
-            $table->string('filename');
-            $table->string('title')->nullable();
+            $table->string('borrower')->nullable();
+            $table->string('manager')->nullable();
+            $table->string('crew_arrange')->nullable();
             $table->timestamps();
-            
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tsk_attachments');
+        Schema::dropIfExists('concerneds');
     }
 };

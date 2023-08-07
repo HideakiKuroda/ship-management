@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('operat_sections', function (Blueprint $table) {
             $table->id();
+            $table->string('section');
+            $table->text('memo')->nullable();
             $table->timestamps();
+            
         });
     }
 

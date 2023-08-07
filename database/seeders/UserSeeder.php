@@ -17,146 +17,26 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         DB::table('users')->insert([
-            [
-                'name' => 'H Kuroda',
-                'email' => 'kurodah@test.com',
-                'password' => Hash::make('s8061710'),
-                'permission_id' => 6,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test1',
-                'email' => 'test1@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 5,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test2',
-                'email' => 'test2@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 5,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test3',
-                'email' => 'test3@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 4,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test4',
-                'email' => 'test4@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 3,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test5',
-                'email' => 'test5@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 2,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test6',
-                'email' => 'test6@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test7',
-                'email' => 'test7@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 4,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test8',
-                'email' => 'test8@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 3,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test9',
-                'email' => 'test9@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 2,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test10',
-                'email' => 'test10@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test11',
-                'email' => 'test11@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 5,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test12',
-                'email' => 'test12@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 5,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test13',
-                'email' => 'test13@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 4,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test14',
-                'email' => 'test14@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 3,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test15',
-                'email' => 'test15@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 2,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test16',
-                'email' => 'test16@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test17',
-                'email' => 'test17@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test18',
-                'email' => 'test18@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
-            [
-                'name' => 'test19',
-                'email' => 'test19@test.com',
-                'password' => Hash::make('password123'),
-                'permission_id' => 1,
-                'created_at' => '2023/01/01 11:11:11'                
-            ],
+            [ 'name' => '太田 正紀' , 'email' => 'masanori.ota@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '坂倉 繁行' , 'email' => 'shigeyuki.sakakura@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '髙松 一憲' , 'email' => 'kazunori.takamatsu@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '二ツ石 聖示' , 'email' => 'seiji.futatsuishi@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '三宅 陸平' , 'email' => 'rikuhei.miyake@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '宮本 強' , 'email' => 'tsuyoshi.miyamoto@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '植田 廣幸' , 'email' => 'hiroyuki.ueda@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '黒田 秀明' , 'email' => 'hideaki.kuroda@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '吉田 美弥' , 'email' => 'miya.yoshida@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '岩本 香利' , 'email' => 'kaori.iwamoto@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '若狭 吉晴' , 'email' => 'yoshiharu.wakasa@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '荒川 純一' , 'email' => 'junichi.arakawa@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '青木 宏之' , 'email' => 'hiroyuki.aoki@nihon-eisen.com  ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '堀 容子' , 'email' => 'yoko.hori@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '村知 一世' , 'email' => 'kazuyo.murachi@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '井上 佳代' , 'email' => 'kayo.inoue@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '柄谷 仁美' , 'email' => 'hitomi.karatani@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '小俣 真美' , 'email' => 'mami.omata@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '西尾 哲郎' , 'email' => 'tetsuro.nishio@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '田村 啓造' , 'email' => 'keizo.tamura@nihon-eisen.com ' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
         ]);
 
     }

@@ -15,7 +15,12 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $this->call([
             UserSeeder::class,
-            PermissionTableSeeder::class,
-        ]);
+            OperatSectionSeeder::class,
+            NavigationAreaSeeder::class,
+            ShipSeeder::class,
+            ColorSeeder::class,
+            ProCategorySeeder::class,
+            SummarySeeder::class,
+            ]);
     }
 }
