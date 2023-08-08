@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
             ColorSeeder::class,
             ProCategorySeeder::class,
             SummarySeeder::class,
+            ConcernedSeeder::class,
+            ShipOwnerSeeder::class,
+            Summary2Seeder::class,
             ]);
     }
 }

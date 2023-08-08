@@ -17,6 +17,7 @@ return new class extends Migration
                         ->constrained()
                         ->onUpdate('cascade')
                         ->onDelete('cascade');
+            $table->string('operator')->nullable();
             $table->string('borrower')->nullable();
             $table->string('manager')->nullable();
             $table->string('crew_arrange')->nullable();

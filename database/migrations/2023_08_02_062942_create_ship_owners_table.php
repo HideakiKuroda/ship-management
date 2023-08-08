@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ship_id')->constrained();
             $table->string('owner_name');
-            $table->integer('ratio');
+            $table->float('ratio');
             $table->timestamps();
 
         });
