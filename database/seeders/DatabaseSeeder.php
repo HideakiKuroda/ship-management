@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             ConcernedSeeder::class,
             ShipOwnerSeeder::class,
             Summary2Seeder::class,
+            ProjectSeeder::class,
+            DepartmentSeeder::class,
+            User_descriptionSeeder::class,
+            
             ]);
     }
 }

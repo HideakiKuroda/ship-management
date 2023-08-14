@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Project;
+use App\Models\Task;
 use Spatie\Permission\Traits\HasRoles;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
 
@@ -49,6 +50,11 @@ class User extends Authenticatable
     public function projects()
     {
     return $this->belongsToMany(Project::class, 'pro_assignments');
+    }
+
+    public function Tasks()
+    {
+    return $this->belongsToMany(Task::class, 'Task_assignments');
     }
 }
 
