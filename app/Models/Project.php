@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Pro_attachment;
+use App\Models\Pro_category;
+use App\Models\Ship;
+Use App\Models\Task;
 
 class Project extends Model
 {
@@ -16,9 +19,24 @@ class Project extends Model
     return $this->belongsToMany(User::class, 'pro_assignments');
     }
 
-    public function Pro_attachments()
+    public function pro_attachments()
     {
         return $this->hasMany(Pro_attachment::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function pro_categories()
+    {
+        return $this->belongsTo(Pro_category::class);
+    }
+
+    public function ships()
+    {
+        return $this->belongsTo(Ship::class);
     }
 }
 

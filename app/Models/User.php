@@ -11,6 +11,8 @@ use App\Models\Project;
 use App\Models\Task;
 use Spatie\Permission\Traits\HasRoles;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
+use App\Models\User_description;
+
 
 class User extends Authenticatable
 {
@@ -55,6 +57,11 @@ class User extends Authenticatable
     public function Tasks()
     {
     return $this->belongsToMany(Task::class, 'Task_assignments');
+    }
+
+    public function user_descriptions()
+    {
+        return $this->hasOne(User_description::class);
     }
 }
 
