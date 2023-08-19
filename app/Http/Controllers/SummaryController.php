@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSummaryRequest;
 use App\Http\Requests\UpdateSummaryRequest;
 use App\Models\Summary;
+use Inertia\Inertia;
 
 class SummaryController extends Controller
 {

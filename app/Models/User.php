@@ -9,9 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\Ship;
 use Spatie\Permission\Traits\HasRoles;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
 use App\Models\User_description;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 
 class User extends Authenticatable
@@ -49,19 +52,24 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function projects()
+    public function projects(): BelongsToMany
     {
     return $this->belongsToMany(Project::class, 'pro_assignments');
     }
 
-    public function Tasks()
+    public function Tasks(): BelongsToMany
     {
     return $this->belongsToMany(Task::class, 'Task_assignments');
     }
 
-    public function user_descriptions()
+    public function user_descriptions(): HasOne
     {
         return $this->hasOne(User_description::class);
+    }
+
+    public function ships(): BelongsToMany
+    {
+        return $this->belongsToMany(Ship::class, 'ship_assignments');
     }
 }
 

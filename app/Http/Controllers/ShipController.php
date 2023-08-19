@@ -5,15 +5,34 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShipRequest;
 use App\Http\Requests\UpdateShipRequest;
 use App\Models\Ship;
+use App\Models\Ship_owner;
+use App\Models\Summary;
+use App\Models\Summary2;
+use App\Models\User;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+
 
 class ShipController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $users = User::with('ships')->has('ships')->get();
+        $ships = Ship::select('id', 'name', 'yard', 'ship_no')
+        ->get();
+
+        return Inertia::render('Ships/Index', [
+            'users' => $users,
+            'ships' => $ships,
+        ]);
+
+        dd( $users, $ships,);
+        
     }
 
     /**
@@ -37,7 +56,15 @@ class ShipController extends Controller
      */
     public function show(Ship $ship)
     {
-        //
+        try {
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas');
+            // dd($ship);
+            return Inertia::render('Ships/Show',['ship' => $ship]);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            dd($e->getMessage());
+        }
+        
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShip_ownerRequest;
 use App\Http\Requests\UpdateShip_ownerRequest;
 use App\Models\Ship_owner;
+use Inertia\Inertia;
 
 class ShipOwnerController extends Controller
 {

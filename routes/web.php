@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ShipController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +18,15 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::resource('ships', ShipController::class)
+    ->middleware(['auth', 'verified']);
+
+Route::resource('projects', ProjectController::class)
+->middleware(['auth', 'verified']);    
+
+Route::resource('tasks', TaskController::class)
+    ->middleware(['auth', 'verified']);
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
