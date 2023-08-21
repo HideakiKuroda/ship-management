@@ -31,7 +31,7 @@ class ShipController extends Controller
             'ships' => $ships,
         ]);
 
-        dd( $users, $ships,);
+        // dd( $users, $ships,);
         
     }
 
@@ -72,7 +72,14 @@ class ShipController extends Controller
      */
     public function edit(Ship $ship)
     {
-        //
+        try {
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas');
+            // dd($ship);
+            return Inertia::render('Ships/Edit',['ship' => $ship]);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            dd($e->getMessage());
+        }
     }
 
     /**
@@ -80,7 +87,15 @@ class ShipController extends Controller
      */
     public function update(UpdateShipRequest $request, Ship $ship)
     {
-        //
+        
+        $ship->save();
+        
+        return to_route('ships.index')
+        ->with([
+            'message' => '更新しました。',
+            'status' => 'success'
+        ]);
+
     }
 
     /**
