@@ -59,7 +59,7 @@ class User extends Authenticatable
 
     public function Tasks(): BelongsToMany
     {
-    return $this->belongsToMany(Task::class, 'Task_assignments');
+    return $this->belongsToMany(Task::class, 'task_assignments');
     }
 
     public function user_descriptions(): HasOne
@@ -70,6 +70,10 @@ class User extends Authenticatable
     public function ships(): BelongsToMany
     {
         return $this->belongsToMany(Ship::class, 'ship_assignments');
+    }
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class, 'dept_assignments');
     }
 }
 

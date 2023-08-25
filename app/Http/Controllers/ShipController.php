@@ -9,6 +9,8 @@ use App\Models\Ship_owner;
 use App\Models\Summary;
 use App\Models\Summary2;
 use App\Models\User;
+use App\Models\Navigation_area;
+use App\Models\Operat_section;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -73,13 +75,46 @@ class ShipController extends Controller
     public function edit(Ship $ship)
     {
         try {
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas');
-            // dd($ship);
-            return Inertia::render('Ships/Edit',['ship' => $ship]);
+            $navigationAreas = Navigation_area::select('id', 'name')->get();
+            $operatSections = Operat_section::select('id', 'section')->get();
+            $departmentId = 4;
+            $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentId) {
+                $query->where('departments.id', $departmentId);
+            })
+            ->select('id','name')
+            ->get();
+            
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users');
+            
+            return Inertia::render('Ships/Edit',[
+                'ship' => $ship, 
+                'navigationAreas'=>$navigationAreas,
+                'operatSections'=>$operatSections,
+                'users'=>$users,
+            ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
+    }
+    public function assignUser(Request $request, $id)
+    {
+       
+        $ship = Ship::findOrFail($id);
+        $userId = $request->input('user_id');
+        $roleId = $request->input('role_id');
+
+        $ship->users()->attach($userId, ['role_id' => $roleId]);
+
+        return redirect()->route('ships.edit', $ship->id); 
+    }
+
+    public function unassignUser($id, $user_id)
+    {
+        $ship = Ship::findOrFail($id);
+        $ship->users()->detach($user_id);
+
+        return redirect()->route('ships.edit', $ship->id);
     }
 
     /**

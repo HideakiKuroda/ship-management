@@ -14,8 +14,8 @@ class OperatSectionSeeder extends Seeder
     public function run(): void
     {
         DB::table('operat_sections')->insert([
-            ['section' => '東海地区' , 'memo' => '伊勢湾・三河湾' , 'created_at' => '2023-08-04' ] ,
             ['section' => '瀬戸内地区' , 'memo' => '泉北・神戸・坂出・広島' , 'created_at' => '2023-08-04' ] ,
+            ['section' => '東海地区' , 'memo' => '伊勢湾・三河湾' , 'created_at' => '2023-08-04' ] ,
             ['section' => '神戸' , 'memo' => '神戸曳船' , 'created_at' => '2023-08-04' ] ,
             ['section' => '石狩新港' , 'memo' => '石狩新港サービス' , 'created_at' => '2023-08-04' ] ,
             ['section' => '苫小牧' , 'memo' => '北日本曳船' , 'created_at' => '2023-08-04' ] ,

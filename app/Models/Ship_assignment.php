@@ -12,6 +12,8 @@ class Ship_assignment extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['user_id', 'ship_id', 'role_id'];
+
     public function ships(): HasMany
     {
         return $this->hasMany(Ship::class);

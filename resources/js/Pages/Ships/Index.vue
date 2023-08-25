@@ -13,8 +13,27 @@ const props = defineProps({
 });
 
 const state = reactive({
-    selectedUser: ""
+    selectedUser: "",
+    isOpen: false // 追加
 });
+
+const selectUser = (id) => {
+  state.selectedUser = id;
+  state.isOpen = false; // 追加
+};
+
+const closeDropdown = () => {
+  state.isOpen = false; // 追加
+};
+
+const selectedUserName = computed(() => {
+    if (state.selectedUser) {
+      const user = props.users.find(user => user.id === state.selectedUser);
+      return user ? user.name : '担当者で絞込み';
+    } else {
+      return '担当者で絞込み';
+    }
+  });
 
 const displayedShips = computed(() => {
     if (state.selectedUser) {
@@ -50,14 +69,30 @@ const displayedShips = computed(() => {
                            <div class="flex pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <div>
                                 <!-- ユーザー選択ドロップダウン -->
-                                <select v-model="state.selectedUser">
+                                <!-- <select v-model="state.selectedUser">
                                     <option value="">All Users</option>
                                     <option v-for="user in props.users" :key="user.id" :value="user.id">
                                         {{ user.name }}
                                     </option>
-                                </select>
+                                </select> -->
+                                <button @click="state.isOpen = !state.isOpen" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{{ selectedUserName }} <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                                </svg></button>
+                                <!-- Dropdown menu -->
+                                <div v-if="state.isOpen" @click-outside="closeDropdown" id="dropdownHover" class="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                                <!-- メニュー項目 -->
+                                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                    <li v-for="user in users" :key="user.id">
+                                        <a @click="selectUser(user.id)" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{{ user.name }}</a>
+                                    </li>
+                                    <li>
+                                        <a @click="selectUser('')" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">全船表示</a>
+                                    </li>
+                                    </ul>
+                                </div>
+
                             </div>
-                            <Link as="button" :href="route('ships.create')" class="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規船登録</Link>
+                            <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規船登録</Link>
                            </div>
                           <div class="lg:w-2/3 w-full mx-auto overflow-auto">
                             <table class="table-auto w-full text-left whitespace-no-wrap">

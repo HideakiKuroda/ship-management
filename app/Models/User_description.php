@@ -13,7 +13,7 @@ class User_description extends Model
 
     public function departments()
     {
-    return $this->belongsToMany(Department::class, 'Dept_assignments');
+    return $this->belongsToMany(Department::class, 'dept_assignments');
     }
 
     public function users()

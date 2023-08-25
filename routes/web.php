@@ -22,6 +22,14 @@ use App\Http\Controllers\ProjectController;
 Route::resource('ships', ShipController::class)
     ->middleware(['auth', 'verified']);
 
+Route::middleware(['auth', 'verified'])
+->group(function () {
+    Route::resource('ships', ShipController::class);
+    Route::post('/ships/assignUser/{id}', [ShipController::class, 'assignUser'])->name('ships.assignUser');
+    // Route::delete('/ships/unassignUser/{id}', [ShipController::class, 'unassignUser'])->name('ships.unassignUser');
+    Route::delete('ships/{id}/unassignUser/{user_id}',  [ShipController::class, 'unassignUser'])->name('ships.unassignUser');
+});    
+
 Route::resource('projects', ProjectController::class)
 ->middleware(['auth', 'verified']);    
 

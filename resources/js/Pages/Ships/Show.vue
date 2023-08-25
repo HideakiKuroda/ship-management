@@ -63,140 +63,125 @@ const formatDate = (date) => {
 
                                 <div>
                                   <vue-collapsible-panel-group>
-                                    <vue-collapsible-panel>
+                               <vue-collapsible-panel>
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
                                 <template #content> 
      
-                                <div class="md:flex">
-                                <div v-if="ship.ex_name" class="p-2">
-                                <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">●船名（前）：</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ ship.ex_name }}
-                                    </div>
+                                  <div class="flex flex-wrap sm:flex-row">
+                                    <div v-if="ship.ex_name" class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●船名（前）：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ ship.ex_name }}
+                                      </div>
                                     </div>
 
-                                    <div v-if="ship.former_name" class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">◎船名（元）：</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ ship.former_name }}
+                                    <div v-if="ship.former_name" class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">◎船名（元）：</label>
+                                      <div id="name" class="w-48 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ ship.former_name }}
+                                      </div>
                                     </div>
+                                  
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎竣工：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ formatDate(ship.deliverd) }}
+                                      </div>
                                     </div>
-                                </div>
-                                <div class="md:flex">
-                                <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎竣工：</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ formatDate(ship.deliverd) }}
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎総トン数：</label>
+                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ ship.gross_tonn }}㌧
+                                      </div>
                                     </div>
+                                  
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎運航地域：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ props.ship.operat_sections.section }}
+                                      </div>
                                     </div>
-                                    <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎総トン数：</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ ship.gross_tonn }}㌧
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎航行区域 :</label>
+                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                          {{ props.ship.navigation_areas.name }}<a v-if="props.ship.navigation_areas.name"> 区域</a>
+                                      </div>
                                     </div>
+                                
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶記号：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ props.ship.summaries.official_number }}
+                                      </div>
                                     </div>
-                                </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎運航地域：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ props.ship.operat_sections.section }}
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎信号符号 :</label>
+                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        {{ props.ship.summaries.signal_code }}
+                                      </div>
                                     </div>
+                                  
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎国際トン数：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ props.ship.summary2s.international_ton }}
+                                      </div>
+                                    </div>
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎旅客定員 :</label>
+                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        {{ props.ship.summary2s.passenger_capacity }}
+                                      </div>
+                                    </div>
+                                  
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶保険（種類）：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ props.ship.summary2s.insurance_type }}
+                                      </div>
+                                    </div> 
                                   </div>
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎航行区域 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                      {{ props.ship.navigation_areas.name }}<a v-if="props.ship.navigation_areas.name"> 区域</a>
-                                  </div>
-                                </div>
-                              </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶記号：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ props.ship.summaries.official_number }}
-                                    </div>
-                                  </div>
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎信号符号 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                    {{ props.ship.summaries.signal_code }}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎国際トン数：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ props.ship.summary2s.international_ton }}
-                                    </div>
-                                  </div>
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎旅客定員 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                    {{ props.ship.summary2s.passenger_capacity }}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶保険（種類）：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ props.ship.summary2s.insurance_type }}
-                                    </div>
-                                  </div>
-                            </template>
-                            </vue-collapsible-panel>
+                                </template>
+                              </vue-collapsible-panel>
                             
                             <vue-collapsible-panel  :expanded="false">
                             <template #title> 機関仕様その他 </template>
                             <template #content> 
-                             <div class="md:flex">
-                                  <div class="p-2">
+                              <div class="flex flex-wrap sm:flex-row">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎馬力：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         {{ props.ship.summaries.engine_kw }}<a v-if="props.ship.summaries.engine_kw"> PS</a>
                                     </div>
                                   </div>
-                                </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎主機型式 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                     {{ props.ship.summaries.me_model }}
                                     </div>
                                   </div>
-                                  <div class="p-2">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎主機製造番号：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         {{ props.ship.summaries.me_sno }}
                                     </div>
                                   </div>
-                                </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎ペラ仕様 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                     {{ props.ship.summaries.pera_spec }}
                                     </div>
                                   </div>
-                                  <div class="p-2">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎ＺＰ製造番号：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         {{ props.ship.summaries.pera_sno }}
                                     </div>
                                   </div>
-                                </div>
-                                <div class="md:flex">
-                                  <div class="p-2">
+                                  <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎発電機型式 :</label>
-                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                    <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                     {{ props.ship.summaries.aux_engine }}
-                                    </div>
-                                  </div>
-                                  <div class="p-2">
-                                    <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎停泊用発電機：</label>
-                                    <div id="name" class="w-48  text-base outline-none text-gray-700 py-0 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        {{ props.ship.summaries.harbor_gen }}
                                     </div>
                                   </div>
                                 </div>
