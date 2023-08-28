@@ -12,6 +12,11 @@ class Pro_category extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        
+    ];
+
+
     public function projects()
     {
         return $this->hasMany(Project::class);

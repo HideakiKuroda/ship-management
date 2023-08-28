@@ -9,10 +9,15 @@ use App\Models\Pro_attachment;
 use App\Models\Pro_category;
 use App\Models\Ship;
 Use App\Models\Task;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
     use HasFactory;
+
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
 
     public function users()
     {

@@ -11,6 +11,13 @@ class Ship_owner extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+       'owner_name',
+       'ratio',
+       'ship_id'
+        
+    ];
+
     public function ships(): BelongsTo
     {
         return $this->belongsTo(Ship::class);

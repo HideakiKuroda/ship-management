@@ -4,8 +4,11 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref } from 'vue';
+//アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
+//アコーディオン機能のCSS
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -24,7 +27,7 @@ const deleteItem = id => {
 }
 
 const formatDate = (date) => {
-//   if (!date) return "N/A";
+  // if (!date) return "N/A";
   return moment(date).format('YYYY年MM月DD日');
 };
 
@@ -46,7 +49,8 @@ const formatDate = (date) => {
                     
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
-                            <div class="m-2">
+                            <FlashMessage  />
+                             <div class="m-2">
                                 
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -85,7 +89,7 @@ const formatDate = (date) => {
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎竣工：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ formatDate(ship.deliverd) }}
+                                            {{ formatDate(ship.delivered) }}
                                       </div>
                                     </div>
                                     <div class="p-2 ml-4">

@@ -11,7 +11,7 @@ class UpdateShip_ownerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**

@@ -10,11 +10,16 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Task extends Model
 {
     use HasFactory;
+
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
 
     protected $fillable = ['name', 'project_id', 'parent_id'];  // 必要なフィールドを追加してください。
 

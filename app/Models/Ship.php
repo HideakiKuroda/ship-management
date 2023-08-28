@@ -16,10 +16,27 @@ use App\Models\Summary;
 use App\Models\Summary2;
 use App\Models\Concerned;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ship extends Model
 {
     use HasFactory;
+
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
+    protected $fillable = [
+        'delivered',
+        'ex_name',
+        'former_name',
+        'gross_tonn',
+        'name',
+        'operat_section_id',
+        'navigation_area_id',
+        'ship_no',
+        'yard',
+    ];
 
     public function projects(): HasMany
     {

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ship_owners', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ship_id')->constrained();
+            $table->foreignId('ship_id')->constrained()->onDelete('cascade');
             $table->string('owner_name');
             $table->float('ratio');
             $table->timestamps();

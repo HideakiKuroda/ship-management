@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('ship_no')->nullable();
             $table->date('delivered')->nullable();
             $table->integer('gross_tonn')->nullable();
-            $table->foreignId('operat_section_id')->constrained();
-            $table->foreignId('navigation_area_id')->constrained();
+            $table->foreignId('operat_section_id')->nullable()->constrained();
+            $table->foreignId('navigation_area_id')->nullable()->constrained();
             $table->timestamps();
             $table->softDeletes();
             
