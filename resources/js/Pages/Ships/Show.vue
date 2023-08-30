@@ -31,6 +31,15 @@ const formatDate = (date) => {
   return moment(date).format('YYYY年MM月DD日');
 };
 
+const downloadFile = async (attachmentId) => {
+  try {
+    const response = await Inertia.get(route('ship.downloadFile', { id:props.ship.id}), { attachmentId: attachmentId });
+    // その他の処理
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+};
+
 </script>
 
 <template>
@@ -427,6 +436,39 @@ const formatDate = (date) => {
                               </div>
                             </template>
                             </vue-collapsible-panel>
+                            <vue-collapsible-panel :expanded="false">
+                            <template #title> 書類添付 </template>
+                            <template #content> 
+                               <div class="flex flex-col">
+                                <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                  <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                    <div class="overflow-hidden">
+                                      <table class="min-w-full text-left text-sm font-light">
+                                        <thead class="border-b font-medium dark:border-neutral-500">
+                                          <tr>
+                                            <!-- 「scope=”col”」の「col」は「column」の略で縦列のことです。 scope=”col” を指定したth要素が、その縦方向（下方向）のセルの見出し -->
+                                            <th scope="col" class="px-20 py-4 whitespace-no-wrap">ファイル内容</th>
+                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap"></th>
+                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap">ファイル名</th>
+                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap">登録日</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr v-for="attachment in  props.ship.ship_attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
+                                            <td><a class="ml-3 w-30 rounded text-center">{{ attachment.title }}</a></td>
+                                            <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
+                                            <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
+                                            <td class="ml-3 w-1/5 rounded ">{{ formatDate(attachment.created_at) }}</td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </template>  
+                            </vue-collapsible-panel>  
 
                             </vue-collapsible-panel-group>
                         </div>                        

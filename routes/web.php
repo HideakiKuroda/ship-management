@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ShipController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\UploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,10 +26,13 @@ Route::resource('ships', ShipController::class)
 Route::middleware(['auth', 'verified'])
 ->group(function () {
     Route::resource('ships', ShipController::class);
-    Route::post('/ships/assignUser/{id}', [ShipController::class, 'assignUser'])->name('ships.assignUser');
-    // Route::delete('/ships/unassignUser/{id}', [ShipController::class, 'unassignUser'])->name('ships.unassignUser');
-    Route::delete('ships/{id}/unassignUser/{user_id}',  [ShipController::class, 'unassignUser'])->name('ships.unassignUser');
+    Route::post('/ships/{id}/upload/', [ShipController::class,'upload'])->name('ship.upload');
+    Route::get('/ships/{id}/downloadFile/', [ShipController::class,'downloadFile'])->name('ship.downloadFile');
+    Route::delete('/ships/{id}/deleteFile/', [ShipController::class,'deleteFile'])->name('ship.deleteFile');
+    
 });    
+
+
 
 Route::resource('projects', ProjectController::class)
 ->middleware(['auth', 'verified']);    

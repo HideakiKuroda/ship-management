@@ -11,11 +11,13 @@ use App\Models\Summary2;
 use App\Models\User;
 use App\Models\Navigation_area;
 use App\Models\Operat_section;
+use App\Models\Ship_attachment;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis as LaravelRedis;
 use Illuminate\Support\Facades;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -100,7 +102,7 @@ class ShipController extends Controller
     public function show(Ship $ship)
     {
         try {
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas');
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','ship_attachments');
             // dd($ship);
             return Inertia::render('Ships/Show',['ship' => $ship]);
         } catch (\Throwable $e) {
@@ -125,7 +127,7 @@ class ShipController extends Controller
             ->select('id','name')
             ->get();
             
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users');
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments');
             
             return Inertia::render('Ships/Edit',[
                 'ship' => $ship, 
@@ -137,6 +139,7 @@ class ShipController extends Controller
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
+        
     }
     /**
      * Update the specified resource in storage.
@@ -209,6 +212,14 @@ class ShipController extends Controller
                 'manager' => $request->input('manager'),
                 'operator' => $request->input('operator'),
             ]);
+
+            // dd($request);
+            foreach ($request->attachments ?? [] as $attachData) {
+                Ship_attachment::where('id', $attachData['id'])
+                    ->where('ship_id', $ship->id)
+                    ->update(['title' => $attachData['title']]);
+            }
+
             $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
             $ship->users()->sync($userIds);
             //リクエストにないオーナーを削除
@@ -249,5 +260,86 @@ class ShipController extends Controller
              'message' => '削除しました。',
              'status' => 'denger'
          ]);
+    }
+
+    public function upload(Request $request, $id)
+    {
+        $ship = Ship::findOrFail($id);
+        $files = $request->file('files');
+        
+
+        foreach ($files as $file) {
+         
+            $originalName = $file->getClientOriginalName();
+            $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
+            // dd($filetype);
+            $icon = '';
+            if ($filetype === 'xls'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'xlsx'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'xlsm'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'doc'){$icon='/images/word_document.png';}
+            elseif ($filetype === 'docx'){$icon='/images/word_document.png';}
+            elseif ($filetype === 'pdf'){$icon='/images/adobe_acrobat_pdf.png';}
+            elseif ($filetype === 'jpg'){$icon='/images/picture_image_photo_file.png';}
+            elseif ($filetype === 'zip'){$icon='/images/zip_file_winzip.png';}
+            elseif ($filetype === 'pptx'){$icon='/images/powerpoint_document.png';}
+            elseif ($filetype === 'pptm'){$icon='/images/powerpoint_document.png';}
+            else{$icon='/images/text_document.png';};
+
+            // $filename = $file->storeAs("/ships/{$id}", $originalName);
+            // dd($filename);
+            $filename = Storage::put("ships/{$id}", $file);
+            // データベースに記録
+            Ship_attachment::create([
+                'ship_id' => $id,
+                'filename' => $filename,
+                'originname' => $originalName,
+                'icon' => $icon,
+            ]);
+        }
+
+        // ships.edit へリダイレクト
+        return redirect()->route('ships.edit', $id)->with([
+            'message' => 'ファイルをアップロードしました。',
+            'status' => 'success'
+        ]);
+    }
+
+    public function deleteFile(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Ship_attachment::where('id', $attachData)->first();
+        // dd($attachment);
+        if ($attachment) {
+            // データベースからレコードを削除
+            Ship_attachment::where('id', $attachData)->delete();
+            
+            // ストレージからファイルを削除
+            Storage::delete($attachment->filename);
+
+            return redirect()->route('ships.edit', $id)->with([
+                'message' => 'ファイルを削除しました。',
+                'status' => 'success'
+            ]);
+        }
+
+        return redirect()->route('ships.edit', $id)->with([
+            'message' => 'ファイルの削除に失敗しました。',
+            'status' => 'error'
+        ]);
+    }
+
+ 
+    public function downloadFile(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Ship_attachment::where('id', $attachData)->first();
+
+        if ($attachment) {
+            $filePath = Storage::path($attachment->filename);
+            return response()->download($filePath, $attachment->originname);
+        }
+
+        return response()->json(['message' => 'File not found'], 404);
     }
 }

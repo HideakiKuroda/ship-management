@@ -7,6 +7,7 @@ import { ref, reactive } from 'vue';
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import axios from 'axios';
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 
 
@@ -15,14 +16,12 @@ const components = {
   VueCollapsiblePanel,
 };
 
-
 const props = defineProps({
     ship : Object,
     navigationAreas : Array,
     operatSections : Array,
     users :Array,
 })
-
 
 const form = reactive({         //内容をreactiveにform変数に収める
     id:                 props.ship.id,
@@ -84,8 +83,10 @@ const form = reactive({         //内容をreactiveにform変数に収める
     manager:            props.ship.concerneds.manager,
     crew_arrange:       props.ship.concerneds.crew_arrange,
     owners:             [...props.ship.ship_owners],
+    attachments:        [...props.ship.ship_attachments],
 
 }) 
+
 
 const deleteItem = id => {
     Inertia.delete(route('ships.destroy',{ ship:id }),{
@@ -125,6 +126,57 @@ const removeOwner = (index) => {
   form.owners.splice(index, 1)
 }
 
+///ファイル添付のスクリプト
+const fileInput = ref(null);
+const uploading = ref(false);
+const uploadComplete = ref(false);
+const uploadPercentage = ref(0);
+
+const handleFileChange = () => {
+  // ファイルの配列を取得
+  const files = fileInput.value.files;
+
+  // ファイルが選択されていなければ何もしない
+  if (files.length === 0) {
+    return;
+  }
+
+  // 確認ダイアログを表示
+  if (window.confirm('ファイルをアップロードしますか？')) {
+    const formData = new FormData();
+
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files[]', files[i]);
+    }
+
+    // ここでInertia.jsを使ってアップロード
+    Inertia.post(route('ship.upload', { id: form.id }), formData, {
+      // オプション：アップロードの進行状況が必要な場合はこちらを使用
+      onUploadProgress: (progressEvent) => {
+        uploadPercentage.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+      }
+    });
+
+    // アップロード完了のフラグをセット（Inertia.jsのPromiseが解決したら設定）
+    uploadComplete.value = true;
+  } else {
+    // ユーザーがキャンセルした場合の処理（オプション）
+  }
+};
+
+const downloadFile = async (attachmentId) => {
+  try {
+    const response = await Inertia.get(route('ship.downloadFile', { id: form.id }), { attachmentId: attachmentId });
+    // その他の処理
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+};
+
+const deleteFile = (attachmentId) => {
+  Inertia.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
+};
+
 </script>
 
 <template>
@@ -144,6 +196,7 @@ const removeOwner = (index) => {
                     
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
+                            <FlashMessage  />
                             <div class="m-2">
                                 
                                 <div class="flex flex-col p-2 ml-4">
@@ -485,6 +538,48 @@ const removeOwner = (index) => {
                               </div>
                             </template>
                             </vue-collapsible-panel>
+                            <vue-collapsible-panel :expanded="false">
+                            <template #title> 書類添付 </template>
+                            <template #content> 
+                              <div  class="content">
+                               <input type="file" multiple ref="fileInput" @change="handleFileChange" class="form-control" />
+                               <div v-if="uploading">
+                                  アップロード中... {{ uploadPercentage }}%
+                                </div>
+                                <div v-if="uploadComplete">
+                                  アップロードが完了しました。
+                                </div>                       
+                              </div>
+                               <div class="flex flex-col">
+                                <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                  <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                    <div class="overflow-hidden">
+                                      <table class="min-w-full text-left text-sm font-light">
+                                        <thead class="border-b  font-medium dark:border-neutral-500">
+                                          <tr>
+                                            <th scope="col" class="px-20 py-4 ">ファイル内容</th>
+                                            <th scope="col" class="px-12 py-4 "></th>
+                                            <th scope="col" class="px-12 py-4 ">ファイル名</th>
+                                            <th scope="col" class="px-12 py-4 ">登録日</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr v-for="attachment in form.attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
+                                            <td><input type="text"  v-model="attachment.title" class="ml-3 w-30 rounded text-center"></td>
+                                            <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
+                                            <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
+                                            <td class="ml-3 w-1/5 rounded ">{{ formatDate(attachment.created_at) }}</td>
+                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </template>  
+                            </vue-collapsible-panel>  
 
                             </vue-collapsible-panel-group>
                                                 
@@ -511,3 +606,12 @@ const removeOwner = (index) => {
     </AuthenticatedLayout>
 </template>
 
+<style>
+/* Style for the drop zone */
+.drop-zone {
+  border: 2px dashed #cccccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+</style>

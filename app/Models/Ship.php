@@ -16,6 +16,7 @@ use App\Models\Summary;
 use App\Models\Summary2;
 use App\Models\Concerned;
 use App\Models\User;
+use App\Models\Ship_attachment;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ship extends Model
@@ -76,5 +77,10 @@ class Ship extends Model
     public function users(): BelongsToMany
     {
     return $this->belongsToMany(User::class, 'ship_assignments');
+    }
+
+    public function ship_attachments(): HasMany
+    {
+        return $this->hasMany(Ship_attachment::class);
     }
 }
