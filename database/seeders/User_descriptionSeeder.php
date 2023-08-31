@@ -34,6 +34,8 @@ class User_descriptionSeeder extends Seeder
             [ 'user_id'=> '18',  'name2' => '小俣',  'name1' => '真美', 'phone'=>'null' ,  'created_at' => '2023/08/10 12:00:00'  ] ,
             [ 'user_id'=> '19',  'name2' => '西尾',  'name1' => '哲郎', 'phone'=>'null' ,  'created_at' => '2023/08/10 12:00:00'  ] ,
             [ 'user_id'=> '20',  'name2' => '田村',  'name1' => '啓造', 'phone'=>'090-1682-9414' ,  'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'user_id'=> '21',  'name2' => '清水',  'name1' => '斉', 'phone'=>'090-2021-0330' ,  'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'user_id'=> '22',  'name2' => '増田',  'name1' => '数一', 'phone'=>'090-4972-6989' ,  'created_at' => '2023/08/10 12:00:00'  ] ,
           
             ]);
     }

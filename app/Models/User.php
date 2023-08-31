@@ -10,11 +10,13 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Ship;
+use App\Models\Ship_attachment;
 use Spatie\Permission\Traits\HasRoles;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
 use App\Models\User_description;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
 class User extends Authenticatable
@@ -75,6 +77,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Department::class, 'dept_assignments');
     }
+
+    
 }
 
 

@@ -21,7 +21,7 @@ const props = defineProps({
     navigationAreas : Array,
     operatSections : Array,
     users :Array,
-})
+ })
 
 const form = reactive({         //内容をreactiveにform変数に収める
     id:                 props.ship.id,
@@ -162,6 +162,31 @@ const handleFileChange = () => {
   } else {
     // ユーザーがキャンセルした場合の処理（オプション）
   }
+};
+
+const dropFiles = (event) => {
+  uploading.value = true;
+  uploadComplete.value = false;
+
+  const formData = new FormData();
+
+  const droppedFiles = event.dataTransfer.files;
+  Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
+
+  Inertia.post(route('ship.upload', { id: form.id }), formData, {
+    onBefore: () => {
+      // 何か処理
+    },
+    onSuccess: () => {
+      uploadComplete.value = true;
+    },
+    onError: () => {
+      // エラーハンドリング
+    },
+    onFinish: () => {
+      uploading.value = false;
+    },
+  });
 };
 
 const downloadFile = async (attachmentId) => {
@@ -550,25 +575,46 @@ const deleteFile = (attachmentId) => {
                                   アップロードが完了しました。
                                 </div>                       
                               </div>
-                               <div class="flex flex-col">
+                             
+                              <div>
+                                <!-- Drag & Drop Container -->
+                                <div 
+                                  @dragover.prevent 
+                                  @drop.prevent="dropFiles" 
+                                  class="hidden md:block"
+                                  style="height: 200px; border: 2px dashed gray;"
+                                >
+                                  ドラッグ＆ドロップでファイルをアップロード
+                                </div>
+
+                                <!-- Progress & Message -->
+                                <div v-if="uploading" class="md:block">
+                                  アップロード中... {{ uploadPercentage }}%
+                                </div>
+                                <div v-if="uploadComplete" class="md:block">
+                                  アップロードが完了しました。
+                                </div>
+                              </div>
+                                                    
+                              <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                                     <div class="overflow-hidden">
                                       <table class="min-w-full text-left text-sm font-light">
                                         <thead class="border-b  font-medium dark:border-neutral-500">
                                           <tr>
-                                            <th scope="col" class="px-20 py-4 ">ファイル内容</th>
-                                            <th scope="col" class="px-12 py-4 "></th>
-                                            <th scope="col" class="px-12 py-4 ">ファイル名</th>
-                                            <th scope="col" class="px-12 py-4 ">登録日</th>
+                                            <th scope="col" class="whitespace-nowrap px-16 py-4 ">ファイル内容</th>
+                                            <th scope="col" class="whitespace-nowrap px-6 py-4 "></th>
+                                            <th scope="col" class="whitespace-nowrap px-4 py-4 ">ファイル名</th>
+                                            <th scope="col" class="whitespace-nowrap px-12 py-4 ">登録日<br>登録者</th>
                                           </tr>
                                         </thead>
                                         <tbody>
                                           <tr v-for="attachment in form.attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
-                                            <td><input type="text"  v-model="attachment.title" class="ml-3 w-30 rounded text-center"></td>
+                                            <td><input type="text"  v-model="attachment.title" class="ml-3 w-30 rounded"></td>
                                             <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
-                                            <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
-                                            <td class="ml-3 w-1/5 rounded ">{{ formatDate(attachment.created_at) }}</td>
+                                            <td class="w-1/3 rounded ">{{ attachment.originname }}</td>
+                                            <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
                                             <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
                                           </tr>
                                         </tbody>

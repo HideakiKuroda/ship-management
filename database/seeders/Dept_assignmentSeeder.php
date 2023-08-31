@@ -38,6 +38,8 @@ class Dept_assignmentSeeder extends Seeder
             [ 'user_description_id'=>'13' , 'department_id'=>'1' ],
             [ 'user_description_id'=>'11' , 'department_id'=>'10' ],
             [ 'user_description_id'=>'12' , 'department_id'=>'10' ],
+            [ 'user_description_id'=>'22' , 'department_id'=>'16' ],
+            [ 'user_description_id'=>'21' , 'department_id'=>'16' ],
                
         ]);
     }

@@ -447,18 +447,18 @@ const downloadFile = async (attachmentId) => {
                                         <thead class="border-b font-medium dark:border-neutral-500">
                                           <tr>
                                             <!-- 「scope=”col”」の「col」は「column」の略で縦列のことです。 scope=”col” を指定したth要素が、その縦方向（下方向）のセルの見出し -->
-                                            <th scope="col" class="px-20 py-4 whitespace-no-wrap">ファイル内容</th>
-                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap"></th>
-                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap">ファイル名</th>
-                                            <th scope="col" class="px-12 py-4 whitespace-no-wrap">登録日</th>
+                                            <th scope="col" class="whitespace-nowrap px-16 py-4">ファイル内容</th>
+                                            <th scope="col" class="whitespace-nowrap px-6 py-4"></th>
+                                            <th scope="col" class="whitespace-nowrap px-4 py-4">ファイル名</th>
+                                            <th scope="col" class="whitespace-nowrap px-12 py-4">登録日<br>登録者</th>
                                           </tr>
                                         </thead>
                                         <tbody>
                                           <tr v-for="attachment in  props.ship.ship_attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
-                                            <td><a class="ml-3 w-30 rounded text-center">{{ attachment.title }}</a></td>
+                                            <td><a class="ml-3 w-30 rounded">{{ attachment.title }}</a></td>
                                             <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
                                             <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
-                                            <td class="ml-3 w-1/5 rounded ">{{ formatDate(attachment.created_at) }}</td>
+                                            <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
                                           </tr>
                                         </tbody>
                                       </table>

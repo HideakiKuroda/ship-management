@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis as LaravelRedis;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -48,9 +49,10 @@ class ShipController extends Controller
     {
         $navigationAreas = Navigation_area::select('id', 'name')->get();
         $operatSections = Operat_section::select('id', 'section')->get();
-        $departmentId = 4;
-        $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentId) {
-            $query->where('departments.id', $departmentId);
+        
+        $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
+        $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
+            $query->whereIn('departments.id', $departmentIds);
         })
         ->select('id','name')
         ->get();
@@ -102,7 +104,7 @@ class ShipController extends Controller
     public function show(Ship $ship)
     {
         try {
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','ship_attachments');
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','ship_attachments.users');
             // dd($ship);
             return Inertia::render('Ships/Show',['ship' => $ship]);
         } catch (\Throwable $e) {
@@ -120,15 +122,16 @@ class ShipController extends Controller
         try {
             $navigationAreas = Navigation_area::select('id', 'name')->get();
             $operatSections = Operat_section::select('id', 'section')->get();
-            $departmentId = 4;
-            $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentId) {
-                $query->where('departments.id', $departmentId);
+            
+            $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
+            $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
+                $query->whereIn('departments.id', $departmentIds);
             })
             ->select('id','name')
             ->get();
-            
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments');
-            
+
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments.users');
+            //   dd($ship);
             return Inertia::render('Ships/Edit',[
                 'ship' => $ship, 
                 'navigationAreas'=>$navigationAreas,
@@ -267,7 +270,7 @@ class ShipController extends Controller
         $ship = Ship::findOrFail($id);
         $files = $request->file('files');
         
-
+        // dd($files);
         foreach ($files as $file) {
          
             $originalName = $file->getClientOriginalName();
@@ -289,11 +292,13 @@ class ShipController extends Controller
             // $filename = $file->storeAs("/ships/{$id}", $originalName);
             // dd($filename);
             $filename = Storage::put("ships/{$id}", $file);
+            $userId = Auth::id();
             // データベースに記録
             Ship_attachment::create([
                 'ship_id' => $id,
                 'filename' => $filename,
                 'originname' => $originalName,
+                'user_id' =>  $userId,
                 'icon' => $icon,
             ]);
         }
