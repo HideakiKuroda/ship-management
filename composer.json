@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "ahmedsaoud31/laravel-permission-to-vuejs": "dev-master",
         "barryvdh/laravel-debugbar": "^3.8",
         "doctrine/dbal": "^3.6",
         "geowrgetudor/laravel-spatie-permissions-vue": "^1.0",

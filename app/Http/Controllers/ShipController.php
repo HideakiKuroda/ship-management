@@ -304,7 +304,8 @@ class ShipController extends Controller
         }
 
         // ships.edit へリダイレクト
-        return redirect()->route('ships.edit', $id)->with([
+        // return redirect()->route('ships.edit', $id)->with([
+            return redirect()->back()->withInput()->with([
             'message' => 'ファイルをアップロードしました。',
             'status' => 'success'
         ]);
@@ -322,13 +323,16 @@ class ShipController extends Controller
             // ストレージからファイルを削除
             Storage::delete($attachment->filename);
 
-            return redirect()->route('ships.edit', $id)->with([
+            // return redirect()->route('ships.edit', $id)->with([
+            return redirect()->back()->with([
+            
                 'message' => 'ファイルを削除しました。',
                 'status' => 'success'
             ]);
         }
 
-        return redirect()->route('ships.edit', $id)->with([
+        // return redirect()->route('ships.edit', $id)->with([
+            return redirect()->back()->with([
             'message' => 'ファイルの削除に失敗しました。',
             'status' => 'error'
         ]);

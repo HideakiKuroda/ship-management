@@ -8,7 +8,7 @@ use App\Http\Controllers\ShipController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
-
+use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,6 +20,7 @@ use App\Http\Controllers\UploadController;
 |
 */
 
+// ships関連のルート設定
 Route::resource('ships', ShipController::class)
     ->middleware(['auth', 'verified']);
 
@@ -32,28 +33,44 @@ Route::middleware(['auth', 'verified'])
     
 });    
 
-
-
+// prpjects関連のルート設定
 Route::resource('projects', ProjectController::class)
 ->middleware(['auth', 'verified']);    
 
+// tasks関連のルート設定
 Route::resource('tasks', TaskController::class)
     ->middleware(['auth', 'verified']);
+        
+//ガントチャートのルート設定
+Route::middleware(['auth', 'verified'])
+->group(function () {
+Route::inertia('/ganttChart','Schedules/GanttChart');
+Route::inertia('/ganttw','Schedules/GantTaiw');
+});    
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canRegister' => auth()->user() && auth()->user()->hasRole('admin'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
 });
 
+// Route::get('register', function () {
+//     // registration logic
+// })->middleware('admin');
+
+Route::get('register', [RegisteredUserController::class, 'create'])->name('user.register')->middleware('checkRole:admin');
+Route::post('admin/register', [RegisteredUserController::class, 'store'])->name('register')->middleware('checkRole:admin');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+
+Route::middleware('auth','admin')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

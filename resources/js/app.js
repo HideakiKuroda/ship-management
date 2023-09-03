@@ -49,6 +49,8 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 import { createI18n } from 'vue-i18n';
+import ganttastic from '@infectoone/vue-ganttastic';
+import LaravelPermissionToVueJS from 'laravel-permission-to-vuejs'
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -59,6 +61,9 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) });
         app.use(plugin);
         app.use(ZiggyVue, Ziggy);
+        app.use(ganttastic);
+        // LaravelPermissionToVueJS プラグインを追加
+        app.use(LaravelPermissionToVueJS);
         
         // ここで i18n の設定も含めてあげる
         const messages = {

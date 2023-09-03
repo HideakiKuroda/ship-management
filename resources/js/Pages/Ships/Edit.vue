@@ -10,7 +10,6 @@ import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
 
 
-
 const components = {
   VueCollapsiblePanelGroup,
   VueCollapsiblePanel,
@@ -127,17 +126,22 @@ const removeOwner = (index) => {
 }
 
 ///ファイル添付のスクリプト
-const fileInput = ref(null);
+const fileInput1 = ref(null);
+const fileInput2 = ref(null);
 const uploading = ref(false);
 const uploadComplete = ref(false);
 const uploadPercentage = ref(0);
 
-const handleFileChange = () => {
-  // ファイルの配列を取得
-  const files = fileInput.value.files;
-
+const handleFileChange = (inputName) => {
+  let files;
+  
+  if (inputName === 'file_upload1') {
+    files = fileInput1.value.files;
+  } else if (inputName === 'file_upload2') {
+    files = fileInput2.value.files;
+  }  
   // ファイルが選択されていなければ何もしない
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     return;
   }
 
@@ -168,7 +172,8 @@ const dropFiles = (event) => {
   uploading.value = true;
   uploadComplete.value = false;
 
-  const formData = new FormData();
+  if (window.confirm('ファイルをアップロードしますか？')) {
+    const formData = new FormData();
 
   const droppedFiles = event.dataTransfer.files;
   Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
@@ -187,7 +192,9 @@ const dropFiles = (event) => {
       uploading.value = false;
     },
   });
-};
+} else {
+    // ユーザーがキャンセルした場合の処理（オプション）
+}};
 
 const downloadFile = async (attachmentId) => {
   try {
@@ -199,11 +206,11 @@ const downloadFile = async (attachmentId) => {
 };
 
 const deleteFile = (attachmentId) => {
-  Inertia.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
-};
+  if (window.confirm('ファイルを削除しますか')) {
+    Inertia.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
+}};
 
 </script>
-
 <template>
     <Head title="船舶の編集" />
 
@@ -563,30 +570,38 @@ const deleteFile = (attachmentId) => {
                               </div>
                             </template>
                             </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="false">
+                            <vue-collapsible-panel :expanded="true">
                             <template #title> 書類添付 </template>
                             <template #content> 
                               <div  class="content">
-                               <input type="file" multiple ref="fileInput" @change="handleFileChange" class="form-control" />
-                               <div v-if="uploading">
+                                <label class="visible md:invisible text-blue-600 underline">
+                                  ファイル選択
+                                  <input class="hidden" type="file" name="file_upload1" multiple ref="fileInput1"  @change="handleFileChange('file_upload1')"  />
+                                </label>
+                                <div v-if="uploading">
                                   アップロード中... {{ uploadPercentage }}%
                                 </div>
                                 <div v-if="uploadComplete">
                                   アップロードが完了しました。
                                 </div>                       
-                              </div>
-                             
                               <div>
-                                <!-- Drag & Drop Container -->
-                                <div 
-                                  @dragover.prevent 
-                                  @drop.prevent="dropFiles" 
-                                  class="hidden md:block"
-                                  style="height: 200px; border: 2px dashed gray;"
-                                >
-                                  ドラッグ＆ドロップでファイルをアップロード
-                                </div>
-
+                                <div class="max-w-xl">
+                                  <label @dragover.prevent @drop.prevent="dropFiles" 
+                                      class=" invisible md:visible flex justify-center w-full h-0 md:h-32  px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                                      <span class="flex items-center space-x-2">
+                                          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                                              stroke="currentColor" stroke-width="2">
+                                              <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                          </svg>
+                                          <span class="font-medium text-gray-600">
+                                            ドラッグ＆ドロップでファイルをアップロード or 
+                                              <span class="text-blue-600 underline">ファイル選択</span>
+                                          </span>
+                                      </span>
+                                      <input type="file" name="file_upload2" class="hidden" multiple ref="fileInput2"  @change="handleFileChange('file_upload2')">
+                                  </label>
+                              </div>
                                 <!-- Progress & Message -->
                                 <div v-if="uploading" class="md:block">
                                   アップロード中... {{ uploadPercentage }}%
@@ -595,6 +610,7 @@ const deleteFile = (attachmentId) => {
                                   アップロードが完了しました。
                                 </div>
                               </div>
+                            </div>
                                                     
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -660,4 +676,6 @@ const deleteFile = (attachmentId) => {
   text-align: center;
   cursor: pointer;
 }
+
+
 </style>

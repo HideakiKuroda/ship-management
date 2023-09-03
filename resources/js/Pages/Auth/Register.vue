@@ -23,7 +23,7 @@ const submit = () => {
 <template>
     <GuestLayout>
         <Head title="Register" />
-
+        <div >
         <form @submit.prevent="submit">
             <div>
                 <InputLabel for="name" value="Name" />
@@ -85,7 +85,7 @@ const submit = () => {
 
                 <InputError class="mt-2" :message="form.errors.password_confirmation" />
             </div>
-
+            
             <div class="flex items-center justify-end mt-4">
                 <Link
                     :href="route('login')"
@@ -98,6 +98,8 @@ const submit = () => {
                     Register
                 </PrimaryButton>
             </div>
+       
         </form>
+        </div>
     </GuestLayout>
 </template>

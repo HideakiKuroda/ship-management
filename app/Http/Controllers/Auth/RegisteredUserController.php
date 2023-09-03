@@ -36,7 +36,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
-
+        dd($request);
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -48,5 +48,10 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
+    }
+
+    public function __construct()
+    {
+        $this->middleware([ 'checkRole:admin']); // admin はミドルウェアのキー
     }
 }

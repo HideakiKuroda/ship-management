@@ -5,13 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+use LaravelAndVueJS\Traits\LaravelPermissionToVueJS;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Ship;
 use App\Models\Ship_attachment;
-use Spatie\Permission\Traits\HasRoles;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
 use App\Models\User_description;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, RolesPermissionsToVue;
+    
     
     /**
      * The attributes that are mass assignable.
@@ -76,6 +79,10 @@ class User extends Authenticatable
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'dept_assignments');
+    }
+    public function isAdmin()
+    {
+        return $this->hasRole('admin'); // Spatie Permission パッケージの hasRole を使う場合
     }
 
     
