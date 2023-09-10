@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Project;
-use App\Models\Tsk_attachment;
+use App\Models\Task_attachment;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,7 +21,17 @@ class Task extends Model
 
     protected $dates = ['deleted_at'];
 
-    protected $fillable = ['name', 'project_id', 'parent_id'];  // 必要なフィールドを追加してください。
+    protected $fillable = [
+        'project_id',
+        'parent_id',
+        'name',
+        'color_id',
+        'start_date',
+        'end_date',
+	    'deadline',
+	    'completion',
+     ];
+
 
     public function projects():BelongsTo
     {
@@ -38,9 +48,9 @@ class Task extends Model
         return $this->hasMany(Task::class, 'parent_id');
     }
 
-    public function Tsk_attachments(): HasMany
+    public function task_attachments(): HasMany
     {
-        return $this->hasMany(Tsk_attachment::class);
+        return $this->hasMany(Task_attachment::class);
     }
 
     public function users(): BelongsToMany

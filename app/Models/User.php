@@ -78,7 +78,7 @@ class User extends Authenticatable
     }
     public function departments()
     {
-        return $this->belongsToMany(Department::class, 'dept_assignments');
+        return $this->belongsToMany(Department::class, 'dept_assignments','user_description_id');
     }
     public function isAdmin()
     {

@@ -31,6 +31,7 @@ class DepartmentSeeder extends Seeder
             ['name'=>'本船瀬戸内地区', 'created_at' => '2023/08/15 12:00:00' ],
             ['name'=>'栄吉曳船', 'created_at' => '2023/08/15 12:00:00' ],
             ['name'=>'北日本曳船', 'created_at' => '2023/08/15 12:00:00' ],
+            ['name'=>'船舶管理', 'created_at' => '2023/08/15 12:00:00' ],
             
             ]);
     }

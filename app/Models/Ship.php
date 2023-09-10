@@ -37,6 +37,7 @@ class Ship extends Model
         'navigation_area_id',
         'ship_no',
         'yard',
+        'issueInspCert',
     ];
 
     public function projects(): HasMany

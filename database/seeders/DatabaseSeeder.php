@@ -30,7 +30,9 @@ class DatabaseSeeder extends Seeder
             Dept_assignmentSeeder::class,
             ShipAssignmentSeeder::class,
             PermissionSeeder::class,
-            RoleSeeder::class
+            RoleSeeder::class,
+            Pro_assignmentSeeder::class,
+            Model_has_roles::class,
             ]);
     }
 }

@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Inertia } from '@inertiajs/inertia';
-import { ref, computed } from 'vue';
+import { ref, computed,onMounted } from 'vue';
 import { toRefs, reactive } from 'vue';
 
 const props = defineProps({

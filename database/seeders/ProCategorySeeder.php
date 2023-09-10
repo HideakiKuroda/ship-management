@@ -22,6 +22,7 @@ class ProCategorySeeder extends Seeder
             [ 'name' => '修繕', 'color_id' => 11, 'dock' => FALSE, 'created_at' => '2023-08-10' ],
             [ 'name' => '売船', 'color_id' => 21, 'dock' => FALSE, 'created_at' => '2023-08-10' ],
             [ 'name' => '入替', 'color_id' => 17, 'dock' => FALSE, 'created_at' => '2023-08-10' ],
+            [ 'name' => '船用品・部品', 'color_id' => 17, 'dock' => FALSE, 'created_at' => '2023-08-10' ],
             
     ]);
 

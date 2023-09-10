@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()
             ->constrained('tasks')->onDelete('cascade');
             $table->string('name');
-            $table->text('description')->nullable();
             $table->foreignId('color_id')->constrained();
             $table->date('start_date');
             $table->date('end_date');

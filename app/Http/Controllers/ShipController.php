@@ -162,6 +162,7 @@ class ShipController extends Controller
                 'operat_section_id' => $request->input('slectedOperatSection'),
                 'ship_no' => $request->input('ship_no'),
                 'yard' => $request->input('yard'),
+                'issueInspCert' => $request->input('issueInspCert'),
             ]);
         
             // summariesテーブルの更新

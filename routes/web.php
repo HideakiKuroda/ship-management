@@ -9,6 +9,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
+use App\Models\Project;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,9 +23,6 @@ use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 */
 
 // ships関連のルート設定
-Route::resource('ships', ShipController::class)
-    ->middleware(['auth', 'verified']);
-
 Route::middleware(['auth', 'verified'])
 ->group(function () {
     Route::resource('ships', ShipController::class);
@@ -34,8 +33,15 @@ Route::middleware(['auth', 'verified'])
 });    
 
 // prpjects関連のルート設定
-Route::resource('projects', ProjectController::class)
-->middleware(['auth', 'verified']);    
+Route::middleware(['auth', 'verified'])   
+->group(function () {
+    Route::resource('projects', ProjectController::class);
+    // Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter');
+    // Route::get('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter');
+
+});    
+Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
+Route::get('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter.get')->middleware(['auth', 'verified']);
 
 // tasks関連のルート設定
 Route::resource('tasks', TaskController::class)
