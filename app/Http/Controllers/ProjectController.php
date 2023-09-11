@@ -74,7 +74,7 @@ class ProjectController extends Controller
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate)
         ->paginate(20)->withQueryString();
-        // dd($filtered);
+        // dd($filtered); 
         return response()->json($filtered);
     }
     /**
