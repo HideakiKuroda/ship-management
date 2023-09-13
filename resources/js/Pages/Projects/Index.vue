@@ -6,9 +6,10 @@ import { Inertia } from '@inertiajs/inertia';
 import { reactive,computed,ref,onMounted } from 'vue';
 import moment from 'moment';
 import axios from 'axios';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
-
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { ChevronDownIcon } from '@heroicons/vue/20/solid';
+import Paginator from 'primevue/paginator';
+import Calendar from 'primevue/calendar';
 
 
 const props = defineProps({
@@ -56,20 +57,7 @@ const selectItem = async (userId, shipId, $uOrS, page = 1) => {
 };
 
 const pagination = ref(props.projects);
-
-const getPagesBeforeCurrent = computed(() => {
-  const startPage = Math.max(pagination.current_page - 5, 1);
-  const endPage = pagination.current_page - 1;
-
-  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-});
-
-const getPagesAfterCurrent = computed(() => {
-  const startPage = pagination.current_page + 1;
-  const endPage = Math.min(pagination.current_page + 5, pagination.last_page);
-
-  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-});
+const first = ref(pagination.current_page);
 
 const changePage = async (page) => {
   try {
@@ -217,86 +205,19 @@ const selectedUserName = computed(() => {
                             </div>
                         </div>
                         <!-- <Pagination  -->
-                        <nav aria-label="Page navigation example">
-                          <ul class="inline-flex -space-x-px text-base h-10">
-                            <li>
-                              <a href="#" :disabled="pagination.current_page === 1" @click.prevent="changePage(pagination.current_page - 1)" 
-                              :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg 
-                              hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              前
-                              </a>
-                            </li>
-
-                            <!-- 最初のページ番号 -->
-                            <li v-if="pagination.current_page > 6">
-                              <a href="#" @click.prevent="changePage(1)" :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              1</a>
-                            </li>
-
-                            <!-- 中間の省略記号 (前) -->
-                            <li v-if="pagination.current_page > 7">
-                              <span :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              ...</span>
-                            </li>
-
-                            <!-- 前の5ページ -->
-                            <li v-for="page in getPagesBeforeCurrent.value" :key="page">
-                              <a href="#" @click.prevent="changePage(page)" :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              {{ page }}
-                              </a>
-                            </li>
-
-                            <!-- 現在のページ番号 -->
-                            <li>
-                              <a href="#" :class="{ active, 'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              {{ pagination.current_page }}
-                              </a>
-                            </li>
-
-                            <!-- 後の5ページ -->
-                            <li v-for="page in getPagesAfterCurrent.value" :key="page">
-                              <a href="#" @click.prevent="changePage(page)" :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              {{ page }}
-                            </a>
-                            </li>
-
-                            <!-- 中間の省略記号 (後) -->
-                            <li v-if="pagination.current_page < pagination.last_page - 2">
-                              <span :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              ...</span>
-                            </li>
-
-                            <!-- 最後のページ番号 -->
-                            <li v-if="pagination.current_page < pagination.last_page - 1">
-                              <a href="#" @click.prevent="changePage(pagination.last_page)" :class="{'text-blue-600 bg-blue-50':  pagination.current_page === page}" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 
-                              hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              {{ pagination.last_page }}
-                              </a>
-                            </li>
-
-                            <li>
-                              <a href="#" :disabled="pagination.current_page === pagination.last_page" @click.prevent="changePage(pagination.current_page + 1)" 
-                              class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg 
-                              hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                              次
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>
+                          <div class="w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <div class="card">
+                            <Paginator 
+                            v-model:first="first"
+                            :rows="20"
+                            :totalRecords="pagination.total" 
+                            @page="changePage($event.page+1)"></Paginator>
+                        </div>
+                        <div class="text-center text-base font-mono">
+                        件数: {{ pagination.total }}
+                        　ページ数: {{ pagination.last_page }}
+                      </div>
+                      </div>
                         <!-- <Pagination </Pagination> -->
                         </section>
                     </div>

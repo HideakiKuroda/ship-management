@@ -51,6 +51,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 import { createI18n } from 'vue-i18n';
 import ganttastic from '@infectoone/vue-ganttastic';
 import LaravelPermissionToVueJS from 'laravel-permission-to-vuejs'
+import PrimeVue from 'primevue/config';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -76,9 +77,11 @@ createInertiaApp({
             locale: 'ja', // 言語設定
             messages,
         });
+        app.use(PrimeVue);
         app.use(i18n);
-
+    
         app.mount(el);
+        
     },
     progress: {
         color: '#4B5563',

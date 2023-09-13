@@ -48,7 +48,8 @@ class ProjectController extends Controller
         ->UserProject($userId);
         Log::info($queryAll->toSql()); 
         
-        $projects = $queryAll->paginate(20)->withQueryString();
+        $projects = $queryAll->paginate(20);
+        // ->withQueryString();
 
         
         return Inertia::render('Projects/Index', [
@@ -73,7 +74,8 @@ class ProjectController extends Controller
         ->EndOrNoProject($EndOrNo)
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate)
-        ->paginate(20)->withQueryString();
+        ->paginate(20);
+        // ->withQueryString();
         // dd($filtered); 
         return response()->json($filtered);
     }
