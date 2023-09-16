@@ -7,7 +7,15 @@ import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/vue3';
 
-
+const test = async () => {
+  try {
+    const response = await axios.post('/testtest', { 
+    });
+    index.projects = response.data;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 </script>
 
 <template>

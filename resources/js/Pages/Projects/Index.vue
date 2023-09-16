@@ -3,13 +3,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Inertia } from '@inertiajs/inertia';
-import { reactive,computed,ref,onMounted } from 'vue';
+import { reactive,computed,ref,onMounted,watch } from 'vue';
 import moment from 'moment';
 import axios from 'axios';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { ChevronDownIcon } from '@heroicons/vue/20/solid';
 import Paginator from 'primevue/paginator';
-import Calendar from 'primevue/calendar';
 
 
 const props = defineProps({
@@ -35,7 +34,7 @@ const index = reactive({
     crtAddDate  : null,
     endDate     : null,
     endAddDate  : null,
-    });
+     });
    
 const selectItem = async (userId, shipId, $uOrS, page = 1) => {
   if ($uOrS == 1){
@@ -75,28 +74,69 @@ const changePage = async (page) => {
   }
 };
 
-const selectedUserName = computed(() => {
-    if (index.userId) {
-      const user = props.users.find(user => user.id === index.userId);
-      return user ? user.name : '担当者で絞込み';
-    } else {
-      return '担当者で絞込み';
-    }
-  });
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxButton,
+  ComboboxOptions,
+  ComboboxOption,
+  TransitionRoot,
+  ComboboxLabel
+} from '@headlessui/vue'
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 
-  const selectedShipName = computed(() => {
-    if (index.shipId) {
-      const ship = props.ships.find(ship => ship.id === index.shipId);
-      return ship ? ship.name+'['+ship.yard+'.'+ship.ship_no+']' : '船名で絞込み';
-    } else {
-      return '船名で絞込み';
+const ship = props.ships
+const user = props.users
+
+let selectedShip = ref({id: null, name: ''})
+let selectedUser = ref(props.currentUser || {id: null, name: ''});
+let query = ref('')
+
+let filteredUser = computed(() =>
+  query.value === ''
+    ? user
+    : user.filter((person) =>
+        person.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+watch(selectedUser, (newValue, oldValue) => {
+  if (newValue && newValue !== oldValue) {
+    selectItem(newValue.id, index.shipId, 1) // shipId は適切な値に置き換える必要があります
+  }
+})
+
+let filteredship = computed(() =>
+  query.value === ''
+    ? ship
+    : ship.filter((vessel) =>
+        vessel.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+watch(selectedShip, (newValue, oldValue) => {
+  if (newValue && newValue !== oldValue) {
+    selectItem(index.userId, newValue.id, 2) 
+  }
+})
+
+const displayVesselData = (vessel) => {
+  if (vessel.id === null) {
+        return '全船';
     }
-  });
-  onMounted(() => {
-    console.log(selectedUserName.value)
+  return `${vessel.name} 　[ ${vessel.yard} ${vessel.ship_no} ]`;
+}
+
+onMounted(() => {
+    console.log(selectedUser.value)
     console.log(props.projects.data)
 })
-  
+
+
 
 </script>
 
@@ -119,52 +159,163 @@ const selectedUserName = computed(() => {
                             <FlashMessage />
                             <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             
-                             <!-- 担当者の検索（ドロップダウンリスト）                                -->
-                            <Menu as="div" class="mb-5 relative inline-block text-left">
-                                <div>
-                                <MenuButton class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                    {{ selectedUserName }}
-                                    <ChevronDownIcon class="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-                                </MenuButton>
-                                </div>
-                                <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                                <MenuItems class="absolute  z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                            style="max-height: 300px; overflow-y: auto;">
-                                    <MenuItem v-slot="{ active }">
-                                        <a @click="selectItem(null,shipId,1)" href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">全員表示</a>
-                                    </MenuItem>
-                                    <div v-for="user in index.users"  :key="user.id" class="py-1">
-                                    <MenuItem v-slot="{ active }">
-                                        <a @click="selectItem(user.id,shipId,1)" href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">{{ user.name }}</a>
-                                    </MenuItem>
+                            <!-- 担当者検索コンボボックス　ここから -->
+                            <div class="flex flex-col  mt-2">
+                            <Combobox v-model="selectedUser" id="shipSerch" name="shipSerch" >
+                                <div  class="relative ml-4" > <ComboboxLabel class=" text-sm ">担当者選択:</ComboboxLabel>
+                                  <div
+                                  class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
+                                  >
+                                    <ComboboxInput 
+                                      class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
+                                      :displayValue="(person) => person.name"
+                                      @change="query = $event.target.value"
+                                      :value="selectedUser.name" 
+                                                                            
+                                    />
+                                    <ComboboxButton
+                                      class="absolute inset-y-0 right-0 flex items-center pr-2"
+                                    >
+                                      <ChevronUpDownIcon
+                                        class="h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                    </ComboboxButton>
+                                  </div>
+                                  <TransitionRoot
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                    @after-leave="query = ''"
+                                     >
+                                    <ComboboxOptions
+                                      class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                    >
+                                      <div
+                                        v-if="filteredUser.length === 0 && query !== ''"
+                                        class="relative cursor-default select-none py-2 px-4 text-gray-700"
+                                      >
+                                        名前が見つかりません.
                                       </div>
-                                </MenuItems>
-                                </transition>
-                            </Menu>
-                            
-                             <!-- 船の検索（ドロップダウンリスト）     -->
-                             <Menu as="div" class="ml-5 mb-5 relative inline-block text-left">
-                                <div>
-                                <MenuButton class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                    {{ selectedShipName }}
-                                    <ChevronDownIcon class="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-                                </MenuButton>
+                                      
+                                      <ComboboxOption
+                                        v-for="person in [{ id: null, name: '' }, ...filteredUser]"
+                                        as="template"
+                                        :key="person.id"
+                                        :value="person"
+                                        v-slot="{ selected, active }"
+                                                                                                                                                              
+                                      >
+                                        <li
+                                          class="relative cursor-default select-none py-2 pl-10 pr-4"
+                                          :class="{
+                                            'bg-teal-600 text-white': active,
+                                            'text-gray-900': !active,
+                                          }" 
+                                        >
+                                          <span
+                                            class="block truncate"
+                                            :class="{ 'font-medium': selectedUser, 'font-normal': !selectedUser }"
+                                          >
+                                            {{ person.name  || '全員'  }}
+                                          </span>
+                                          <span
+                                            v-if="selected" 
+                                            class="absolute inset-y-0 left-0 flex items-center pl-3"
+                                            :class="{ 'text-white': active, 'text-teal-600': !active }"
+                                             
+                                            >
+                                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                                          </span>
+                                        </li>
+                                      </ComboboxOption>
+                                    
+                                    </ComboboxOptions>
+                                  </TransitionRoot>
                                 </div>
-                                <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                                <MenuItems class="absolute z-10 mt-2 w-44 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                            style="max-height: 300px; overflow-y: auto;">
-                                    <MenuItem v-slot="{ active }">
-                                        <a @click="selectItem(userId,null,2)" href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">全船表示</a>
-                                    </MenuItem>
-                                    <div v-for="ship in index.ships"  :key="ship.id" class="py-1">
-                                    <MenuItem v-slot="{ active }">
-                                        <a @click="selectItem(userId,ship.id,2)" href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">{{ ship.name }}[{{ ship.yard }}-{{ ship.ship_no }}]</a>
-                                    </MenuItem>
-                                      </div>
-                                </MenuItems>
-                                </transition>
-                            </Menu>
+                              </Combobox>
+                            </div>
+                            <!-- 担当者検索コンボボックス　ここまで -->
 
+                            <!-- 船検索コンボボックス　ここから -->
+                            <div class="flex flex-col  mt-2">
+                            <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch">
+                                <div  class="relative ml-4" ><ComboboxLabel class=" text-sm ">船の選択:</ComboboxLabel>
+                                  <div
+                                  class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
+                                  >
+                                    <ComboboxInput 
+                                      class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
+                                      :displayValue="(vessel) => vessel.name"
+                                      @change="query = $event.target.value"
+                                    />
+                                    <ComboboxButton
+                                      class="absolute inset-y-0 right-0 flex items-center pr-2"
+                                    >
+                                      <ChevronUpDownIcon
+                                        class="h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                    </ComboboxButton>
+                                  </div>
+                                  <TransitionRoot
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                    @after-leave="query = ''"
+                                  >
+                                    <ComboboxOptions
+                                      class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                    >
+                                      <div
+                                        v-if="filteredship.length === 0 && query !== ''"
+                                        class="relative cursor-default select-none py-2 px-4 text-gray-700"
+                                      >
+                                        名前が見つかりません.
+                                      </div>
+
+                                      <ComboboxOption
+                                        v-for="vessel in [{ id: null, name: '' }, ...filteredship]"
+                                        as="template"
+                                        :key="vessel.id"
+                                        :value="vessel"
+                                        v-slot="{ selected, active }" 
+                                        @click="selectItem(userId,vessel.id,2)"
+                                      >
+                                        <li
+                                          class="relative cursor-default select-none py-2 pl-10 pr-4"
+                                          :class="{
+                                            'bg-teal-600 text-white': active,
+                                            'text-gray-900': !active,
+                                          }"
+                                        >
+                                          <span
+                                            class="block truncate"
+                                            :class="{ 'font-medium': selectedShip, 'font-normal': !selectedShip }"
+                                          >
+                                            {{ displayVesselData(vessel)  || '全船'  }}
+                                          </span>
+                                          <span
+                                            v-if="selected"
+                                            class="absolute inset-y-0 left-0 flex items-center pl-3"
+                                            :class="{ 'text-white': active, 'text-teal-600': !active }"
+                                          >
+                                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                                          </span>
+                                        </li>
+                                      </ComboboxOption>
+                                    </ComboboxOptions>
+                                  </TransitionRoot>
+                                </div>
+                              </Combobox>
+                            </div>
+                            <!-- 船検索コンボボックス　ここまで -->
+                            <div class="flex flex-col p-2 ml-4 ">
+                              <label for="crtDate" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">日付範囲指定</label>
+                              <input type="date" id="crtDate" name="crtDate" v-model="crtDate" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                            </div>
+                            
+                             
                             
                             <Link as="button" :href="route('projects.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
                            </div>
