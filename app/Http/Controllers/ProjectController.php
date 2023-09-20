@@ -41,7 +41,7 @@ class ProjectController extends Controller
         })->select('id', 'name')->get();
         $ships = Ship::select('id','name','yard','ship_no')->get();
         $queryAll = Project::query()->with(['ships:id,name','pro_categories:id,name','users:id,name'])
-        ->EndOrNoProject($EndOrNo)
+        ->EndOrNoProject($EndOrNo) //0:未完了　1:完了
         ->ShipProject($shipId)
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate)

@@ -10,6 +10,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 use App\Models\Project;
+use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,7 @@ Route::middleware(['auth', 'verified'])
 Route::inertia('/ganttChart','Schedules/GanttChart');
 Route::inertia('/ganttw','Schedules/GantTaiw');
 Route::inertia('/test12','Projects/test');
+Route::inertia('/test22','Projects/test2');
 });    
 
 
@@ -87,6 +90,15 @@ Route::get('/test', [App\Http\Controllers\TestController::class, 'create'])->nam
 
 Route::prefix('admin')->name('admin.')->group(function(){
     require __DIR__.'/admin.php';
+});
+
+Route::get('/', function () {
+    // return view('welcome');
+    $user = Auth::loginUsingId(8);
+
+    $token = $user->createToken('test');
+
+    dd($token);
 });
 
 require __DIR__.'/auth.php';

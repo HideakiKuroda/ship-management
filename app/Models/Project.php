@@ -63,14 +63,17 @@ class Project extends Model
 //scopeの設定
 
     //完了・未完了の設定
-    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了
-    {
+    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了 2:全体  
+     {
         if($EndOrNo === 0){
            return $query->whereNull('completion');
         }
-        else{
+        elseif ($EndOrNo === 1) {
             return $query->whereNotNull('completion');
          }
+        else{
+            return $query;
+        } 
     }  
     //船選択
     public function scopeShipProject($query,$shipId=null)

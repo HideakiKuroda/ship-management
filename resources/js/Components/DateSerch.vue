@@ -37,7 +37,7 @@
               <input type="date" id="crtDate" name="crtDate" v-model="serchDate" class="w-40 h-9 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
             </div> 
        <!-- 日付範囲選択　ここから -->
-            <div class="flex flex-col p-0 ml-4">
+            <div class="flex flex-col p-0 ml-4 ">
               <label for="crtDate" class="rounded ml-3 w-32 leading-tight  text-justify text-sm text-gray-600">期間</label>
               <div>       
                 <Listbox v-model="selectedPeriod">

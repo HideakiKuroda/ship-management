@@ -6,10 +6,10 @@ import { Inertia } from '@inertiajs/inertia';
 import { reactive,computed,ref,onMounted,watch } from 'vue';
 import moment from 'moment';
 import axios from 'axios';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
-import { ChevronDownIcon } from '@heroicons/vue/20/solid';
 import Paginator from 'primevue/paginator';
-
+// import Micromodal from '@/Components/Micromodal.vue';
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+import DateSerch from '@/Components/DateSerch.vue';
 
 const props = defineProps({
     ships: Array,
@@ -35,9 +35,10 @@ const index = reactive({
     endDate     : null,
     endAddDate  : null,
      });
-   
+
+//船と担当者の絞込み     
 const selectItem = async (userId, shipId, $uOrS, page = 1) => {
-  if ($uOrS == 1){
+  if ($uOrS == 1){          //1で担当者検索　2で船の検索
     index.userId = userId;
   } else if($uOrS == 2) {
     index.shipId = shipId;
@@ -55,6 +56,7 @@ const selectItem = async (userId, shipId, $uOrS, page = 1) => {
   }
 };
 
+//ページネイションの設定
 const pagination = ref(props.projects);
 const first = ref(pagination.current_page);
 
@@ -74,6 +76,7 @@ const changePage = async (page) => {
   }
 };
 
+//Comboboxのインポート
 import {
   Combobox,
   ComboboxInput,
@@ -85,13 +88,17 @@ import {
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 
+//コンボボックス用の変数設定
 const ship = props.ships
 const user = props.users
-
+const curntUIdx = computed(() => {
+  return user.findIndex(ur => ur?.id === index.userId)
+})
 let selectedShip = ref({id: null, name: ''})
-let selectedUser = ref(props.currentUser || {id: null, name: ''});
+let selectedUser = ref({id:user[curntUIdx.value].id,name:user[curntUIdx.value].name} || {id: null, name: ''});
 let query = ref('')
 
+//担当者索ComboboxのinputBox内での名前検索
 let filteredUser = computed(() =>
   query.value === ''
     ? user
@@ -102,12 +109,15 @@ let filteredUser = computed(() =>
           .includes(query.value.toLowerCase().replace(/\s+/g, ''))
       )
 )
+
+//担当者索Comboboxでリストから選んだ時の動作
 watch(selectedUser, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
     selectItem(newValue.id, index.shipId, 1) // shipId は適切な値に置き換える必要があります
   }
 })
 
+//船検索ComboboxのinputBoxで船名検索
 let filteredship = computed(() =>
   query.value === ''
     ? ship
@@ -118,12 +128,15 @@ let filteredship = computed(() =>
           .includes(query.value.toLowerCase().replace(/\s+/g, ''))
       )
 )
+
+//船検索Comboboxでリストから選んだ時の動作
 watch(selectedShip, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
     selectItem(index.userId, newValue.id, 2) 
   }
 })
 
+//船検索Comboboxのリストに造船所と船番を表示するため
 const displayVesselData = (vessel) => {
   if (vessel.id === null) {
         return '全船';
@@ -132,10 +145,9 @@ const displayVesselData = (vessel) => {
 }
 
 onMounted(() => {
-    console.log(selectedUser.value)
+  console.log('props.users:', props.users);
     console.log(props.projects.data)
 })
-
 
 
 </script>
@@ -160,8 +172,9 @@ onMounted(() => {
                             <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             
                             <!-- 担当者検索コンボボックス　ここから -->
-                            <div class="flex flex-col  mt-2">
-                            <Combobox v-model="selectedUser" id="shipSerch" name="shipSerch" >
+                            <div class="flex flex-col md:flex-row mt-2">
+                              <div class="flex flex-row ">
+                            <Combobox v-model="selectedUser" class=" opacity-100 z-10">
                                 <div  class="relative ml-4" > <ComboboxLabel class=" text-sm ">担当者選択:</ComboboxLabel>
                                   <div
                                   class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -174,7 +187,7 @@ onMounted(() => {
                                                                             
                                     />
                                     <ComboboxButton
-                                      class="absolute inset-y-0 right-0 flex items-center pr-2"
+                                      class="absolute inset-y-0 right-0 flex items-center pr-2 opacity-100 z-10"
                                     >
                                       <ChevronUpDownIcon
                                         class="h-5 w-5 text-gray-400"
@@ -234,12 +247,10 @@ onMounted(() => {
                                   </TransitionRoot>
                                 </div>
                               </Combobox>
-                            </div>
                             <!-- 担当者検索コンボボックス　ここまで -->
 
                             <!-- 船検索コンボボックス　ここから -->
-                            <div class="flex flex-col  mt-2">
-                            <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch">
+                            <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch" class=" opacity-100 z-10">
                                 <div  class="relative ml-4" ><ComboboxLabel class=" text-sm ">船の選択:</ComboboxLabel>
                                   <div
                                   class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -250,7 +261,7 @@ onMounted(() => {
                                       @change="query = $event.target.value"
                                     />
                                     <ComboboxButton
-                                      class="absolute inset-y-0 right-0 flex items-center pr-2"
+                                      class="absolute inset-y-0 right-0 flex items-center pr-2 "
                                     >
                                       <ChevronUpDownIcon
                                         class="h-5 w-5 text-gray-400"
@@ -280,7 +291,7 @@ onMounted(() => {
                                         :key="vessel.id"
                                         :value="vessel"
                                         v-slot="{ selected, active }" 
-                                        @click="selectItem(userId,vessel.id,2)"
+                                       
                                       >
                                         <li
                                           class="relative cursor-default select-none py-2 pl-10 pr-4"
@@ -308,19 +319,24 @@ onMounted(() => {
                                   </TransitionRoot>
                                 </div>
                               </Combobox>
-                            </div>
                             <!-- 船検索コンボボックス　ここまで -->
-                            <div class="flex flex-col p-2 ml-4 ">
-                              <label for="crtDate" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">日付範囲指定</label>
-                              <input type="date" id="crtDate" name="crtDate" v-model="crtDate" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                            </div>
+                              </div>
+                            <div class="ml-32 mt-3 w-2/3">
+                            <Link as="button" :href="route('projects.create')" class=" h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
+                          </div>
+                        </div>
+
+
+                            <!-- 日付の検索　ここから -->
                             
+                            <DateSerch class="z-0"></DateSerch>
+
+                            <!-- 日付の検索　ここまで -->
                              
                             
-                            <Link as="button" :href="route('projects.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
                            </div>
                           <div class="lg:w-2/3 w-full mx-auto overflow-auto">
-                            <table class="table-auto w-full text-left whitespace-no-wrap">
+                            <table class="table-auto w-full text-left whitespace-no-wrap ">
                                 <thead>
                                 <tr>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>

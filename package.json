@@ -29,6 +29,7 @@
         "@vue-hero-icons/outline": "^1.7.2",
         "@vue-hero-icons/solid": "^1.7.2",
         "laravel-permission-to-vuejs": "^3.0.1",
+        "micromodal": "^0.4.10",
         "moment": "^2.29.4",
         "primeflex": "^2.0.0",
         "v-pagination-3": "^0.1.7",
