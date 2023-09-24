@@ -62,42 +62,6 @@ class Project extends Model
 
 //scopeの設定
 
-    //完了・未完了の設定
-    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了 2:全体  
-     {
-        if($EndOrNo === 0){
-           return $query->whereNull('completion');
-        }
-        elseif ($EndOrNo === 1) {
-            return $query->whereNotNull('completion');
-         }
-        else{
-            return $query;
-        } 
-    }  
-    //船選択
-    public function scopeShipProject($query,$shipId=null)
-    {
-        if(!empty($shipId)){
-           return $query->where('ship_id','=',$shipId);
-        }
-    }  
-    //作成日の日付範囲で検索
-    public function scopeDateCreateProject($query,$crtDate=null,$crtAddDate)
-    {
-        if(!empty($crtDate)){
-           return $query->whereBetween('created_at',[$crtDate,$crtAddDate]);
-        }
-    
-    }
-    //完了日日付範囲で検索
-    public function scopeDateEndProject($query,$endDate=null,$endAddDate)
-    {
-        if(!empty($maxDate)){
-           return $query->whereBetween('completion',[$endDate,$endAddDate]);
-        }
-    
-    }
     //ユーザーで検索
     public function scopeUserProject($query, $userId = null)
     {
@@ -106,6 +70,46 @@ class Project extends Model
                 $query->where('pro_assignments.user_id', $userId);
             });
         }
+        return $query;
+    }
+    //船選択
+    public function scopeShipProject($query,$shipId=null)
+    {
+        if(!empty($shipId)){
+           return $query->where('ship_id','=',$shipId);
+        }
+        return $query;
+    }  
+    //完了・未完了の設定
+    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了 2:全体  
+     {
+        if($EndOrNo == 0){
+           return $query->whereNull('completion');
+        }
+        elseif ($EndOrNo == 1) {
+            return $query->whereNotNull('completion');
+         }
+         elseif ($EndOrNo == 2) {
+            return $query;
+        } 
+        return $query;
+    }  
+    //作成日の日付範囲で検索
+    public function scopeDateCreateProject($query,$crtDate=null,$crtAddDate)
+    {
+        if(!empty($crtDate)){
+           return $query->whereBetween('created_at',[$crtDate,$crtAddDate]);
+        }
+        return $query;
+    
+    }
+    //完了日日付範囲で検索
+    public function scopeDateEndProject($query,$endDate=null,$endAddDate)
+    {
+        if(!empty($endDate)){
+           return $query->whereBetween('completion',[$endDate,$endAddDate]);
+        }
+        return $query;
     }
     
 }

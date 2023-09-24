@@ -48,8 +48,8 @@ class ProjectController extends Controller
         ->UserProject($userId);
         Log::info($queryAll->toSql()); 
         
-        $projects = $queryAll->paginate(20);
-        // ->withQueryString();
+        $projects = $queryAll->paginate(20)
+        ->withQueryString();
 
         
         return Inertia::render('Projects/Index', [
@@ -61,24 +61,28 @@ class ProjectController extends Controller
     }
     public function indexfilter(Request $request) {
         $userId =  $request->userId;
-        // dd($userId);
-        $EndOrNo = 0;
+        $EndOrNo = $request->EndOrNo;
         $shipId = $request->shipId;
-        $crtDate = null;
-        $crtAddDate = null;
-        $endDate = null;
-        $endAddDate = null;
-        $filtered = Project::query()->with(['ships:id,name','pro_categories:id,name','users:id,name'])
+        $crtDate = $request->crtDate;
+        $crtAddDate = $request->crtAddDate;
+        $endDate = $request->endDate;
+        $endAddDate = $request->endAddDate;
+        $query = Project::query()->with(['ships:id,name','pro_categories:id,name','users:id,name'])
         ->UserProject($userId)
         ->ShipProject($shipId)
         ->EndOrNoProject($EndOrNo)
         ->DateCreateProject($crtDate,$crtAddDate)
-        ->DateEndProject($endDate,$endAddDate)
-        ->paginate(20);
+        ->DateEndProject($endDate,$endAddDate);
+        Log::info('crtAddDate value:', ['value' => $crtAddDate]);
+        Log::info('endAddDate value:', ['value' => $endAddDate]);
+        Log::info($query->toSql()); 
+        $filtered = $query->Paginate(20);    
+       
         // ->withQueryString();
-        // dd($filtered); 
         return response()->json($filtered);
     }
+
+    
     public function idxtest(Project $project)
     {
         $userId = auth()->id();
@@ -88,6 +92,7 @@ class ProjectController extends Controller
         $crtAddDate = null;
         $endDate = null;
         $endAddDate = null;
+        // dd($crtDate,$crtAddDate,$endDate,$endAddDate)
         //部門　18　の人だけを抽出
         $users = User::whereHas('user_descriptions.departments', function ($query) {
             $query->where('departments.id', 18);

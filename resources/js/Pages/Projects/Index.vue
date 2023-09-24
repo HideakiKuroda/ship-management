@@ -29,32 +29,116 @@ const index = reactive({
     projects    :props.projects,
     userId      :props.currentUser,
     shipId      : null,
-    EndOrNo     : null,
+    EndOrNo     : 0,
     crtDate     : null,
     crtAddDate  : null,
     endDate     : null,
     endAddDate  : null,
      });
 
+const safeParseInt = (value) => {
+    const result = parseInt(value, 10); // 常に基数10を指定してください
+    return isNaN(result) ? 0 : result; // NaNの場合、デフォルトの値を返す（この例では0）
+}
+
+const addDaysToDate = (dateString, daysToAdd) => {
+  if (!dateString) {
+        console.error("Invalid date string:", dateString);
+        return null;
+  }
+    // 日付の文字列を Date オブジェクトに変換
+    let date = new Date(dateString);
+
+    // 日数を追加
+    console.log("daysToAdd:", daysToAdd);
+    if (daysToAdd !== null && daysToAdd !== 0){
+    date.setDate(date.getDate() + daysToAdd);
+    }
+    else {date.setDate(date.getDate() + 30);
+    }
+          
+    // 日付を 'yyyy-mm-dd' 形式の文字列に変換して返す
+    let month = '' + (date.getMonth() + 1),
+        day = '' + date.getDate(),
+        year = date.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+} 
+
 //船と担当者の絞込み     
-const selectItem = async (userId, shipId, $uOrS, page = 1) => {
+const selectItem = async (userId, shipId,$uOrS, page = 1) => {
   if ($uOrS == 1){          //1で担当者検索　2で船の検索
     index.userId = userId;
   } else if($uOrS == 2) {
     index.shipId = shipId;
-  }
+  } else if($uOrS == 3) {}
+  const daysToAdd = safeParseInt(index.crtAddDate);
+  console.log("Parsed daysToAdd:", daysToAdd);
+  let newDate = null;
+  if (index.crtDate && index.EndOrNo !== 1){
+    newDate = addDaysToDate(index.crtDate, daysToAdd);
+    }else if(index.crtDate == null){
+      newDate = null;
+    }
+  let newendDate = null; 
+  if (index.endDate && index.EndOrNo == 1){
+    newendDate = addDaysToDate(index.endDate, daysToAdd);
+    }else if(index.endDate == null){
+    newendDate = null;
+    }
+  console.log("newDate:", index.crtDate, newDate,index.endDate, newendDate);    
   try {
     const response = await axios.post('/projects/indexfilter', { 
       userId: index.userId, 
-      shipId: index.shipId, 
+      shipId: index.shipId,
+      EndOrNo: index.EndOrNo,
+      
+      crtDate: index.crtDate,
+      endDate: index.endDate,
+      crtAddDate:newDate, 
+      endAddDate :newendDate,
       page: page 
     });
+    console.log("dateSerch:", index.crtDate,newDate)
     index.projects = response.data;
     pagination.value = index.projects;
   } catch (error) {
     console.error('Error:', error);
   }
 };
+//DateSerch.vueの変更によるメソッド
+
+const handleCategoryId = (categoryId) =>{
+  index.EndOrNo = categoryId
+  selectItem(index.userId, index.shipId, 3)
+  console.log("handleCategoryId:", index.EndOrNo)
+}
+
+const handleSerchDate = (serchDate) => {
+  if (index.EndOrNo !== 1){
+    index.crtDate = serchDate
+    index.endDate = null
+  }
+  else{
+    index.endDate = serchDate
+    index.crtDate = null
+  }
+  selectItem(index.userId, index.shipId, 3)
+  console.log("handleSerchDate:", index.crtDate,index.endDate)
+}
+
+const handleTermD = (termD) => {
+  index.crtAddDate = termD
+  if (index.crtDate !== null || index.endDate !== null){
+  selectItem(index.userId, index.shipId, 3)}
+  console.log("handleTermD:", index.crtAddDate)
+}
+
+///ここから変更要
+
 
 //ページネイションの設定
 const pagination = ref(props.projects);
@@ -65,10 +149,17 @@ const changePage = async (page) => {
     const response = await axios.get('/getindex/indexfilter', {
       params: {
         userId: index.userId, 
-        shipId: index.shipId, 
+        shipId: index.shipId,
+        EndOrNo: index.EndOrNo,
+        // crtDate: index.crtDate + index.crtAddDate,
+        // endDate: index.endDate,
+        // crtAddDate:index.crtAddDate, 
+        // endAddDate :index.endAddDate +index.endDate,
         page: page 
       }
     });
+    console.log("selectCategoryId:", index.EndOrNo)
+
     index.projects = response.data;
     pagination.value = index.projects;
   } catch (error) {
@@ -132,7 +223,7 @@ let filteredship = computed(() =>
 //船検索Comboboxでリストから選んだ時の動作
 watch(selectedShip, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
-    selectItem(index.userId, newValue.id, 2) 
+    selectItem(index.userId, newValue.id,2) 
   }
 })
 
@@ -328,8 +419,12 @@ onMounted(() => {
 
 
                             <!-- 日付の検索　ここから -->
-                            
-                            <DateSerch class="z-0"></DateSerch>
+                            <!-- categoryId,serchDate,termD -->
+                            <DateSerch 
+                            @update:categoryId="handleCategoryId"
+                            @update:serchDate="handleSerchDate"
+                            @update:termD="handleTermD"
+                            class="z-0"></DateSerch>
 
                             <!-- 日付の検索　ここまで -->
                              

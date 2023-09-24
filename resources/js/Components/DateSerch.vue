@@ -109,6 +109,7 @@ import {
     ListboxOptions,
     ListboxOption,
   } from '@headlessui/vue'
+
   
   const term = [
     { date: '30日間' },
@@ -141,26 +142,29 @@ const slectedTab = ref(0)
 const serchDate = ref(''); 
 const selectedPeriod = ref(term[0])
 const newTabIndex = ref(0)
+const termdays = ref(7)
 
 const emit = defineEmits([
-  'categoryId',
-  'serchDate',
-  'termId',
+  'update:categoryId',
+  'update:serchDate',
+  'update:termD',
 ])  
 const handleTabChange = (tabIndex) => {
-  console.log("Selected Category ID:", tabIndex); // コンソールログに表示
-  emit('categoryId', tabIndex); // 親にデータを送信
+  emit('update:categoryId', tabIndex); // 親にデータを送信
   newTabIndex.value = tabIndex;
 }
 watch(serchDate, (newDate) => {
-  console.log("Selected Date:", newDate); // コンソールログに表示
-  emit('serchDate', newDate); // 親にデータを送信
+  emit('update:serchDate', newDate); // 親にデータを送信
 });
 watch(selectedPeriod, (newPeriod) => {
   const index = term.findIndex(p => p.date === newPeriod.date);
   if (index !== -1) {
-    console.log("Selected Term ID:", index); // コンソールログに表示
-    emit('termId', index); // 親にデータを送信
+    if (index == 0){ termdays.value = 30}
+    if (index == 1){ termdays.value = 7}
+    if (index == 2){ termdays.value = 15}
+    if (index == 3){ termdays.value = 90}
+    if (index == 4){ termdays.value = 120}
+    emit('update:termD', termdays.value); // 親にデータを送信
   }
 });
 
