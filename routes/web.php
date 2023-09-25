@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])
     Route::delete('/ships/{id}/deleteFile/', [ShipController::class,'deleteFile'])->name('ship.deleteFile');
     
 });    
+Route::get('getship/shipfilter', [ShipController::class,'shipfilter'])->name('ships.shipfilter')->middleware(['auth', 'verified']);
 
 // prpjects関連のルート設定
 Route::middleware(['auth', 'verified'])   

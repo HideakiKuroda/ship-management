@@ -30,16 +30,20 @@ class ShipController extends Controller
     public function index(Request $request)
     {
         $users = User::with('ships')->has('ships')->get();
-        $ships = Ship::select('id', 'name', 'yard', 'ship_no')
-        ->get();
-
+        $ships = Ship::query()->with(['users:id,name'])->select('id', 'name', 'yard', 'ship_no')->get();
+        // dd($ships);
+        // Log::info('Ship with users loaded.');
         return Inertia::render('Ships/Index', [
             'users' => $users,
             'ships' => $ships,
         ]);
-
-        // dd( $users, $ships,);
+    }
+    public function shipfilter(Request $request) {
+        $userId =  $request->userId;
+        $filtered = Ship::query()->with(['users:id,name'])->select('id', 'name', 'yard', 'ship_no')
+        ->UserShip($userId)->get();
         
+        return response()->json($filtered);
     }
 
     /**

@@ -77,11 +77,27 @@ class Ship extends Model
 
     public function users(): BelongsToMany
     {
-    return $this->belongsToMany(User::class, 'ship_assignments');
+    return $this->belongsToMany(User::class, 'ship_assignments','ship_id');
     }
 
     public function ship_attachments(): HasMany
     {
         return $this->hasMany(Ship_attachment::class);
     }
+
+
+
+    //scopeの設定
+
+    //ユーザーで検索
+    public function scopeUserShip($query, $userId = null)
+    {
+        if (!empty($userId)) {
+            return $query->whereHas('users', function ($query) use ($userId) {
+                $query->where('ship_assignments.user_id', $userId);
+            });
+        }
+        return $query;
+    }
+
 }

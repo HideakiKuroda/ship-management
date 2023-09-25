@@ -2,50 +2,67 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import Pagination from '@/Components/Pagination.vue';
-import { Inertia } from '@inertiajs/inertia';
-import { ref, computed,onMounted } from 'vue';
-import { toRefs, reactive } from 'vue';
+import { toRefs, reactive,ref, computed,onMounted,watch } from 'vue';
+//Comboboxのインポート
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxButton,
+  ComboboxOptions,
+  ComboboxOption,
+  TransitionRoot,
+  ComboboxLabel
+} from '@headlessui/vue'
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 
 const props = defineProps({
     users: Array,
     ships: Array,
 });
 
-const state = reactive({
-    selectedUser: "",
-    isOpen: false // 追加
+const ship = reactive({
+    ships       :props.ships,
+    users       :props.users,
+    userId      :props.currentUser,
 });
 
-const selectUser = (id) => {
-  state.selectedUser = id;
-  state.isOpen = false; // 追加
+const user = props.users
+let selectedUser = ref({id: null, name: ''});
+let query = ref('')
+
+//担当者索ComboboxのinputBox内での名前検索
+let filteredUser = computed(() =>
+  query.value === ''
+    ? user
+    : user.filter((person) =>
+        person.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+
+//担当者索Comboboxでリストから選んだ時の動作
+watch(selectedUser, (newValue, oldValue) => {
+  if (newValue && newValue !== oldValue) {
+    selectItem(newValue.id) 
+  }
+})
+
+const selectItem = async (userId) => {
+  try {
+    const response = await axios.get('/getship/shipfilter', {
+      params: {
+        userId: userId, 
+      }
+    });
+    // console.log("selectCategoryId:", index.EndOrNo)
+
+    ship.ships = response.data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 };
-
-const closeDropdown = () => {
-  state.isOpen = false; // 追加
-};
-
-const selectedUserName = computed(() => {
-    if (state.selectedUser) {
-      const user = props.users.find(user => user.id === state.selectedUser);
-      return user ? user.name : '担当者で絞込み';
-    } else {
-      return '担当者で絞込み';
-    }
-  });
-
-const displayedShips = computed(() => {
-    if (state.selectedUser) {
-        const user = props.users.find(user => user.id === state.selectedUser);
-        return user ? user.ships.map(ship => ({...ship, userName: user.name })) : [];
-    } else {
-        return props.ships.map(ship => {
-            const user = props.users.find(user => user.ships.some(s => s.id === ship.id));
-            return {...ship, userName: user ? user.name : 'N/A'};
-        });
-    }
-});
 
 </script>
 
@@ -67,29 +84,87 @@ const displayedShips = computed(() => {
                         <div class="container px-5 py-8 mx-auto">
                            <FlashMessage /> 
                            <div class="flex pl-4 my-4 lg:w-2/3 w-full mx-auto">
-                            <div>
                                 <!-- ユーザー選択ドロップダウン -->
-                                <!-- <select v-model="state.selectedUser">
-                                    <option value="">All Users</option>
-                                    <option v-for="user in props.users" :key="user.id" :value="user.id">
-                                        {{ user.name }}
-                                    </option>
-                                </select> -->
-                                <button @click="state.isOpen = !state.isOpen" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{{ selectedUserName }} <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                                </svg></button>
-                                <!-- Dropdown menu -->
-                                <div v-if="state.isOpen" @click-outside="closeDropdown" id="dropdownHover" class="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                                <!-- メニュー項目 -->
-                                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                    <li v-for="user in users" :key="user.id">
-                                        <a @click="selectUser(user.id)" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{{ user.name }}</a>
-                                    </li>
-                                    <li>
-                                        <a @click="selectUser('')" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">全船表示</a>
-                                    </li>
-                                    </ul>
+                            <div>
+                            <!-- 担当者検索コンボボックス　ここから -->
+                            <div class="flex flex-col md:flex-row mt-2">
+                              <div class="flex flex-row ">
+                            <Combobox v-model="selectedUser" class=" opacity-100 z-10">
+                                <div  class="relative ml-4" > <ComboboxLabel class=" text-sm ">担当者選択:</ComboboxLabel>
+                                  <div
+                                  class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
+                                  >
+                                    <ComboboxInput 
+                                      class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
+                                      :displayValue="(person) => person.name"
+                                      @change="query = $event.target.value"
+                                      :value="selectedUser.name" 
+                                                                            
+                                    />
+                                    <ComboboxButton
+                                      class="absolute inset-y-0 right-0 flex items-center pr-2 opacity-100 z-10"
+                                    >
+                                      <ChevronUpDownIcon
+                                        class="h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                    </ComboboxButton>
+                                  </div>
+                                  <TransitionRoot
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                    @after-leave="query = ''"
+                                     >
+                                    <ComboboxOptions
+                                      class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                    >
+                                      <div
+                                        v-if="filteredUser.length === 0 && query !== ''"
+                                        class="relative cursor-default select-none py-2 px-4 text-gray-700"
+                                      >
+                                        名前が見つかりません.
+                                      </div>
+                                      
+                                      <ComboboxOption
+                                        v-for="person in [{ id: null, name: '' }, ...filteredUser]"
+                                        as="template"
+                                        :key="person.id"
+                                        :value="person"
+                                        v-slot="{ selected, active }"
+                                                                                                                                                              
+                                      >
+                                        <li
+                                          class="relative cursor-default select-none py-2 pl-10 pr-4"
+                                          :class="{
+                                            'bg-teal-600 text-white': active,
+                                            'text-gray-900': !active,
+                                          }" 
+                                        >
+                                          <span
+                                            class="block truncate"
+                                            :class="{ 'font-medium': selectedUser, 'font-normal': !selectedUser }"
+                                          >
+                                            {{ person.name  || '全員'  }}
+                                          </span>
+                                          <span
+                                            v-if="selected" 
+                                            class="absolute inset-y-0 left-0 flex items-center pl-3"
+                                            :class="{ 'text-white': active, 'text-teal-600': !active }"
+                                             
+                                            >
+                                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                                          </span>
+                                        </li>
+                                      </ComboboxOption>
+                                    
+                                    </ComboboxOptions>
+                                  </TransitionRoot>
                                 </div>
+                              </Combobox>
+                            <!-- 担当者検索コンボボックス　ここまで -->
+                            </div>
+                            </div>
 
                             </div>
                             <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規船登録</Link>
@@ -106,14 +181,21 @@ const displayedShips = computed(() => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                 <tr  v-for="ship in displayedShips" :key="ship.id">
+                                 <tr  v-for="ship in ship.ships" :key="ship.id">
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                         <Link class="text-blue-400" :href="route('ships.show', { ship:ship.id })"> {{ ship.id }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                         <Link class="text-blue-400" :href="route('ships.show', { ship:ship.id })">{{ ship.name }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.yard }}</td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.ship_no }}</td>
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.userName  }}</td>
+                                    <!-- <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.users.name  }}</td> -->
+                                    <!-- 担当者（ユーザー）列 -->
+                                    <td class="border-b-2 border-gray-200 px-4 py-3">
+                                    <div v-for="user in ship.users">
+                                        {{ user.name }}
+                                    </div>
+                                    </td>
+        
                                  </tr>
                                 </tbody>
                             </table>

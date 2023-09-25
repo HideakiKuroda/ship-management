@@ -50,7 +50,7 @@ const addDaysToDate = (dateString, daysToAdd) => {
     let date = new Date(dateString);
 
     // 日数を追加
-    console.log("daysToAdd:", daysToAdd);
+    // console.log("daysToAdd:", daysToAdd);
     if (daysToAdd !== null && daysToAdd !== 0){
     date.setDate(date.getDate() + daysToAdd);
     }
@@ -76,7 +76,7 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     index.shipId = shipId;
   } else if($uOrS == 3) {}
   const daysToAdd = safeParseInt(index.crtAddDate);
-  console.log("Parsed daysToAdd:", daysToAdd);
+  // console.log("Parsed daysToAdd:", daysToAdd);
   let newDate = null;
   if (index.crtDate && index.EndOrNo !== 1){
     newDate = addDaysToDate(index.crtDate, daysToAdd);
@@ -89,7 +89,7 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     }else if(index.endDate == null){
     newendDate = null;
     }
-  console.log("newDate:", index.crtDate, newDate,index.endDate, newendDate);    
+  // console.log("newDate:", index.crtDate, newDate,index.endDate, newendDate);    
   try {
     const response = await axios.post('/projects/indexfilter', { 
       userId: index.userId, 
@@ -102,7 +102,7 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
       endAddDate :newendDate,
       page: page 
     });
-    console.log("dateSerch:", index.crtDate,newDate)
+    // console.log("dateSerch:", index.crtDate,newDate)
     index.projects = response.data;
     pagination.value = index.projects;
   } catch (error) {
@@ -114,7 +114,7 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
 const handleCategoryId = (categoryId) =>{
   index.EndOrNo = categoryId
   selectItem(index.userId, index.shipId, 3)
-  console.log("handleCategoryId:", index.EndOrNo)
+  // console.log("handleCategoryId:", index.EndOrNo)
 }
 
 const handleSerchDate = (serchDate) => {
@@ -127,14 +127,14 @@ const handleSerchDate = (serchDate) => {
     index.crtDate = null
   }
   selectItem(index.userId, index.shipId, 3)
-  console.log("handleSerchDate:", index.crtDate,index.endDate)
+  // console.log("handleSerchDate:", index.crtDate,index.endDate)
 }
 
 const handleTermD = (termD) => {
   index.crtAddDate = termD
   if (index.crtDate !== null || index.endDate !== null){
   selectItem(index.userId, index.shipId, 3)}
-  console.log("handleTermD:", index.crtAddDate)
+  // console.log("handleTermD:", index.crtAddDate)
 }
 
 ///ここから変更要
@@ -158,7 +158,7 @@ const changePage = async (page) => {
         page: page 
       }
     });
-    console.log("selectCategoryId:", index.EndOrNo)
+    // console.log("selectCategoryId:", index.EndOrNo)
 
     index.projects = response.data;
     pagination.value = index.projects;
@@ -236,8 +236,8 @@ const displayVesselData = (vessel) => {
 }
 
 onMounted(() => {
-  console.log('props.users:', props.users);
-    console.log(props.projects.data)
+  // console.log('props.users:', props.users);
+  //   console.log(props.projects.data)
 })
 
 
