@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('ship_no')->nullable();
             $table->date('delivered')->nullable();
             $table->date('issueInspCert')->nullable();
+            $table->date('expiry_date')->nullable();
+            $table->integer('dock_term')->nullable();
             $table->integer('gross_tonn')->nullable();
             $table->foreignId('operat_section_id')->nullable()->constrained();
             $table->foreignId('navigation_area_id')->nullable()->constrained();

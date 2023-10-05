@@ -39,12 +39,11 @@ Route::get('getship/shipfilter', [ShipController::class,'shipfilter'])->name('sh
 Route::middleware(['auth', 'verified'])   
 ->group(function () {
     Route::resource('projects', ProjectController::class);
-    // Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter');
-    // Route::get('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter');
 
 });    
 Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
+
 
 // tasks関連のルート設定
 Route::resource('tasks', TaskController::class)

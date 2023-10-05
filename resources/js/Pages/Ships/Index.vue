@@ -46,6 +46,7 @@ let filteredUser = computed(() =>
 watch(selectedUser, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
     selectItem(newValue.id) 
+    console.log("selectUserId:", newValue.id)
   }
 })
 

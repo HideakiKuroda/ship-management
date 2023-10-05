@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Project;
+use App\Models\Schedule;
 use App\Models\Ship_owner;
 use App\Models\Navigation_area;
 use App\Models\Operat_section;
@@ -38,11 +39,17 @@ class Ship extends Model
         'ship_no',
         'yard',
         'issueInspCert',
+        'expiry_date',
+        'dock_term',
     ];
 
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
     }
 
     public function ship_owners(): HasMany

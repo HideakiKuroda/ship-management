@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('task_descriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')
+            $table->foreignId('task_id')
             ->constrained()
             ->onUpdate('cascade')
             ->onDelete('cascade');

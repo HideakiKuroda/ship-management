@@ -151,10 +151,6 @@ const changePage = async (page) => {
         userId: index.userId, 
         shipId: index.shipId,
         EndOrNo: index.EndOrNo,
-        // crtDate: index.crtDate + index.crtAddDate,
-        // endDate: index.endDate,
-        // crtAddDate:index.crtAddDate, 
-        // endAddDate :index.endAddDate +index.endDate,
         page: page 
       }
     });
@@ -200,6 +196,9 @@ let filteredUser = computed(() =>
           .includes(query.value.toLowerCase().replace(/\s+/g, ''))
       )
 )
+const options = computed(() => {
+  return [{ id: null, name: '' }, ...filteredUser.value];
+});
 
 //担当者索Comboboxでリストから選んだ時の動作
 watch(selectedUser, (newValue, oldValue) => {
@@ -219,6 +218,11 @@ let filteredship = computed(() =>
           .includes(query.value.toLowerCase().replace(/\s+/g, ''))
       )
 )
+
+const shipOptions = computed(() => {
+  return [{ id: null, name: '' }, ...filteredship.value];
+});
+
 
 //船検索Comboboxでリストから選んだ時の動作
 watch(selectedShip, (newValue, oldValue) => {
@@ -265,7 +269,7 @@ onMounted(() => {
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex flex-col md:flex-row mt-2">
                               <div class="flex flex-row ">
-                            <Combobox v-model="selectedUser" class=" opacity-100 z-10">
+                            <Combobox v-model="selectedUser" id="urSerch" name="urSerch" class=" opacity-100 z-10">
                                 <div  class="relative ml-4" > <ComboboxLabel class=" text-sm ">担当者選択:</ComboboxLabel>
                                   <div
                                   class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -274,7 +278,7 @@ onMounted(() => {
                                       class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
                                       :displayValue="(person) => person.name"
                                       @change="query = $event.target.value"
-                                      :value="selectedUser.name" 
+                                      
                                                                             
                                     />
                                     <ComboboxButton
@@ -302,8 +306,8 @@ onMounted(() => {
                                         名前が見つかりません.
                                       </div>
                                       
-                                      <ComboboxOption
-                                        v-for="person in [{ id: null, name: '' }, ...filteredUser]"
+                                      <ComboboxOption 
+                                        v-for="person in options"
                                         as="template"
                                         :key="person.id"
                                         :value="person"
@@ -377,7 +381,7 @@ onMounted(() => {
                                       </div>
 
                                       <ComboboxOption
-                                        v-for="vessel in [{ id: null, name: '' }, ...filteredship]"
+                                        v-for="vessel in shipOptions"
                                         as="template"
                                         :key="vessel.id"
                                         :value="vessel"

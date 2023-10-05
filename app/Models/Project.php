@@ -30,6 +30,7 @@ class Project extends Model
         'start_date',
         'end_date',
         'completion',
+        'date_of_issue', 
    ];
 
     protected $dates = ['deleted_at'];
@@ -38,7 +39,7 @@ class Project extends Model
     {
     return $this->belongsToMany(User::class, 'pro_assignments');
     }
-
+   
     public function pro_attachments():HasMany
     {
         return $this->hasMany(Pro_attachment::class);
@@ -95,7 +96,7 @@ class Project extends Model
         return $query;
     }  
     //作成日の日付範囲で検索
-    public function scopeDateCreateProject($query,$crtDate=null,$crtAddDate)
+    public function scopeDateCreateProject($query,$crtAddDate,$crtDate=null)
     {
         if(!empty($crtDate)){
            return $query->whereBetween('created_at',[$crtDate,$crtAddDate]);
@@ -104,7 +105,7 @@ class Project extends Model
     
     }
     //完了日日付範囲で検索
-    public function scopeDateEndProject($query,$endDate=null,$endAddDate)
+    public function scopeDateEndProject($query,$endAddDate,$endDate=null)
     {
         if(!empty($endDate)){
            return $query->whereBetween('completion',[$endDate,$endAddDate]);

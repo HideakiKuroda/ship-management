@@ -85,7 +85,7 @@ class ProjectController extends Controller
     
     public function idxtest(Project $project)
     {
-        $userId = auth()->id();
+        $userId = auth()->user();
         $EndOrNo = 0;
         $shipId = null;
         $crtDate = null;
@@ -123,7 +123,25 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        $userId = auth()->user();
+        $ships = Ship::select('id','name','yard','ship_no')->get();
+        $categories = Pro_category::select('id','name')->get();
+        $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
+        $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
+            $query->whereIn('departments.id', $departmentIds);
+        })
+        ->select('id','name')
+        ->get();
+
+        // dd($users);
+        return Inertia::render('Projects/Create', [
+            'ships' => $ships,
+            'currentUser' => $userId, 
+            'categories' => $categories,
+            'users'=>$users,
+        ]);
+
+        
     }
 
     /**
@@ -131,7 +149,38 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        //
+        /** @var Project|null */
+        $project = null;
+        try {
+            LaravelRedis::transaction(function () use ($request, &$project) {
+            $project = Project::Create([
+                'ship_id' => $request->input('ship_id'),
+                'name' => $request->input('name'),
+                'pro_category_id' => $request->input('pro_category_id'),
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'completion' => $request->input('completion'),
+                'date_of_issue' => $request->input('date_of_issue'),
+            ]);
+            
+            // assignedUsersList から user_id を取り出して、$userIds に配列として格納
+            $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
+            // syncメソッドは、多対多リレーションシップを同期するためのメソッドです。
+            //これにより、与えられたIDのリスト$userIdsに基づいて中間テーブルのレコードが更新されます。            
+            $project->users()->sync($userIds);
+        });
+        
+        return redirect()->route('project.show', $project->id)->with([
+            'message' => '新しいproject「' . $project->name . '」を登録しました',
+            'status' => 'success'
+        ]);   
+        } catch (\Exception $e) {
+            Log::error($e);
+            return redirect()->back()->with([
+                'message' => 'project「' . $project->name . '」の登録に失敗しました',
+                'status' => 'error'
+            ]);
+        }
     }
 
     /**

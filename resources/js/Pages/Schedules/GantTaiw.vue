@@ -6,7 +6,7 @@ import moment from 'moment'; //npm install moment でインストール要
 // reactive data
 const start_month = ref('2022-04');
 const end_month = ref('2031-03');
-const block_size = ref(15);
+const block_size = ref(20);
 const block_number = ref('');
 const calendars = ref([]);
 const inner_width = ref(''); //追加
@@ -363,11 +363,13 @@ defineExpose({ windowSizeCheck, displayTasks})
 
 
 <template>
+  <!-- ガントチャートのヘッダー部分 -->
   <div id="gantt-header" class="h-12 p-2 flex items-center">
     <h1 class="text-xl font-bold">スケジュール管理  {{ start_month }}  ～  {{ end_month }}</h1>
   </div>
   <div id="gantt-content" class="flex">
-    <div id="gantt-task">
+    <!-- ガントチャートのタスク領域 -->
+    <div id="gantt-task">  
       <div id="gantt-task-title" class="flex items-center bg-green-600 text-white h-20" ref="taskElement">
         <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-32 h-full">
         タスク
@@ -408,6 +410,7 @@ defineExpose({ windowSizeCheck, displayTasks})
     </div>
     </div> <!-- id="gantt-task"  -->
 
+    <!-- ガントチャートのカレンダー領域 -->
     <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l" 
           :style="`width:${calendarViewWidth}px`" ref="calendar">
       <div id="gantt-date" class="h-20">
