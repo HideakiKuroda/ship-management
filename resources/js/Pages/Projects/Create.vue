@@ -25,7 +25,7 @@ const props = defineProps({
     categories : Array,
     users :Array,
     errors: Object,
-});
+})
 
 const form = reactive({         //内容をreactiveにform変数に収める
     selectedUser:       null,
@@ -35,25 +35,18 @@ const form = reactive({         //内容をreactiveにform変数に収める
     pro_category_id:    null,
     start_date:         null,
     end_date:           null,
-    completion:         null,
-    date_of_issue:      null,
-
-    ex_name:            null,
-    slectedOperatSection : null,
-    delivered:          null,
-    gross_tonn:         null,
-}) ;
+}) 
 
 onMounted(() => {
             if (props.currentUser) {
                 form.assignedUsersList.push(props.currentUser);
             }
-        });
+        })
 
 const formatDate = (date) => {
 //   if (!date) return "N/A";
   return moment(date).format('YYYY年MM月DD日');
-};
+}
 
 const userIds = form.assignedUsersList.map(user => user.id);
 
@@ -64,18 +57,14 @@ const assignUser = () => {        //担当者追加ボタン　selectedUserがob
     }
     // console.log("selectUser:", form.selectedUser)
     // console.log("selectUserLst:", form.assignedUsersList)
-};
-
-
+}
 
 const unassignUser = (userId) => {
     form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
-};
+}
 
 //コンボボックス用の変数設定
 let query = ref('')
-let selectedShip = ref({id: null, name: ''})
-
 
 //担当者索ComboboxのinputBox内での名前検索
 let filteredUser = computed(() =>
@@ -95,8 +84,9 @@ let filteredUser = computed(() =>
 //既存のリスト（filteredUser）からオプションを動的に生成して表示するためのもの
 const options = computed(() => {
   return [{ id: null, name: '' }, ...filteredUser.value];
-});
+})
 
+let selectedShip = ref({id: null, name: ''})
 //船検索ComboboxのinputBoxで船名検索
 let filteredship = computed(() =>
   query.value === ''
@@ -111,7 +101,7 @@ let filteredship = computed(() =>
 
 const shipOptions = computed(() => {
   return [{ id: null, name: '' }, ...filteredship.value];
-});
+})
 
 //船検索Comboboxのリストに造船所と船番を表示するため
 const displayVesselData = (vessel) => {
@@ -137,8 +127,19 @@ let filteredCategory = computed(() =>
 
 const typeOptions = computed(() => {
   return [{ id: null, name: '' }, ...filteredCategory.value];
-});
+})
 
+const storeproject = () => {
+  form.shipId = selectedShip.value.id
+  form.pro_category_id =  selectedCategory.value.id
+  Inertia.post(route('projects.store'), form) 
+  // console.log("selectUser:", form.assignedUsersList);
+  // console.log("projectName:", form.name);
+  // console.log("selectShip:", form.shipId);
+  // console.log("selectCategory:", form.pro_category_id);
+  // console.log("start_date:", formatDate(form.start_date));
+  // console.log("end_date:", formatDate(form.end_date));
+}
 
 </script>
 
@@ -165,7 +166,7 @@ const typeOptions = computed(() => {
                                   <div id="pro_name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                       <label> ◆　プロジェクト名 </label>
                                         <div class="flex flex-wrap sm:flex-row sm:space-x-4">
-                                          <input type="text" id="pro_name" name="pro_name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 leading-8 transition-colors duration-200 ease-in-out">                                    
+                                          <input type="text" id="pro_name" name="pro_name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 mr-6 leading-8 transition-colors duration-200 ease-in-out">                                    
                                         </div>
                                   </div>
                                   <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -272,9 +273,9 @@ const typeOptions = computed(() => {
      
                                   <div class="flex flex-wrap sm:flex-row">
                                     <div class="flex flex-col p-2 ml-4">
-                                      <label for="ship.ex_name" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船の選択：</label>
+                                      <label for="shipSerch" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船の選択：</label>
                                       <!-- 船検索コンボボックス　ここから -->
-                                      <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch" class=" opacity-100 z-10">
+                                      <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch" class=" opacity-100 z-0">
                                             <div  class="relative mt-1" >
                                               <div
                                               class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -346,9 +347,9 @@ const typeOptions = computed(() => {
                                         <!-- 船検索コンボボックス　ここまで -->
                                      </div>
                                      <div class="flex flex-col p-2 ml-4">
-                                      <label for="ship.ex_name" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト種類：</label>
+                                      <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
                                       <!-- Category検索コンボボックス　ここから -->
-                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 z-10">
+                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 z-0">
                                             <div  class="relative mt-1" >
                                               <div
                                               class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -422,26 +423,15 @@ const typeOptions = computed(() => {
 
 
                                     <div class="flex flex-col p-2 ml-4">
-                                      <label for="delivered" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎竣工：</label>
-                                      <input type="date" id="delivered" name="delivered" v-model="form.delivered" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <label for="start" class="rounded  w-32 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎開始日（予定）：</label>
+                                      <input type="date" id="start" name="start" v-model="form.start_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
                  
                                     <div class="flex flex-col p-2 ml-4">
-                                      <label for="gross_tonn" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎総トン数：</label>
-                                      <input type="tel" id="gross_tonn" name="gross_tonn" v-model="form.gross_tonn" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
+                                      <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
                                   
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="section" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎運航地域：</label>
-                                      <div id="section" class=" w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" >
-                                      <!-- ユーザー選択ドロップダウン -->
-                                      <!-- <select class="rounded  border border-indigo-300 h-10 w-40" v-model="form.slectedOperatSection">
-                                        <option v-for="operatSection in operatSections" :key="operatSection.id" :value="operatSection.id">
-                                          {{ operatSection.section }}
-                                         </option>
-                                      </select> -->
-                                    </div>  
-                                    </div>
                                     
                                   
                                   </div>
@@ -453,7 +443,7 @@ const typeOptions = computed(() => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="storeShip" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
+                                  <button  @click="storeproject" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>

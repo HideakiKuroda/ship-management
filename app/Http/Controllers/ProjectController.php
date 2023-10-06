@@ -123,7 +123,11 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $userId = auth()->user();
+        $user = auth()->user();
+        $userId = (object)[
+            'id' => $user->id,
+            'name' => $user->name
+        ];
         $ships = Ship::select('id','name','yard','ship_no')->get();
         $categories = Pro_category::select('id','name')->get();
         $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
@@ -153,14 +157,13 @@ class ProjectController extends Controller
         $project = null;
         try {
             LaravelRedis::transaction(function () use ($request, &$project) {
+                // dd($request);
             $project = Project::Create([
-                'ship_id' => $request->input('ship_id'),
+                'ship_id' => $request->input('shipId'),
                 'name' => $request->input('name'),
                 'pro_category_id' => $request->input('pro_category_id'),
                 'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
-                'completion' => $request->input('completion'),
-                'date_of_issue' => $request->input('date_of_issue'),
             ]);
             
             // assignedUsersList から user_id を取り出して、$userIds に配列として格納
@@ -169,8 +172,7 @@ class ProjectController extends Controller
             //これにより、与えられたIDのリスト$userIdsに基づいて中間テーブルのレコードが更新されます。            
             $project->users()->sync($userIds);
         });
-        
-        return redirect()->route('project.show', $project->id)->with([
+        return redirect()->route('projects.show', $project->id)->with([
             'message' => '新しいproject「' . $project->name . '」を登録しました',
             'status' => 'success'
         ]);   
@@ -188,7 +190,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $project->load('ships', 'pro_categories', 'users','pro_attachments.users');
+        $project->load('users','pro_attachments.user','tasks','pro_categories','ships','pro_descriptions');
             // dd($ship);
             return Inertia::render('Projects/Show',['project' => $project]);
     }

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\User;
 use App\Models\Pro_attachment;
-// use App\Models\Pro_assignment;
+use App\Models\Pro_description;
 use App\Models\Pro_category;
 use App\Models\Ship;
 Use App\Models\Task;
@@ -43,6 +43,11 @@ class Project extends Model
     public function pro_attachments():HasMany
     {
         return $this->hasMany(Pro_attachment::class);
+    }
+
+    public function pro_descriptions():HasMany
+    {
+        return $this->hasMany(Pro_description::class);
     }
 
     public function tasks():HasMany
