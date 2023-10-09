@@ -8,6 +8,8 @@ import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-colla
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+
 
 
 const components = {
@@ -224,6 +226,7 @@ const deleteFile = (attachmentId) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                    <BreezeValidationErrors :errors="errors" />    
                     <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                      <section class="text-gray-600 body-font relative">
                     

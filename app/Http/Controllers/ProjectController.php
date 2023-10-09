@@ -81,43 +81,6 @@ class ProjectController extends Controller
         // ->withQueryString();
         return response()->json($filtered);
     }
-
-    
-    public function idxtest(Project $project)
-    {
-        $userId = auth()->user();
-        $EndOrNo = 0;
-        $shipId = null;
-        $crtDate = null;
-        $crtAddDate = null;
-        $endDate = null;
-        $endAddDate = null;
-        // dd($crtDate,$crtAddDate,$endDate,$endAddDate)
-        //部門　18　の人だけを抽出
-        $users = User::whereHas('user_descriptions.departments', function ($query) {
-            $query->where('departments.id', 18);
-        })->select('id', 'name')->get();
-        $ships = Ship::select('id','name','yard','ship_no')->get();
-        $queryAll = Project::query()->with(['ships:id,name','pro_categories:id,name','users:id,name'])
-        ->EndOrNoProject($EndOrNo)
-        ->ShipProject($shipId)
-        ->DateCreateProject($crtDate,$crtAddDate)
-        ->DateEndProject($endDate,$endAddDate)
-        ->UserProject($userId);
-        // Log::info($queryAll->toSql()); 
-        
-        $projects = $queryAll->paginate(20);
-        // ->withQueryString();
-
-        
-        return Inertia::render('Projects/test', [
-            'ships' => $ships,
-            'currentUser' => $userId, 
-            'users' => $users,
-            'projects' => $projects,
-        ]);
-    }
-
     /**
      * Show the form for creating a new resource.
      */

@@ -22,7 +22,14 @@ class StoreShipRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name'=>  ['required', 'max:50'],
+            'ex_name'=> ['max:50'],
+            'former_name'=> ['max:50'],
+            'yard'=> ['max:50'],
+            'ship_no'=> ['max:50'],
+            'gross_tonn'=> ['nullable','integer'],
+            'dock_term'=> ['nullable','integer'],
+            
         ];
     }
 }

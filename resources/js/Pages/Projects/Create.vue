@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import {onMounted, computed,reactive,defineProps,ref,watch } from 'vue';
+import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 //Comboboxのインポート
 import {
   Combobox,
@@ -155,6 +156,7 @@ const storeproject = () => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                    <BreezeValidationErrors :errors="errors" />  
                     <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                      <section class="text-gray-600 body-font relative">
                     

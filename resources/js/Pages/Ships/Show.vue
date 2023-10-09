@@ -27,7 +27,7 @@ const deleteItem = id => {
 }
 
 const formatDate = (date) => {
-  // if (!date) return "N/A";
+   if (!date) return "";
   return moment(date).format('YYYY年MM月DD日');
 };
 
@@ -117,7 +117,7 @@ const downloadFile = async (attachmentId) => {
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎航行区域 :</label>
                                       <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                          {{ props.ship.navigation_areas.name }}<a v-if="props.ship.navigation_areas.name"> 区域</a>
+                                          {{ props.ship.navigation_areas?.name }}<a v-if="props.ship.navigation_areas?.name"> 区域</a>
                                       </div>
                                     </div>
                                 

@@ -22,7 +22,10 @@ class StoreProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name'=> ['required', 'max:100'],
+            'pro_category_id'=>['required'],
+            'start_date'=>['required'],
+            'end_date'=>['required'],
         ];
     }
 }

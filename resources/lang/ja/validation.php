@@ -153,6 +153,10 @@ return [
     |
     */
 
-    'attributes' => [],
-
+    'attributes' => [
+        'name' => '名称',
+        'pro_category_id'=> '区分',
+        'start_date'=> '開始日',
+        'end_date'=> '終了日',
+    ],
 ];
