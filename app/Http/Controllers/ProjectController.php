@@ -19,7 +19,7 @@ use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
-
+use app\Exceptions\Handler as Exception;
 
 class ProjectController extends Controller
 {
@@ -153,9 +153,15 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $project->load('users','pro_attachments.user','tasks','pro_categories','ships','pro_descriptions');
-            // dd($ship);
+        try {
+            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions');
+            // dd($project);
             return Inertia::render('Projects/Show',['project' => $project]);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            dd($e->getMessage());
+        }
+
     }
 
     /**
@@ -163,7 +169,26 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        try {
+            $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
+            $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
+                $query->whereIn('departments.id', $departmentIds);
+            })
+            ->select('id','name')
+            ->get();
+            $ships = Ship::select('id','name')->get();
+
+            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions');
+                // dd($project);
+            return Inertia::render('Projects/Edit',[
+                'project' => $project,
+                'users' => $users,
+                'ships' => $ships,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            dd($e->getMessage());
+        }
     }
 
     /**
@@ -171,7 +196,24 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        $project = Project::findOrFail($project->id);
+        LaravelRedis::transaction(function () use ($request, &$project) {
+   
+        foreach ($request->attachments ?? [] as $attachData) {
+        Pro_attachment::where('id', $attachData['id'])
+            ->where('project_id', $project->id)
+            ->update(['title' => $attachData['title']]);
+        }
+
+        $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
+        $project->users()->sync($userIds);
+    });
+    // dd($ownerData);
+    return redirect()->route('projects.show', $project->id)->with([
+        'message' => '更新しました。',
+        'status' => 'success'
+    ]);
+
     }
 
     /**
@@ -180,5 +222,105 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
+    }
+
+    public function upload(Request $request, $id)
+    {
+        $project = Project::findOrFail($id);
+        $files = $request->file('files');
+        
+        //  dd($files);
+        foreach ($files as $file) {
+         
+            $originalName = $file->getClientOriginalName();
+            $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
+            // dd($filetype);
+            $icon = '';
+            if ($filetype === 'xls'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'xlsx'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'xlsm'){$icon='/images/excel_xls_spreadsheet.png';}
+            elseif ($filetype === 'doc'){$icon='/images/word_document.png';}
+            elseif ($filetype === 'docx'){$icon='/images/word_document.png';}
+            elseif ($filetype === 'pdf'){$icon='/images/adobe_acrobat_pdf.png';}
+            elseif ($filetype === 'jpg'){$icon='/images/picture_image_photo_file.png';}
+            elseif ($filetype === 'zip'){$icon='/images/zip_file_winzip.png';}
+            elseif ($filetype === 'pptx'){$icon='/images/powerpoint_document.png';}
+            elseif ($filetype === 'pptm'){$icon='/images/powerpoint_document.png';}
+            else{$icon='/images/text_document.png';};
+
+            // $filename = $file->storeAs("/projects/{$id}", $originalName);
+            // dd($filename);
+            $filename = Storage::put("projects/{$id}", $file);
+            $userId = Auth::id();
+            // データベースに記録
+            Pro_attachment::create([
+                'project_id' => $id,
+                'filename' => $filename,
+                'originname' => $originalName,
+                'user_id' =>  $userId,
+                'icon' => $icon,
+            ]);
+        }
+
+        // projects.edit へリダイレクト
+        // return redirect()->route('projects.edit', $id)->with([
+            return redirect()->back()->withInput()->with([
+            'message' => 'ファイルをアップロードしました。',
+            'status' => 'success'
+        ]);
+    }
+
+    public function deleteFile(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Pro_attachment::where('id', $attachData)->first();
+        // dd($attachment);
+        if ($attachment) {
+            // データベースからレコードを削除
+            Pro_attachment::where('id', $attachData)->delete();
+            
+            // ストレージからファイルを削除
+            Storage::delete($attachment->filename);
+
+            // return redirect()->route('projects.edit', $id)->with([
+            return redirect()->back()->with([
+            
+                'message' => 'ファイルを削除しました。',
+                'status' => 'success'
+            ]);
+        }
+
+        // return redirect()->route('projects.edit', $id)->with([
+            return redirect()->back()->with([
+            'message' => 'ファイルの削除に失敗しました。',
+            'status' => 'error'
+        ]);
+    }
+
+    //ダウンロードファイルの取得
+    public function downloadFile(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Pro_attachment::where('id', $attachData)->first();
+        // dd($attachment);
+        if ($attachment) {
+            $filePath = Storage::path($attachment->filename);
+            return response()->download($filePath, $attachment->originname);
+            
+        }
+        
+        return response()->json(['message' => 'File not found'], 404);
+    }
+    //ダウンロードファイルの名前の取得
+    public function getFileName(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Pro_attachment::where('id', $attachData)->first();
+
+        if ($attachment) {
+            return response()->json(['filename' => $attachment->originname]);
+        }
+
+        return response()->json(['message' => 'File not found'], 404);
     }
 }

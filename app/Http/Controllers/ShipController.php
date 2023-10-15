@@ -343,7 +343,7 @@ class ShipController extends Controller
         ]);
     }
 
- 
+    //ダウンロードファイル（バイナリー）の取得
     public function downloadFile(Request $request, $id)
     {
         $attachData = $request->input('attachmentId');
@@ -352,6 +352,19 @@ class ShipController extends Controller
         if ($attachment) {
             $filePath = Storage::path($attachment->filename);
             return response()->download($filePath, $attachment->originname);
+        }
+
+        return response()->json(['message' => 'File not found'], 404);
+    }
+
+    //ダウンロードファイルの名前の取得
+    public function getFileName(Request $request, $id)
+    {
+        $attachData = $request->input('attachmentId');
+        $attachment = Ship_attachment::where('id', $attachData)->first();
+
+        if ($attachment) {
+            return response()->json(['filename' => $attachment->originname]);
         }
 
         return response()->json(['message' => 'File not found'], 404);

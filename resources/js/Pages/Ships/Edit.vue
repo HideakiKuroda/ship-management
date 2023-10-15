@@ -22,6 +22,7 @@ const props = defineProps({
     navigationAreas : Array,
     operatSections : Array,
     users :Array,
+    errors: Object,
  })
 
 const form = reactive({         //内容をreactiveにform変数に収める
@@ -107,7 +108,7 @@ const updateShip = id => {
     })
   }
 
-  const userIds = form.assignedUsersList.map(user => user.id);
+const userIds = form.assignedUsersList.map(user => user.id);
 
 const assignUser = () => {
     const selectedUserData = props.users.find(user => user.id === form.selectedUser);
@@ -199,14 +200,43 @@ const dropFiles = (event) => {
     // ユーザーがキャンセルした場合の処理（オプション）
 }};
 
+// const downloadFile = async (attachmentId) => {
+//   try {
+//     const response = await Inertia.get(route('ship.downloadFile', { id: form.id }), { attachmentId: attachmentId });
+//     // その他の処理
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//   }
+// };
 const downloadFile = async (attachmentId) => {
-  try {
-    const response = await Inertia.get(route('ship.downloadFile', { id: form.id }), { attachmentId: attachmentId });
-    // その他の処理
-  } catch (error) {
-    console.error("An error occurred:", error);
-  }
+    try {
+      // まずファイル名を取得
+      const filenameResponse = await axios.get(route('ship.getFileName', { id: form.id }), {
+            params: { attachmentId: attachmentId }
+        });
+
+        const filename = filenameResponse.data.filename; // ファイル名を取得
+
+        // ファイルをダウンロード
+        const response = await axios.get(route('ship.downloadFile', { id: form.id }), {
+            params: { attachmentId: attachmentId },
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // console.log('filename:',filename);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (error) {
+        console.error("エラーが発生しました：", error);
+        // エラーメッセージの表示などのエラーハンドリング
+    }
 };
+
 
 const deleteFile = (attachmentId) => {
   if (window.confirm('ファイルを削除しますか')) {

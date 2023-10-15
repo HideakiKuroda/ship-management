@@ -32,12 +32,32 @@ const formatDate = (date) => {
 };
 
 const downloadFile = async (attachmentId) => {
-  try {
-    const response = await Inertia.get(route('ship.downloadFile', { id:props.ship.id}), { attachmentId: attachmentId });
-    // その他の処理
-  } catch (error) {
-    console.error("An error occurred:", error);
-  }
+    try {
+      // まずファイル名を取得
+      const filenameResponse = await axios.get(route('ship.getFileName', { id: props.ship.id }), {
+            params: { attachmentId: attachmentId }
+        });
+
+        const filename = filenameResponse.data.filename; // ファイル名を取得
+
+        // ファイルをダウンロード
+        const response = await axios.get(route('ship.downloadFile', { id: props.ship.id }), {
+            params: { attachmentId: attachmentId },
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // console.log('filename:',filename);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (error) {
+        console.error("エラーが発生しました：", error);
+        // エラーメッセージの表示などのエラーハンドリング
+    }
 };
 
 </script>
@@ -74,8 +94,8 @@ const downloadFile = async (attachmentId) => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
 
-                                <div>
-                                  <vue-collapsible-panel-group>
+                             <div>
+                              <vue-collapsible-panel-group>
                                <vue-collapsible-panel>
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
                                 <template #content> 
@@ -111,7 +131,7 @@ const downloadFile = async (attachmentId) => {
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎運航地域：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ props.ship.operat_sections.section }}
+                                            {{ props.ship.operat_sections?.section }}
                                       </div>
                                     </div>
                                     <div class="p-2 ml-4">

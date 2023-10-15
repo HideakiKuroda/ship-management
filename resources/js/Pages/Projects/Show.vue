@@ -3,12 +3,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref } from 'vue';
+import { ref,onMounted } from 'vue';
 //アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 //アコーディオン機能のCSS
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
+import axios from 'axios';
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -31,14 +32,54 @@ const formatDate = (date) => {
   return moment(date).format('YYYY年MM月DD日');
 };
 
+
+// const downloadFile = async (attachmentId) => {
+//   try {
+//     await new Promise((resolve, reject) => {
+//       Inertia.get(route('project.downloadFile', { id:props.project.id}), { attachmentId: attachmentId }, {
+//         onSuccess: () => resolve(),
+//         onError: (errors) => reject(errors)
+//       });
+//     });
+//     // その他の処理
+//   } catch (error) {
+//     console.error("An error occurred:", error.response ? error.response.data : error);
+//   }
+// };
+
 const downloadFile = async (attachmentId) => {
-  try {
-    const response = await Inertia.get(route('project.downloadFile', { id:props.project.id}), { attachmentId: attachmentId });
-    // その他の処理
-  } catch (error) {
-    console.error("An error occurred:", error);
-  }
+    try {
+      // まずファイル名を取得
+      const filenameResponse = await axios.get(route('project.getFileName', { id: props.project.id }), {
+            params: { attachmentId: attachmentId }
+        });
+
+        const filename = filenameResponse.data.filename; // ファイル名を取得
+
+        // ファイルをダウンロード
+        const response = await axios.get(route('project.downloadFile', { id: props.project.id }), {
+            params: { attachmentId: attachmentId },
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // console.log('filename:',filename);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (error) {
+        console.error("エラーが発生しました：", error);
+        // エラーメッセージの表示などのエラーハンドリング
+    }
 };
+
+
+onMounted(() =>{
+  // console.log('id:',props.project.users);
+})
 
 </script>
 
@@ -47,7 +88,7 @@ const downloadFile = async (attachmentId) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細☆彡</h2>
         </template>
 
         <div class="py-12">
@@ -63,7 +104,8 @@ const downloadFile = async (attachmentId) => {
                                 
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        ◆　No.:{{ project.id }}　{{ project.name }}　
+                                        <span>◆</span><span class="pl-5">Project No.: {{ props.project.id }}</span><span class="pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
+                                        <span class="pl-8">Subject: {{ props.project.name }}</span>
                                     </div>
                                 </div>
 
@@ -81,18 +123,22 @@ const downloadFile = async (attachmentId) => {
                                 <template #content> 
      
                                   <div class="flex flex-wrap sm:flex-row">
-                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●プロジェクト区分：</label>
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●区分：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             {{ props.project.pro_categories.name }}
                                       </div>
-
-                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">◎担当者：</label>
+                                    </div>
+                                    
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">◎担当：</label>
                                       <div id="name" class="w-48 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-z                                       <div v-for="user in props.project.users">
-                                        {{ user.name }}
+                                       <div v-for="user in props.project.users" >
+                                        <div >{{ user.name }}</div>
                                        </div>
                                       </div>
-                                  
+                                    </div>
+                                    
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎開始日（予定）：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -112,7 +158,7 @@ z                                       <div v-for="user in props.project.users"
                                             {{ formatDate(props.project.completion) }}
                                       </div>
                                     </div>
-                                    <div class="p-2 ml-4">
+                                    <div class="p-2 ml-4"  v-if="props.project.pro_category_id === 1">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎証書発行日 :</label>
                                       <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                           {{ formatDate(props.project.date_of_issue) }}
@@ -123,7 +169,7 @@ z                                       <div v-for="user in props.project.users"
                                 </template>
                               </vue-collapsible-panel>
 
-                              <vue-collapsible-panel :expanded="false">
+                              <vue-collapsible-panel :expanded="true">
                               <template #title> タスク一覧 </template>
                               <template #content> 
                                 <div class="flex flex-col">
@@ -168,7 +214,7 @@ z                                       <div v-for="user in props.project.users"
                                 </div>
                               </template>
                               </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="false">
+                            <vue-collapsible-panel :expanded="true">
                               <template #title> メモ一覧 </template>
                             <template #content> 
                               <div class="flex flex-col">
@@ -198,7 +244,7 @@ z                                       <div v-for="user in props.project.users"
                             </template>
                             </vue-collapsible-panel>
                    
-                            <vue-collapsible-panel :expanded="false">
+                            <vue-collapsible-panel :expanded="true">
                             <template #title> 書類添付 </template>
                             <template #content> 
                                <div class="flex flex-col">
@@ -241,7 +287,7 @@ z                                       <div v-for="user in props.project.users"
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                <Link as="button" :href="route('projects.edit', { project:project.id })" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
+                                <Link as="button" :href="route('projects.edit', { project:props.project.id })" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->

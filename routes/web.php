@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])
     Route::resource('ships', ShipController::class);
     Route::post('/ships/{id}/upload/', [ShipController::class,'upload'])->name('ship.upload');
     Route::get('/ships/{id}/downloadFile/', [ShipController::class,'downloadFile'])->name('ship.downloadFile');
+    Route::get('/ships/{id}/getFileName/', [ShipController::class,'getFileName'])->name('ship.getFileName');
     Route::delete('/ships/{id}/deleteFile/', [ShipController::class,'deleteFile'])->name('ship.deleteFile');
     
 });    
@@ -39,6 +40,10 @@ Route::get('getship/shipfilter', [ShipController::class,'shipfilter'])->name('sh
 Route::middleware(['auth', 'verified'])   
 ->group(function () {
     Route::resource('projects', ProjectController::class);
+    Route::post('/projects/{id}/upload/', [ProjectController::class,'upload'])->name('project.upload');
+    Route::get('/projects/{id}/downloadFile/', [ProjectController::class,'downloadFile'])->name('project.downloadFile');
+    Route::get('/projects/{id}/getFileName/', [ProjectController::class,'getFileName'])->name('project.getFileName');
+    Route::delete('/projects/{id}/deleteFile/', [ProjectController::class,'deleteFile'])->name('project.deleteFile');
 
 });    
 Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);

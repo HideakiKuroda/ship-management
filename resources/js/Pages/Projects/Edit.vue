@@ -3,109 +3,61 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref, reactive } from 'vue';
+import { ref,onMounted,reactive } from 'vue';
+//アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
+//アコーディオン機能のCSS
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
-import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import axios from 'axios';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-
 
 const components = {
   VueCollapsiblePanelGroup,
   VueCollapsiblePanel,
 };
 
+
 const props = defineProps({
-    ship : Object,
-    navigationAreas : Array,
-    operatSections : Array,
-    users :Array,
- })
+  project : Object,
+  users : Array,
+  ships : Array,
+  errors: Object,
+})
 
-const form = reactive({         //内容をreactiveにform変数に収める
-    id:                 props.ship.id,
-    selectedUser:       null,
-    // assignedUsers:      props.ship.users.map(user => user.id),
-    assignedUsersList: [...props.ship.users],
-    name:               props.ship.name,
-    yard:               props.ship.yard,
-    ship_no:            props.ship.ship_no,
-    ex_name:            props.ship.ex_name,
-    former_name:        props.ship.former_name,
-    slectedOperatSection : props.ship.operat_section_id,
-    selectedNavigationArea : props.ship.navigation_area_id,
-    delivered:           props.ship.delivered,
-    gross_tonn:           props.ship.gross_tonn,
-    
-    official_number:    props.ship.summaries.official_number,
-    signal_code:        props.ship.summaries.signal_code,
-    international_ton:  props.ship.summary2s.international_ton,
-    passenger_capacity: props.ship.summary2s.passenger_capacity,
-    insurance_type:     props.ship.summary2s.insurance_type,
-    // :機関仕様その他,
-    engine_kw:          props.ship.summaries.engine_kw,
-    me_model:           props.ship.summaries.me_model,
-    me_sno:             props.ship.summaries.me_sno,
-    pera_spec:          props.ship.summaries.pera_spec,
-    pera_sno:           props.ship.summaries.pera_sno,
-    aux_engine:         props.ship.summaries.aux_engine,
-    // :船体寸法・喫水・設備等,
-    full_length:        props.ship.summaries.full_length,
-    lpp:                props.ship.summaries.lpp,
-    breadth:            props.ship.summaries.breadth,
-    beam_depth:         props.ship.summaries.beam_depth,
-    mold_draft:         props.ship.summaries.mold_draft,
-    draft_mark_F:       props.ship.summaries.draft_mark_F,
-    draft_mark_A:       props.ship.summaries.draft_mark_A,
-    fm_bl:              props.ship.summaries.fm_bl,
-    draft_m:            props.ship.summaries.draft_m,
-    layer_2or3:         props.ship.summaries.layer_2or3,
-    winch_tension:      props.ship.summaries.winch_tension,
-    stern_towboat:      props.ship.summaries.stern_towboat,
-    dk_machine_pp:      props.ship.summaries.dk_machine_pp,
-    exhaust:            props.ship.summaries.exhaust,
-    intake:             props.ship.summaries.intake,
-    harbor_gen:         props.ship.summaries.harbor_gen,
-    fire_extinguish:    props.ship.summaries.fire_extinguish,
-    // :試運転記録等,
-    speed50:            props.ship.summary2s.speed50,
-    speed100:           props.ship.summary2s.speed100,
-    rpm_peller50:       props.ship.summary2s.rpm_peller50,
-    rpm_peller100:      props.ship.summary2s.rpm_peller100,
-    slip_rate50:        props.ship.summary2s.slip_rate50,
-    slip_rate100:       props.ship.summary2s.slip_rate100,
-    tug_force50:        props.ship.summary2s.tug_force50,
-    tug_force100:       props.ship.summary2s.tug_force100,
-    // :船舶関係者,
-    operator:           props.ship.concerneds.operator,
-    borrower:           props.ship.concerneds.borrower,
-    manager:            props.ship.concerneds.manager,
-    crew_arrange:       props.ship.concerneds.crew_arrange,
-    owners:             [...props.ship.ship_owners],
-    attachments:        [...props.ship.ship_attachments],
-
-}) 
+const form = reactive({
+  id:              props.project.id,
+  ship_id:         props.project.ships.id,
+  assignedUsersList: [...props.project.users],
+  name:            props.project.name,
+  pro_category_id: props.project.pro_categories.id,
+  start_date:      props.project.start_date,
+  end_date:        props.project.end_date,
+  completion:      props.project.completion,
+  date_of_issue:   props.project.date_of_issue,
+  tasks:           [...props.project.tasks],
+  attachments:     [...props.project.pro_attachments],
+})
 
 
 const deleteItem = id => {
-    Inertia.delete(route('ships.destroy',{ ship:id }),{
+    Inertia.delete(route('projects.destroy',{ project:id }),{
         onBefore: () => confirm('本当に削除しますか？')
     })
 }
 
 const formatDate = (date) => {
-//   if (!date) return "N/A";
+   if (!date) return "";
   return moment(date).format('YYYY年MM月DD日');
 };
 
-const updateShip = id => {
-  Inertia.put(route('ships.update',{ ship:id }), form,{ 
+const updateProject = id => {
+  Inertia.put(route('projects.update',{ project:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
   }
 
-  const userIds = form.assignedUsersList.map(user => user.id);
+const userIds = form.assignedUsersList.map(user => user.id);
 
 const assignUser = () => {
     const selectedUserData = props.users.find(user => user.id === form.selectedUser);
@@ -117,14 +69,6 @@ const assignUser = () => {
 const unassignUser = (userId) => {
     form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
 };
-
-const addOwner = () => {
-  form.owners.push({ owner_name: '', ratio: 0 })
-}
-
-const removeOwner = (index) => {
-  form.owners.splice(index, 1)
-}
 
 ///ファイル添付のスクリプト
 const fileInput1 = ref(null);
@@ -155,7 +99,7 @@ const handleFileChange = (inputName) => {
     }
 
     // ここでInertia.jsを使ってアップロード
-    Inertia.post(route('ship.upload', { id: form.id }), formData, {
+    Inertia.post(route('project.upload', { id: form.id }), formData, {
       // オプション：アップロードの進行状況が必要な場合はこちらを使用
       onUploadProgress: (progressEvent) => {
         uploadPercentage.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
@@ -179,7 +123,7 @@ const dropFiles = (event) => {
   const droppedFiles = event.dataTransfer.files;
   Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
 
-  Inertia.post(route('ship.upload', { id: form.id }), formData, {
+  Inertia.post(route('project.upload', { id: form.id }), formData, {
     onBefore: () => {
       // 何か処理
     },
@@ -197,51 +141,86 @@ const dropFiles = (event) => {
     // ユーザーがキャンセルした場合の処理（オプション）
 }};
 
+
 const downloadFile = async (attachmentId) => {
-  try {
-    const response = await Inertia.get(route('ship.downloadFile', { id: form.id }), { attachmentId: attachmentId });
-    // その他の処理
-  } catch (error) {
-    console.error("An error occurred:", error);
-  }
+    try {
+      // まずファイル名を取得
+      const filenameResponse = await axios.get(route('project.getFileName', { id: props.project.id }), {
+            params: { attachmentId: attachmentId }
+        });
+
+        const filename = filenameResponse.data.filename; // ファイル名を取得
+
+        // ファイルをダウンロード
+        const response = await axios.get(route('project.downloadFile', { id: props.project.id }), {
+            params: { attachmentId: attachmentId },
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // console.log('filename:',filename);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (error) {
+        console.error("エラーが発生しました：", error);
+        // エラーメッセージの表示などのエラーハンドリング
+    }
 };
+
 
 const deleteFile = (attachmentId) => {
   if (window.confirm('ファイルを削除しますか')) {
-    Inertia.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
+    Inertia.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
 }};
 
+onMounted(() =>{
+  // console.log('id:',props.project.users);
+})
+
 </script>
+
 <template>
-    <Head title="船舶の編集" />
+    <Head title="プロジェクトの詳細" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">船舶の詳細編集</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                    <BreezeValidationErrors :errors="errors" />   
-                    <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                      <section class="text-gray-600 body-font relative">
                     
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <FlashMessage  />
-                            <div class="m-2">
+                             <div class="m-2">
                                 
-                                <div class="flex flex-col p-2 ml-4">
+                                <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                      <label> ◆　船名・造船所・船番 </label>
-                                          <div class="flex flex-wrap sm:flex-row sm:space-x-4">
-                                          <input type="text" id="name" name="name" v-model="form.name" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 leading-8 transition-colors duration-200 ease-in-out">                                    
-                                          <input type="text" id="yard" name="yard" v-model="form.yard" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">                                    
-                                          <input type="number" id="ship_no" name="ship_no" v-model="form.ship_no" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">                           
-                                        </div>
-                                  </div>
+                                        <span>◆</span><span class="pl-5">Project No.: {{ props.project.id }}</span><span class="pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
+                                        <span class="pl-8">Subject: {{ props.project.name }}</span>
+                                    </div>
+                                </div>
+
+                            </div></div></div>
+  
+                        
+                        <div class="container px-5 py-0 mx-auto">
+                          <div class="lg:w-2/3 md:w-2/3 mx-auto">
+                            <div class="m-2">
+
+                              <div>
+                               <vue-collapsible-panel-group>
+                               <vue-collapsible-panel>
+                                <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
+                                <template #content> 
                                   <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         ◆　担当者
                                         <div class="flex flex-wrap sm:flex-row sm:space-x-0">
@@ -258,322 +237,129 @@ const deleteFile = (attachmentId) => {
                                           <div class="flex flex-wrap sm:flex-row h-20 w-80">
                                             <button class="mr-4 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
                                             <select class="rounded  border border-indigo-300 h-10 w-40" v-model="form.selectedUser">
-                                              <option v-for="user in users" :value="user.id" :key="user.id">
+                                              <option v-for="user in props.users" :value="user.id" :key="user.id">
                                                   {{ user.name }}
                                               </option>
                                             </select>
                                         </div>
                                     </div> 
-                                  </div>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
+                                  </div> 
 
-                        <div class="container px-5 py-0 mx-auto">
-                          <div class="lg:w-2/3 md:w-2/3 mx-auto">
-                            <div class="m-2">
-                             
-                             <vue-collapsible-panel-group>
-                               <vue-collapsible-panel>
-                                <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
-                                <template #content> 
-     
                                   <div class="flex flex-wrap sm:flex-row">
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="ship.ex_name" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船名（前）：</label>
-                                      <input type="text" id="ship.ex_name" name="ship.ex_name" v-model="form.ex_name" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●区分：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ props.project.pro_categories.name }}
+                                      </div>
                                     </div>
-
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="former_name" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船名（元）：</label>
-                                      <input type="text" id="former_name" name="former_name" v-model="form.former_name" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎開始日（予定）：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ formatDate(props.project.start_date) }}
+                                      </div>
                                     </div>
-                                  
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="delivered" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎竣工：</label>
-                                      <input type="date" id="delivered" name="delivered" v-model="form.delivered" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                 
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="gross_tonn" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎総トン数：</label>
-                                      <input type="tel" id="gross_tonn" name="gross_tonn" v-model="form.gross_tonn" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                                  
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="section" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎運航地域：</label>
-                                      <div id="section" class=" w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" >
-                                      <!-- ユーザー選択ドロップダウン -->
-                                      <select class="rounded  border border-indigo-300 h-10 w-40" v-model="form.slectedOperatSection">
-                                        <option v-for="operatSection in operatSections" :key="operatSection.id" :value="operatSection.id">
-                                          {{ operatSection.section }}
-                                         </option>
-                                      </select>
-                                    </div>  
-                                    </div>
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="name" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎航行区域 :</label>
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎終了日（予定）：</label>
                                       <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                      <!-- ユーザー選択ドロップダウン -->
-                                      <select class="rounded  border border-indigo-300 h-10 w-40" v-model="form.selectedNavigationArea">
-                                        <option v-for="navigationArea in navigationAreas" :key="navigationArea.id" :value="navigationArea.id">
-                                          {{ navigationArea.name }} 
-                                        </option>
-                                      </select>    
+                                            {{ formatDate(props.project.end_date)}}
+                                      </div>
+                                    </div>
+                                  
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎完了日：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ formatDate(props.project.completion) }}
+                                      </div>
+                                    </div>
+                                    <div class="p-2 ml-4"  v-if="props.project.pro_category_id === 1">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎証書発行日 :</label>
+                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                          {{ formatDate(props.project.date_of_issue) }}
                                       </div>
                                     </div>
                                 
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="official_number" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船舶記号：</label>
-                                      <input type="tel" id="official_number" name="official_number" v-model="form.official_number" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="signal_code" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎信号符号 :</label>
-                                      <input type="tel" id="signal_code" name="signal_code" v-model="form.signal_code" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                                  
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="international_ton" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎国際トン数：</label>
-                                      <input type="tel" id="international_ton" name="international_ton" v-model="form.international_ton" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="passenger_capacity" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎旅客定員 :</label>
-                                      <input type="text" id="passenger_capacity" name="passenger_capacity" v-model="form.passenger_capacity" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
-                                  
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="insurance_type" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船舶保険（種類）：</label>
-                                      <input type="tel" id="insurance_type" name="insurance_type" v-model="form.insurance_type" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div> 
-                                  </div>
+                                 </div>
                                 </template>
                               </vue-collapsible-panel>
-                            
-                            <vue-collapsible-panel  :expanded="false">
-                            <template #title> 機関仕様その他 </template>
-                            <template #content> 
-                              <div class="flex flex-wrap sm:flex-row">
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="engine_kw" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎馬力：</label>
-                                    <input type="tel" id="engine_kw" name="engine_kw" v-model="form.engine_kw" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="me_model" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎主機型式 :</label>
-                                    <input type="tel" id="me_model" name="me_model" v-model="form.me_model" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="me_sno" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎主機製造番号：</label>
-                                    <input type="tel" id="me_sno" name="me_sno" v-model="form.me_sno" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="pera_spec" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎ペラ仕様 :</label>
-                                    <input type="tel" id="pera_spec" name="pera_spec" v-model="form.pera_spec" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="pera_sno" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎ＺＰ製造番号：</label>
-                                    <input type="tel" id="pera_sno" name="pera_sno" v-model="form.pera_sno" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="aux_engine" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎発電機型式 :</label>
-                                    <input type="tel" id="aux_engine" name="aux_engine" v-model="form.aux_engine" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+
+                              <vue-collapsible-panel :expanded="true">
+                              <template #title> タスク一覧 </template>
+                              <template #content> 
+                                <div class="flex flex-col">
+                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                      <div class="overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light">
+                                          <thead>
+                                            <tr>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">期限</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録者</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr  v-for="task in props.project.tasks" :key="tasks.id" >
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
+                                              
+                                              <!-- 担当者（ユーザー）列 -->
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                              <div v-for="user in task.users">
+                                                  {{ user.name }}
+                                              </div>
+                                              </td>
+                                              <!-- <td v-for="user in project.users"
+                                              class="border-b-2 border-gray-200 px-4 py-3">{{ user.name  }}</td> -->
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-
-                            </template>
-                            </vue-collapsible-panel>
-
-                            <vue-collapsible-panel  :expanded="false">
-                            <template #title> 船体寸法・喫水・設備等 </template>
-                            <template #content>
-                              <div class="flex flex-wrap sm:flex-row">
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="full_length" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎全長 :</label>
-                                    <input type="number"  step="0.1" id="full_length" name="full_length" v-model="form.full_length" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="lpp" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎垂線間長：</label>
-                                    <input type="number"  step="0.1" id="lpp" name="lpp" v-model="form.lpp" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="breadth" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎型幅：</label>
-                                    <input type="number"  step="0.1" id="breadth" name="breadth" v-model="form.breadth" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="beam_depth" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎型深さ :</label>
-                                    <input type="number"  step="0.1" id="beam_depth" name="beam_depth" v-model="form.beam_depth" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="mold_draft" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎型深さ :</label>
-                                    <input type="number"  step="0.1" id="mold_draft" name="mold_draft" v-model="form.mold_draft" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="draft_mark_F" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎喫水ﾏｰｸ：F :</label>
-                                    <input type="tel" id="draft_mark_F" name="draft_mark_F" v-model="form.draft_mark_F" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="draft_mark_A" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎喫水ﾏｰｸ：A：</label>
-                                    <input type="tel" id="draft_mark_A" name="draft_mark_A" v-model="form.draft_mark_A" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="fm_bl" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎AF塗上：fm B.L :</label>
-                                    <input type="number"  step="0.1" id="fm_bl" name="fm_bl" v-model="form.fm_bl" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="draft_m" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎AF塗上：draft m：</label>
-                                    <input type="tel" id="draft_m" name="draft_m" v-model="form.draft_m" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="layer_2or3" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎2.5層・3層 :</label>
-                                    <input type="text" id="layer_2or3" name="layer_2or3" v-model="form.layer_2or3" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="winch_tension" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎ﾃﾝｼｮﾝｳｲﾝﾁ：</label>
-                                    <input type="text" id="winch_tension" name="winch_tension" v-model="form.winch_tension" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="stern_towboat" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船尾曳航設備 :</label>
-                                    <input type="text" id="stern_towboat" name="stern_towboat" v-model="form.stern_towboat" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="dk_machine_pp" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎甲板機ポンプ設置場所：</label>
-                                    <input type="text" id="dk_machine_pp" name="dk_machine_pp" v-model="form.dk_machine_pp" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="exhaust" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎機関排気方式 :</label>
-                                    <input type="text" id="exhaust" name="exhaust" v-model="form.exhaust" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="intake" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎機関室吸気方式：</label>
-                                    <input type="text" id="intake" name="intake" v-model="form.intake" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="harbor_gen" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎停泊機設置場所 :</label>
-                                    <input type="text" id="harbor_gen" name="harbor_gen" v-model="form.harbor_gen" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                  <div class="flex flex-col p-2 ml-4">
-                                    <label for="fire_extinguish" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎消火設備：</label>
-                                    <input type="text" id="fire_extinguish" name="fire_extinguish" v-model="form.fire_extinguish" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                  </div>
-                                </div> 
-
-                            </template>
-                            </vue-collapsible-panel>
-
-                            <vue-collapsible-panel :expanded="false">
-                            <template #title> 試運転記録等 </template>
+                              </template>
+                              </vue-collapsible-panel>
+                            <vue-collapsible-panel :expanded="true">
+                              <template #title> メモ一覧 </template>
                             <template #content> 
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                                     <div class="overflow-hidden">
                                       <table class="min-w-full text-left text-sm font-light">
-                                        <thead class="border-b font-medium dark:border-neutral-500">
+                                        <thead>
                                           <tr>
-                                            <th scope="col" class="px-12 py-4">#</th>
-                                            <th scope="col" class="px-12 py-4">出力50%</th>
-                                            <th scope="col" class="px-12 py-4">出力100%</th>
+                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">メモ</th>
+                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">日付</th>
+                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録者</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr  v-for="description in props.project.pro_descriptions" :key="pro_descriptions.id" >
+                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(description.created_at) }}</td>
+                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.users.name }}</td>
+                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.memo }}</td>
                                           </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">速力</td>
-                                            <td><input type="number" step="0.01" v-model="form.speed50" class="text-right w-28 rounded"></td>
-                                            <td><input type="number" step="0.01"  v-model="form.speed100" class="text-right w-28 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">ペラ回転数</td>
-                                            <td><input type="number" step="1"  v-model="form.rpm_peller50" class="text-right w-28 rounded"></td>
-                                            <td><input type="number"  step="1" v-model="form.rpm_peller100" class="text-right w-28 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">スリップ</td>
-                                            <td><input type="number" step="0.01"  v-model="form.slip_rate50" class="text-right w-28 rounded"></td>
-                                            <td ><input type="number" step="0.01"  v-model="form.slip_rate100" class="text-right w-28 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">後進引力（平均）</td>
-                                            <td><input type="number" step="0.1"  v-model="form.tug_force50" class="text-right w-28 rounded"></td>
-                                            <td><input type="number" step="0.1"  v-model="form.tug_force100" class="text-right w-28 rounded"></td>
-                                          </tr>
-                                        </tbody>
+                                          </tbody>
                                       </table>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             </template>
-                            </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="false">
-                            <template #title> 船舶関係者 </template>
-                            <template #content> 
-                              <div class="flex flex-col">
-                                <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                  <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                    <div class="overflow-hidden">
-                                      <table class="min-w-full text-left text-sm font-light">
-                                        <thead class="border-b font-medium dark:border-neutral-500">
-                                          <tr>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">運航者</td>
-                                            <td><input type="text"  v-model="form.operator" class="text-right w-30 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">船舶借入人</td>
-                                            <td><input type="text"  v-model="form.borrower" class="text-right w-30 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">船舶管理人</td>
-                                            <td><input type="text"  v-model="form.manager" class="text-right w-30 rounded"></td>
-                                          </tr>
-                                          <tr class="border-b dark:border-neutral-500">
-                                            <td class="whitespace-nowrap px-12 py-4 font-medium">乗組員手配</td>
-                                            <td><input type="text"  v-model="form.crew_arrange" class="text-right w-30 rounded"></td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </template> 
                             </vue-collapsible-panel>
                    
-                            <vue-collapsible-panel :expanded="false">
-                            <template #title> 船舶所有者 </template>
-                            <template #content> 
-                              <div class="flex flex-col">
-                                <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                  <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                    <div class="overflow-hidden">
-                                      <table class="min-w-full text-left text-sm font-light">
-                                        <thead class="border-b font-medium dark:border-neutral-500">
-                                          <tr>
-                                            <th scope="col" class="px-20 py-4 ">所有者名</th>
-                                            <th scope="col" class="px-12 py-4 ">割合（%）</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr v-for="(owner, index) in form.owners" class="border-b dark:border-neutral-500">
-                                            <td><input type="text"  v-model="owner.owner_name" class="ml-20 w-60 rounded text-center"></td>
-                                            <td><input type="number"  v-model.number="owner.ratio"  class="text-right ml-8 w-28 rounded"></td>
-                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="removeOwner(index)">削除</button></td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
-                                      <div class=" object-right">
-                                      <button  class="mx-4 w-10 h-6 text-xs bg-blue-300  text-white font-semibold rounded hover:bg-blue-400" @click="addOwner">追加</button>
-                                    </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </template>
-                            </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="true">
-                            <template #title> 書類添付 </template>
+                              <template #title> 書類添付 </template>
                             <template #content> 
                               <div  class="content">
                                 <label class="visible md:invisible text-blue-600 underline">
@@ -646,7 +432,7 @@ const deleteFile = (attachmentId) => {
                             </vue-collapsible-panel>  
 
                             </vue-collapsible-panel-group>
-                                                
+                        </div>                        
                         </div>
                       </div>
                     </div>
@@ -654,30 +440,17 @@ const deleteFile = (attachmentId) => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button @click="updateShip(form.id)" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>  
+                                  <button @click="updateProject(form.id)" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>  
                                 </div>
                                 <div class="p-0 w-full">
+                                <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->
                                 </div>
                             </div></div></div>
 
-                        </section> 
-                      <!-- </form>                -->
-                      <button @click="deleteItem(form.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button>
+                        </section>                
                     </div>
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style>
-/* Style for the drop zone */
-.drop-zone {
-  border: 2px dashed #cccccc;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-}
-
-
-</style>
