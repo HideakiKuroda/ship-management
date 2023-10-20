@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Pro_assignment;
 use App\Models\Pro_attachment;
 use App\Models\Department;
+use App\Models\Pro_description;
 use App\Models\Pro_category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -154,15 +155,14 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         try {
-            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions');
+            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions.users');
             // dd($project);
             return Inertia::render('Projects/Show',['project' => $project]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
-
-    }
+   }
 
     /**
      * Show the form for editing the specified resource.
@@ -177,13 +177,17 @@ class ProjectController extends Controller
             ->select('id','name')
             ->get();
             $ships = Ship::select('id','name')->get();
-
-            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions');
+            $categories = Pro_category::select('id','name')->get();
+            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions.users');
                 // dd($project);
+            $loginUser = Auth::user('id','name');  
+            // dd($loginUser);  
             return Inertia::render('Projects/Edit',[
                 'project' => $project,
                 'users' => $users,
                 'ships' => $ships,
+                'categories'=>$categories,
+                'loginUser'=>$loginUser
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
@@ -196,9 +200,20 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
+    //    dd($request);
         $project = Project::findOrFail($project->id);
         LaravelRedis::transaction(function () use ($request, &$project) {
-   
+        
+        $project->update([
+            'name'=>$request->input('name'),
+            'pro_category_id'=>$request->input('pro_category_id'),
+            'start_date'=>$request->input('start_date'),
+            'end_date'=>$request->input('end_date'),
+            'completion'=>$request->input('completion'),
+            'date_of_issue'=>$request->input('date_of_issue'),  
+            
+        ]);    
+            
         foreach ($request->attachments ?? [] as $attachData) {
         Pro_attachment::where('id', $attachData['id'])
             ->where('project_id', $project->id)
@@ -207,8 +222,31 @@ class ProjectController extends Controller
 
         $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
         $project->users()->sync($userIds);
+
+        // メモの同期
+        if ($request->has('deletedMessageIds')) {
+            $deletedMessageIds = $request->input('deletedMessageIds');
+            foreach ($deletedMessageIds as $id) {
+                Pro_description::where('id', $id)->delete();
+            }
+        }
+        if ($request->has('assignedMassagesList')) {
+            $assignedMassagesList = $request->input('assignedMassagesList');
+            foreach ($assignedMassagesList as $messageData) {
+                // メモの更新または作成 
+                $project->pro_descriptions()->updateOrCreate(
+                    ['id' => $messageData['id'] ?? null],
+                    [
+                    'project_id' => $messageData['project_id'],
+                    'memo' => $messageData['memo'],
+                    'user_id' => $messageData['users']['id'],
+                    ]
+                );
+            }
+        }
+        
     });
-    // dd($ownerData);
+    
     return redirect()->route('projects.show', $project->id)->with([
         'message' => '更新しました。',
         'status' => 'success'

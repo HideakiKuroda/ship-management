@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full max-w-md px-2 py-8 sm:px-0">
+  <div class="w-full max-w-md m-2 px-5 py-3 sm:px-0 bg-indigo-50 rounded-xl">
     <TabGroup @change="handleTabChange">
-      <TabList class="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+      <TabList class="flex space-x-1 rounded-xl bg-blue-900/20 p-2 m-2">
         <Tab
           v-for="(category,tabIndex) in Object.keys(categories)"
           as="template"
@@ -32,12 +32,12 @@
 </div>   
     <div class="flex flex-col md:flex-row p-0 ml-4">
        <!-- 日付入力　ここから -->
-            <div class="flex flex-col p-0 ml-4">
+            <div class="flex flex-col p-0 md:ml-8 ml-3">
               <label for="crtDate" class="rounded  w-32 leading-tight  text-justify text-sm text-gray-600">日付 ➡</label>
               <input type="date" id="crtDate" name="crtDate" v-model="serchDate" class="w-40 h-9 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
             </div> 
        <!-- 日付範囲選択　ここから -->
-            <div class="flex flex-col p-0 ml-4 ">
+            <div class="flex flex-col p-0 md:ml-4 ml-0">
               <label for="crtDate" class="rounded ml-3 w-32 leading-tight  text-justify text-sm text-gray-600">期間</label>
               <div>       
                 <Listbox v-model="selectedPeriod">

@@ -17,11 +17,11 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         // 'created_at'と'start_date'は過去5年から現在までの日付
-        $startDate = $this->faker->dateTimeBetween('-3 years');
+        $startDate = $this->faker->dateTimeBetween('-1 years');
         // 'end_date'は'start_date'より後の日付
-        $endDate = $this->faker->dateTimeBetween($startDate,'+4 years');
+        $endDate = $this->faker->dateTimeBetween($startDate,'+1 years');
         // 'completion'と'date_of_issue'は'start_date'から1週間後までの日付
-        $completionDate = $this->faker->optional(0.6)->dateTimeBetween($startDate, '+4 years');
+        $completionDate = $this->faker->optional(0.6)->dateTimeBetween($startDate, '+1 years');
         if ($completionDate) {
             $issueDate = $this->faker->dateTimeBetween((clone $completionDate)->modify('-4 days'), (clone $completionDate)->modify('+4 days'));
         } else {

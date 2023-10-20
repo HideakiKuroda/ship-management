@@ -28,9 +28,10 @@ class Pro_assignmentSeeder extends Seeder
              DB::table('pro_assignments')->insert([
                 'project_id' => $project->id,
                 'user_id' => $userId,
-                'created_at' => now(),
+                'created_at' => $project->created_at,
                 'updated_at' => now(),
-            ]);
+            ]
+        );
         }
 
         // DB::table('pro_assignments')->insert([

@@ -1,9 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { usePage,Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref,onMounted,reactive } from 'vue';
+import { ref,onMounted,reactive, computed } from 'vue';
 //アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 //アコーディオン機能のCSS
@@ -11,10 +11,54 @@ import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+import UserSerch from '@/Components/UserSerch.vue';
+//Comboboxのインポート
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxButton,
+  ComboboxOptions,
+  ComboboxOption,
+  TransitionRoot,
+  ComboboxLabel
+} from '@headlessui/vue'
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid';
 
 const components = {
   VueCollapsiblePanelGroup,
   VueCollapsiblePanel,
+};
+
+const newMessage = ref('');
+// const messages = ref(props.project.pro_descriptions || []); 
+
+const assignMassage = () => {
+  if (newMessage.value.trim() === '') return;
+  form.assignedMassagesList.push({
+    project_id:props.project.id,
+    created_at: new Date().toISOString(),
+    users: { id: form.loginUser.id, name:form.loginUser.name }, // ここは現在ログインしているユーザーの名前を想定しています。
+    // user_id:form.loginUser.id,
+    // name:form.loginUser.name,
+    memo: newMessage.value.trim(),
+  });
+  newMessage.value = ''; 
+};
+// const unassignMassage = (id) => {
+//     form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
+//     form.deletedMessageIds.push(id);
+// };
+
+const unassignMassage = (id, userId) => {
+    if (userId !== form.loginUser.id) {
+        // ユーザーIDがログインユーザーのIDと一致しない場合は削除を許可しない
+        console.error('You can only delete your own messages.');
+        return;
+    }
+    
+    // ユーザーIDがログインユーザーのIDと一致する場合は削除を実行
+    form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
+    form.deletedMessageIds.push(id); // 削除されたメッセージのIDを保存
 };
 
 
@@ -22,6 +66,8 @@ const props = defineProps({
   project : Object,
   users : Array,
   ships : Array,
+  categories : Array,
+  loginUser :  Object,
   errors: Object,
 })
 
@@ -29,6 +75,7 @@ const form = reactive({
   id:              props.project.id,
   ship_id:         props.project.ships.id,
   assignedUsersList: [...props.project.users],
+  assignedMassagesList: [...props.project.pro_descriptions || []],
   name:            props.project.name,
   pro_category_id: props.project.pro_categories.id,
   start_date:      props.project.start_date,
@@ -37,7 +84,10 @@ const form = reactive({
   date_of_issue:   props.project.date_of_issue,
   tasks:           [...props.project.tasks],
   attachments:     [...props.project.pro_attachments],
-})
+  currentUser:     null,
+  loginUser:       props.loginUser,
+  deletedMessageIds: [],
+  })
 
 
 const deleteItem = id => {
@@ -52,23 +102,31 @@ const formatDate = (date) => {
 };
 
 const updateProject = id => {
+  form.pro_category_id =  selectedCategory.value.id
   Inertia.put(route('projects.update',{ project:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
   }
 
-const userIds = form.assignedUsersList.map(user => user.id);
+  const handleUserId = (currentUser) =>{
+  form.currentUser = currentUser
+  // console.log("handleUserId:", index.userId)
+}
 
+const userIds = form.assignedUsersList.map(user => user.id);
+const userSearch = ref();
 const assignUser = () => {
-    const selectedUserData = props.users.find(user => user.id === form.selectedUser);
+    const selectedUserData = props.users.find(user => user.id === form.currentUser);
     if (selectedUserData) {
         form.assignedUsersList.push(selectedUserData);
+            userSearch.value.boxClear();
     }
 };
 
 const unassignUser = (userId) => {
     form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
 };
+
 
 ///ファイル添付のスクリプト
 const fileInput1 = ref(null);
@@ -177,6 +235,30 @@ const deleteFile = (attachmentId) => {
     Inertia.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
 }};
 
+//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
+let query = ref('')
+const categorie = props.categories
+const curntCidx = computed(() => {
+  return props.categories.findIndex(cr => cr?.id === form.pro_category_id)
+})
+let selectedCategory = ref({id:categorie[curntCidx.value].id,name:categorie[curntCidx.value].name} || {id: null, name: ''})
+
+let filteredCategory = computed(() =>
+  query.value === ''
+    ? props.categories
+    : props.categories.filter((proType) =>
+      proType.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+
+const typeOptions = computed(() => {
+  return [{ id: null, name: '' }, ...filteredCategory.value];
+})
+
+
 onMounted(() =>{
   // console.log('id:',props.project.users);
 })
@@ -184,11 +266,11 @@ onMounted(() =>{
 </script>
 
 <template>
-    <Head title="プロジェクトの詳細" />
+    <Head title="プロジェクトの詳細（編集）" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細（編集）</h2>
         </template>
 
         <div class="py-12">
@@ -205,7 +287,7 @@ onMounted(() =>{
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         <span>◆</span><span class="pl-5">Project No.: {{ props.project.id }}</span><span class="pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
-                                        <span class="pl-8">Subject: {{ props.project.name }}</span>
+                                        <label>Subject:</label> <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full" >
                                     </div>
                                 </div>
 
@@ -218,73 +300,135 @@ onMounted(() =>{
 
                               <div>
                                <vue-collapsible-panel-group>
-                               <vue-collapsible-panel>
+                               <vue-collapsible-panel class="z-10">
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
                                 <template #content> 
                                   <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         ◆　担当者
-                                        <div class="flex flex-wrap sm:flex-row sm:space-x-0">
-                                          <div class="h-20 w-40 overflow-auto">
-                                            <div>
-                                                <ul>
-                                                    <li v-for="user in form.assignedUsersList" :key="user.id">
-                                                        {{ user.name }}
-                                                        <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
-                                                    </li>
-                                                </ul>
-                                           </div>
-                                          </div>
-                                          <div class="flex flex-wrap sm:flex-row h-20 w-80">
-                                            <button class="mr-4 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                            <select class="rounded  border border-indigo-300 h-10 w-40" v-model="form.selectedUser">
-                                              <option v-for="user in props.users" :value="user.id" :key="user.id">
-                                                  {{ user.name }}
-                                              </option>
-                                            </select>
+                                    <div class="flex flex-wrap sm:flex-row sm:space-x-0">
+                                      <div class="h-50 w-44  overflow-auto">
+                                        <div>
+                                            <ul>
+                                                <li v-for="user in form.assignedUsersList" :key="user.id">
+                                                    {{ user.name }}
+                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
+                                                </li>
+                                            </ul>
                                         </div>
+                                      </div>
+                                      <div class="flex flex-wrap sm:flex-row w-80">
+                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
+                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
+                                      </div>
                                     </div> 
                                   </div> 
 
                                   <div class="flex flex-wrap sm:flex-row">
-                                    <div class="p-2 ml-4">
-                                      <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●区分：</label>
-                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ props.project.pro_categories.name }}
-                                      </div>
-                                    </div>
+                                    <div class="flex flex-col p-2 ml-4">
+                                      <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
+                                      <!-- Category検索コンボボックス　ここから -->
+                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 z-0">
+                                            <div  class="relative mt-1" >
+                                              <div
+                                              class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
+                                              >
+                                                <ComboboxInput 
+                                                  class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
+                                                  :displayValue="(proType) => proType.name"
+                                                  @change="query = $event.target.value"
+                                                />
+                                                <ComboboxButton
+                                                  class="absolute inset-y-0 right-0 flex items-center pr-2 "
+                                                >
+                                                  <ChevronUpDownIcon
+                                                    class="h-5 w-5 text-gray-400"
+                                                    aria-hidden="true"
+                                                  />
+                                                </ComboboxButton>
+                                              </div>
+                                              <TransitionRoot
+                                                leave="transition ease-in duration-100"
+                                                leaveFrom="opacity-100"
+                                                leaveTo="opacity-0"
+                                                @after-leave="query = ''"
+                                              >
+                                                <ComboboxOptions
+                                                  class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                                >
+                                                  <div
+                                                    v-if="filteredCategory.length === 0 && query !== ''"
+                                                    class="relative cursor-default select-none py-2 px-4 text-gray-700"
+                                                  >
+                                                    名前が見つかりません.
+                                                  </div>
+
+                                                  <ComboboxOption
+                                                    v-for="proType in typeOptions"
+                                                    as="template"
+                                                    :key="proType.id"
+                                                    :value="proType"
+                                                    v-slot="{ selected, active }" 
+                                                  
+                                                  >
+                                                    <li
+                                                      class="relative cursor-default select-none py-2 pl-10 pr-4"
+                                                      :class="{
+                                                        'bg-teal-600 text-white': active,
+                                                        'text-gray-900': !active,
+                                                      }"
+                                                    >
+                                                      <span
+                                                        class="block truncate"
+                                                        :class="{ 'font-medium': selectedCategory, 'font-normal': !selectedCategory }"
+                                                      >
+                                                        {{ proType.name  || '選択なし'  }}
+                                                      </span>
+                                                      <span
+                                                        v-if="selected"
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3"
+                                                        :class="{ 'text-white': active, 'text-teal-600': !active }"
+                                                      >
+                                                        <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                                                      </span>
+                                                    </li>
+                                                  </ComboboxOption>
+                                                </ComboboxOptions>
+                                              </TransitionRoot>
+                                            </div>
+                                          </Combobox>
+                                        <!-- Category検索コンボボックス　ここまで -->
+                                     </div>
+                                    <div class="p-1 ml-4">
+                                      <label for="start_date" class="rounded  border border-indigo-300 mx-0 h-5 leading-7 text-sm text-gray-600">◎開始日（予定）：</label>
+                                      <div id="start_date" class="text-base outline-none text-gray-700 leading-8 transition-colors duration-200 ease-in-out">
+                                      <input type="date" id="start_date" name="start_date" v-model="form.start_date" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    </div></div>
+                                   
+                                    <div class="p-1 ml-4">
+                                      <label for="end_date" class="rounded  border border-indigo-300 mx-0 h-5 leading-7 text-sm text-gray-600">◎終了日（予定）：</label>
+                                      <div id="end_date" class="text-base outline-none text-gray-700 leading-8 transition-colors duration-200 ease-in-out">
+                                      <input type="date" id="end_date" name="end_date" v-model="form.end_date" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    </div></div>
                                     
-                                    <div class="p-2 ml-4">
-                                      <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎開始日（予定）：</label>
-                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ formatDate(props.project.start_date) }}
-                                      </div>
+                                    <div class="p-1 ml-4">
+                                      <label for="completion" class="rounded  border border-indigo-300 mx-0 h-5 leading-7 text-sm text-gray-600">◎完了日：</label>
+                                      <div id="completion" class="text-base outline-none text-gray-700 leading-8 transition-colors duration-200 ease-in-out">
+                                      <input type="date" id="completion" name="completion" v-model="form.completion" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    </div></div>
+                                    
+
+                                    <div class="p-2 ml-4"  v-if="form.pro_category_id === 1">
+                                      <label for="date_of_issue" class="rounded  border border-indigo-300 mx-0 h-5 leading-7 text-sm text-gray-600">◎証書発行日：</label>
+                                      <div id="date_of_issue" class="text-base outline-none text-gray-700 leading-8 transition-colors duration-200 ease-in-out">
+                                      <input type="date" id="date_of_issue" name="date_of_issue" v-model="form.date_of_issue" class="w-30 bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
-                                    <div class="p-2 ml-4">
-                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎終了日（予定）：</label>
-                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ formatDate(props.project.end_date)}}
-                                      </div>
                                     </div>
-                                  
-                                    <div class="p-2 ml-4">
-                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎完了日：</label>
-                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ formatDate(props.project.completion) }}
-                                      </div>
-                                    </div>
-                                    <div class="p-2 ml-4"  v-if="props.project.pro_category_id === 1">
-                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎証書発行日 :</label>
-                                      <div id="name" class="w-48   text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                          {{ formatDate(props.project.date_of_issue) }}
-                                      </div>
-                                    </div>
-                                
                                  </div>
                                 </template>
                               </vue-collapsible-panel>
 
-                              <vue-collapsible-panel :expanded="true">
-                              <template #title> タスク一覧 </template>
+                              <vue-collapsible-panel :expanded="true" class="z-0">
+                              <template #title > タスク一覧 </template>
                               <template #content> 
                                 <div class="flex flex-col">
                                   <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -329,30 +473,25 @@ onMounted(() =>{
                               </template>
                               </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="true">
-                              <template #title> メモ一覧 </template>
-                            <template #content> 
+                           <template #title> メモ一覧 </template>
+                            <template #content>
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                    <div class="overflow-hidden">
-                                      <table class="min-w-full text-left text-sm font-light">
-                                        <thead>
-                                          <tr>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">メモ</th>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">日付</th>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録者</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                          <tr  v-for="description in props.project.pro_descriptions" :key="pro_descriptions.id" >
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(description.created_at) }}</td>
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.users.name }}</td>
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.memo }}</td>
-                                          </tr>
-                                          </tbody>
-                                      </table>
+                                    <div class="overflow-hidden rounded border-2 p-2 mb-3 border-gray-200">
+                                    <div v-for="message in form.assignedMassagesList" :key="message.id" class="message">
+                                      <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignMassage(message.id,message.users.id)">削除</button>
+                                      <div class="text-sm">{{ formatDate(message.created_at) }}</div>
+                                      <div class="text-sm">{{ message.users?.name }}</div>
+                                      <div class="" >{{ message.memo }}</div>
                                     </div>
                                   </div>
+                                      <div class="flex flex-col">
+                                        <input class="rounded border-b-2 border-gray-200 px-1 py-3 w-full" v-model="newMessage" placeholder="メモを入力" />
+                                        <button class="mr-4 mt-2 h-8 w-20 px-0 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignMassage">追加</button>
+                                      </div>
+                                    </div>
+                                  
                                 </div>
                               </div>
                             </template>
@@ -454,3 +593,5 @@ onMounted(() =>{
         </div>
     </AuthenticatedLayout>
 </template>
+
+

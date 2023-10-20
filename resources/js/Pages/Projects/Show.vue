@@ -10,6 +10,7 @@ import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-colla
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
+import { nl2br } from '@/nl2br';
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -84,11 +85,11 @@ onMounted(() =>{
 </script>
 
 <template>
-    <Head title="プロジェクトの詳細" />
+    <Head title="プロジェクトの詳細(参照)" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細☆彡</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細☆</h2>
         </template>
 
         <div class="py-12">
@@ -224,16 +225,14 @@ onMounted(() =>{
                                       <table class="min-w-full text-left text-sm font-light">
                                         <thead>
                                           <tr>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">メモ</th>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">日付</th>
-                                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録者</th>
+                                            <th class="px-2 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">◆日付　登録者</th>
+                                            <th class="px-2 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"></th>
                                             </tr>
                                           </thead>
                                           <tbody>
-                                          <tr  v-for="description in props.project.pro_descriptions" :key="pro_descriptions.id" >
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(description.created_at) }}</td>
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.users.name }}</td>
-                                            <td class="border-b-2 border-gray-200 px-4 py-3">{{ description.memo }}</td>
+                                          <tr  v-for="description in props.project.pro_descriptions" :key="description.id" >
+                                            <td class="border-b-2 border-gray-200 px-2 py-3">{{ formatDate(description.created_at) }}<br>{{ description.users?.name }}</td>
+                                            <td v-html="nl2br(description.memo)" class="border-b-2 border-gray-200 px-4 py-3"></td>
                                           </tr>
                                           </tbody>
                                       </table>

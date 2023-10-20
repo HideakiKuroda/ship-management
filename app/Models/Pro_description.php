@@ -22,7 +22,7 @@ class Pro_description extends Model
 
     public function users()
     {
-    return $this->belongsTo(User::class, 'user_id','id');
+    return $this->belongsTo(User::class, 'user_id');
     }
 
 }

@@ -9,7 +9,7 @@ export { nl2br }
 
 
 /* <script setup>
-    import { nl2br } from '@/common'
+    import { nl2br } from '@/nl2br'
 </script>
 
 

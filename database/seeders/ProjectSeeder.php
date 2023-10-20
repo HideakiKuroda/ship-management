@@ -43,6 +43,6 @@ class ProjectSeeder extends Seeder
             [ 'ship_id' => '31' , 'name' => '定期検査' , 'pro_category_id' => 1 ,'end_date'=>'2021-03-02', 'date_of_issue' => '2021-03-02' ,   'created_at' => '2023/08/10 12:00:00'  ] ,
         ]);
 
-        \App\Models\Project::factory(3000)->create();
+        \App\Models\Project::factory(500)->create();
     }
 }
