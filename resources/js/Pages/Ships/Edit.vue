@@ -208,29 +208,44 @@ const dropFiles = (event) => {
 //     console.error("An error occurred:", error);
 //   }
 // };
-const downloadFile = async (attachmentId) => {
+const isPdf = (filename) => {
+  const fileExtension = filename.split('.').pop().toLowerCase();
+  return fileExtension === 'pdf';
+};
+
+const downloadFile = async (attachmentId,dp) => {
     try {
       // まずファイル名を取得
-      const filenameResponse = await axios.get(route('ship.getFileName', { id: form.id }), {
+      const filenameResponse = await axios.get(route('ship.getFileName', { id: props.ship.id }), {
             params: { attachmentId: attachmentId }
         });
 
         const filename = filenameResponse.data.filename; // ファイル名を取得
+        console.log('Filename:', filename);
+        const fileExtension = filename.split('.').pop().toLowerCase(); // ファイルの拡張子を取得
+        console.log('File Extension:', fileExtension);
 
         // ファイルをダウンロード
-        const response = await axios.get(route('ship.downloadFile', { id: form.id }), {
+        const response = await axios.get(route('ship.downloadFile', { id: props.ship.id }), {
             params: { attachmentId: attachmentId },
             responseType: 'blob'
         });
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        // console.log('filename:',filename);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        if (dp === 'p') {
+            // PDFの場合、新しいタブでプレビューを開く
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            window.open(url, '_blank');
+        } else {
+            // それ以外の場合、ファイルをダウンロード
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            // console.log('filename:',filename);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            }
     } catch (error) {
         console.error("エラーが発生しました：", error);
         // エラーメッセージの表示などのエラーハンドリング
@@ -668,10 +683,11 @@ const deleteFile = (attachmentId) => {
                                         <tbody>
                                           <tr v-for="attachment in form.attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
                                             <td><input type="text"  v-model="attachment.title" class="ml-3 w-30 rounded"></td>
-                                            <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
-                                            <td class="w-1/3 rounded ">{{ attachment.originname }}</td>
+                                            <td class="flex justify-center flex-col"><img :src="attachment.icon" @click="downloadFile(attachment.id,'d')" alt="xls?" width="30" height="30" class="ml-3 mt-3 px-0">
+                                            <button v-if="isPdf(attachment.originname)" class="mt-2 px-0 py-0 w-14 text-xs bg-blue-300  text-white font-semibold rounded-full hover:bg-indigo-400" @click="downloadFile(attachment.id,'p')">⊕view</button>
+                                            </td>
+                                            <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
                                             <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
-                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
                                           </tr>
                                         </tbody>
                                       </table>

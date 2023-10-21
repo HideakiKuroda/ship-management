@@ -343,7 +343,11 @@ class ProjectController extends Controller
         // dd($attachment);
         if ($attachment) {
             $filePath = Storage::path($attachment->filename);
-            return response()->download($filePath, $attachment->originname);
+            $headers = [
+                'Content-Disposition' => 'inline; filename="' . $attachment->originname . '"'
+            ];
+            return response()->file($filePath, $headers);
+            // return response()->download($filePath, $attachment->originname);
             
         }
         

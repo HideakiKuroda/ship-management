@@ -240,16 +240,14 @@ const displayVesselData = (vessel) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <section class="text-gray-600 body-font">
-                        <div class="container px-5 py-8 mx-auto">
-                            <FlashMessage />
-                            <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
+                      <section class="text-gray-600 body-font">
+                    <div class="container px-5 py-8 mx-auto">
+                      <FlashMessage />
+                        <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             
                             <!-- 担当者検索コンボボックス　ここから -->
-                             <div class="flex flex-col md:flex-row mt-2">
-                              <div class="flex flex-row ">
+                            <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
                             <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
-                           
                             <!-- 担当者検索コンボボックス　ここまで -->
 
                             <!-- 船検索コンボボックス　ここから -->
@@ -323,9 +321,9 @@ const displayVesselData = (vessel) => {
                                 </div>
                               </Combobox>
                             <!-- 船検索コンボボックス　ここまで -->
-                              </div>
-                            <div class="ml-32 mt-3 w-2/3">
-                            <Link as="button" :href="route('projects.create')" class=" h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
+                             
+                          <div class="flex justify-end">
+                            <Link as="button" :href="route('projects.create')" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
                           </div>
                         </div>
 

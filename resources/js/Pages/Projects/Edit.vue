@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { usePage,Inertia } from '@inertiajs/inertia';
+import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed } from 'vue';
 //アコーディオン機能のインポート
@@ -23,6 +23,7 @@ import {
   ComboboxLabel
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid';
+import { nl2br } from '@/nl2br';
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -30,7 +31,6 @@ const components = {
 };
 
 const newMessage = ref('');
-// const messages = ref(props.project.pro_descriptions || []); 
 
 const assignMassage = () => {
   if (newMessage.value.trim() === '') return;
@@ -44,10 +44,6 @@ const assignMassage = () => {
   });
   newMessage.value = ''; 
 };
-// const unassignMassage = (id) => {
-//     form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
-//     form.deletedMessageIds.push(id);
-// };
 
 const unassignMassage = (id, userId) => {
     if (userId !== form.loginUser.id) {
@@ -198,9 +194,12 @@ const dropFiles = (event) => {
 } else {
     // ユーザーがキャンセルした場合の処理（オプション）
 }};
+const isPdf = (filename) => {
+  const fileExtension = filename.split('.').pop().toLowerCase();
+  return fileExtension === 'pdf';
+};
 
-
-const downloadFile = async (attachmentId) => {
+const downloadFile = async (attachmentId,dp) => {
     try {
       // まずファイル名を取得
       const filenameResponse = await axios.get(route('project.getFileName', { id: props.project.id }), {
@@ -208,6 +207,9 @@ const downloadFile = async (attachmentId) => {
         });
 
         const filename = filenameResponse.data.filename; // ファイル名を取得
+        console.log('Filename:', filename);
+        const fileExtension = filename.split('.').pop().toLowerCase(); // ファイルの拡張子を取得
+        console.log('File Extension:', fileExtension);
 
         // ファイルをダウンロード
         const response = await axios.get(route('project.downloadFile', { id: props.project.id }), {
@@ -215,20 +217,26 @@ const downloadFile = async (attachmentId) => {
             responseType: 'blob'
         });
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        // console.log('filename:',filename);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        if (dp === 'p') {
+            // PDFの場合、新しいタブでプレビューを開く
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            window.open(url, '_blank');
+        } else {
+            // それ以外の場合、ファイルをダウンロード
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            // console.log('filename:',filename);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename); // ファイルの拡張子は適切に設定してください
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            }
     } catch (error) {
         console.error("エラーが発生しました：", error);
         // エラーメッセージの表示などのエラーハンドリング
     }
 };
-
 
 const deleteFile = (attachmentId) => {
   if (window.confirm('ファイルを削除しますか')) {
@@ -480,16 +488,22 @@ onMounted(() =>{
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                                     <div class="overflow-hidden rounded border-2 p-2 mb-3 border-gray-200">
                                     <div v-for="message in form.assignedMassagesList" :key="message.id" class="message">
-                                      <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignMassage(message.id,message.users.id)">削除</button>
-                                      <div class="text-sm">{{ formatDate(message.created_at) }}</div>
-                                      <div class="text-sm">{{ message.users?.name }}</div>
-                                      <div class="" >{{ message.memo }}</div>
+                                      <div class="flex justify-between items-center mt-1">
+                                        <div class="text-xs">{{ formatDate(message.created_at) }}</div>
+                                        <div class="flex justify-end">
+                                          <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignMassage(message.id,message.users.id)">削除</button>
+                                        </div>
+                                      </div>
+                                       <div class="text-xs border-b border-gray-200">{{ message.users?.name }}</div>
+                                      <div  v-html="nl2br(message.memo)" class="border-b border-gray-400" ></div>
                                     </div>
                                   </div>
                                       <div class="flex flex-col">
-                                        <input class="rounded border-b-2 border-gray-200 px-1 py-3 w-full" v-model="newMessage" placeholder="メモを入力" />
-                                        <button class="mr-4 mt-2 h-8 w-20 px-0 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignMassage">追加</button>
+                                        <textarea class="rounded border-b-2 border-gray-200 p-1 w-full h-32 text-justify" v-model="newMessage" placeholder="メモを入力" ></textarea>
+                                        <div class="flex justify-end">
+                                        <button class="mr-4 mt-2 h-8 w-20 px-0 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500 " @click="assignMassage">追加</button>
                                       </div>
+                                    </div>
                                     </div>
                                   
                                 </div>
@@ -555,13 +569,14 @@ onMounted(() =>{
                                         <tbody>
                                           <tr v-for="attachment in form.attachments" :key="attachment.id" class="border-b dark:border-neutral-500">
                                             <td><input type="text"  v-model="attachment.title" class="ml-3 w-30 rounded"></td>
-                                            <td><img :src="attachment.icon" @click="downloadFile(attachment.id)" alt="xls?" width="30" height="30" ></td>
-                                            <td class="w-1/3 rounded ">{{ attachment.originname }}</td>
+                                            <td class="flex justify-center flex-col"><img :src="attachment.icon" @click="downloadFile(attachment.id,'d')" alt="xls?" width="30" height="30" class="ml-3 mt-3 px-0">
+                                            <button v-if="isPdf(attachment.originname)" class="mt-2 px-0 py-0 w-14 text-xs bg-blue-300  text-white font-semibold rounded-full hover:bg-indigo-400" @click="downloadFile(attachment.id,'p')">⊕view</button>
+                                            </td>
+                                            <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
                                             <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
-                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
                                           </tr>
                                         </tbody>
-                                      </table>
+                                    </table>
                                     </div>
                                   </div>
                                 </div>
