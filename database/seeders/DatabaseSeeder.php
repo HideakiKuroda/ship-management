@@ -34,7 +34,8 @@ class DatabaseSeeder extends Seeder
             Pro_assignmentSeeder::class,
             Model_has_roles::class,
             Pro_descriptionSeeder::class,
-            // TaskSeeder::class,
+            TaskSeeder::class,
+        
             ]);
     }
 }
