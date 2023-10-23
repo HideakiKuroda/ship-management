@@ -26,6 +26,7 @@ class Task extends Model
         'parent_id',
         'name',
         'color_id',
+        'ganttchart',
         'start_date',
         'end_date',
 	    'deadline',
@@ -35,7 +36,7 @@ class Task extends Model
 
     public function projects():BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class,'project_id');
     }
 
     public function parent():BelongsTo
