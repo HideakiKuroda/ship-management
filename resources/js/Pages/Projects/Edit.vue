@@ -48,7 +48,7 @@ const assignMassage = () => {
 const unassignMassage = (id, userId) => {
     if (userId !== form.loginUser.id) {
         // ユーザーIDがログインユーザーのIDと一致しない場合は削除を許可しない
-        console.error('You can only delete your own messages.');
+        alert('本人以外は削除できる権限がありません。');
         return;
     }
     
@@ -145,9 +145,9 @@ const handleFileChange = (inputName) => {
   }
 
   // 確認ダイアログを表示
-  if (window.confirm('ファイルをアップロードしますか？')) {
+  if (window.confirm('入力内容を更新して、ファイルをアップロードしますか？')) {
     const formData = new FormData();
-
+    
     for (let i = 0; i < files.length; i++) {
       formData.append('files[]', files[i]);
     }
@@ -171,9 +171,9 @@ const dropFiles = (event) => {
   uploading.value = true;
   uploadComplete.value = false;
 
-  if (window.confirm('ファイルをアップロードしますか？')) {
+  if (window.confirm('入力内容を更新して、ファイルをアップロードしますか？')) {
     const formData = new FormData();
-
+    
   const droppedFiles = event.dataTransfer.files;
   Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
 
@@ -239,7 +239,8 @@ const downloadFile = async (attachmentId,dp) => {
 };
 
 const deleteFile = (attachmentId) => {
-  if (window.confirm('ファイルを削除しますか')) {
+  if (window.confirm('入力内容を更新して、ファイルを削除しますか')) {
+    
     Inertia.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
 }};
 
@@ -311,26 +312,7 @@ onMounted(() =>{
                                <vue-collapsible-panel class="z-10">
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
                                 <template #content> 
-                                  <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        ◆　担当者
-                                    <div class="flex flex-wrap sm:flex-row sm:space-x-0">
-                                      <div class="h-50 w-44  overflow-auto">
-                                        <div>
-                                            <ul>
-                                                <li v-for="user in form.assignedUsersList" :key="user.id">
-                                                    {{ user.name }}
-                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                      </div>
-                                      <div class="flex flex-wrap sm:flex-row w-80">
-                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
-                                      </div>
-                                    </div> 
-                                  </div> 
-
+                                 
                                   <div class="flex flex-wrap sm:flex-row">
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
@@ -432,8 +414,28 @@ onMounted(() =>{
                                     </div>
                                     </div>
                                  </div>
+                
                                 </template>
                               </vue-collapsible-panel>
+                              <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        ◆　担当者
+                                    <div class="flex flex-wrap sm:flex-row sm:space-x-0">
+                                      <div class="h-32 w-44  overflow-auto">
+                                        <div>
+                                            <ul>
+                                                <li v-for="user in form.assignedUsersList" :key="user.id">
+                                                    {{ user.name }}
+                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                      </div>
+                                      <div class="flex flex-wrap sm:flex-row w-80">
+                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
+                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
+                                      </div>
+                                    </div> 
+                                  </div> 
 
                               <vue-collapsible-panel :expanded="true" class="z-0">
                               <template #title > タスク一覧 </template>

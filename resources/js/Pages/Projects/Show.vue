@@ -20,6 +20,7 @@ const components = {
 
 const props = defineProps({
   project : Object,
+  loginUser :  Object,
 })
 
 const deleteItem = id => {
@@ -77,9 +78,17 @@ const downloadFile = async (attachmentId,dp) => {
     }
 };
 
+const editOpen = () => {
+  if (props.project.users.some(user => user.id === props.loginUser.id)) {
+    Inertia.get(route('projects.edit', { project:props.project.id }));
+  } else {
+    alert('編集は担当者のみ可能です');
+  }  
+}
 
 onMounted(() =>{
-  // console.log('id:',props.project.users);
+   console.log('これ:',props.project.users);
+   console.log('は:',props.loginUser);
 })
 
 </script>
@@ -278,7 +287,7 @@ onMounted(() =>{
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                <Link as="button" :href="route('projects.edit', { project:props.project.id })" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
+                                  <button  @click="editOpen" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->

@@ -156,11 +156,12 @@ class ProjectController extends Controller
     {
         try {
             $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions.users');
+            $loginUser = Auth::user('id','name'); 
             // dd($project);
-            return Inertia::render('Projects/Show',['project' => $project]);
+            return Inertia::render('Projects/Show',['project' => $project,'loginUser'=>$loginUser]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
-            dd($e->getMessage());
+           // dd($e->getMessage());
         }
    }
 
@@ -191,7 +192,7 @@ class ProjectController extends Controller
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
-            dd($e->getMessage());
+           // dd($e->getMessage());
         }
     }
 
@@ -246,10 +247,13 @@ class ProjectController extends Controller
         }
         
     });
-    
-    return redirect()->route('projects.show', $project->id)->with([
+    return redirect()->back()->withInput()->with([
         'message' => '更新しました。',
         'status' => 'success'
+    
+    // return redirect()->route('projects.edit', $project->id)->with([
+    //     'message' => '更新しました。',
+    //     'status' => 'success'
     ]);
 
     }

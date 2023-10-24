@@ -16,6 +16,7 @@ import {
   ComboboxLabel
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
+import UserSerch from '@/Components/UserSerch.vue';
 
 const props = defineProps({
     ships : Array,
@@ -49,44 +50,27 @@ const formatDate = (date) => {
   return moment(date).format('YYYY年MM月DD日');
 }
 
-const userIds = form.assignedUsersList.map(user => user.id);
+const handleUserId = (currentUser) =>{
+  form.currentUser = currentUser
+  // console.log("handleUserId:", index.userId)
+}
 
-const assignUser = () => {        //担当者追加ボタン　selectedUserがobjectなので、idだけをassignedUsersListに追加する
-    const selectedUserData = props.users.find(user => user.id === form.selectedUser.id);
+const userIds = form.assignedUsersList.map(user => user.id);
+const userSearch = ref();
+const assignUser = () => {
+    const selectedUserData = props.users.find(user => user.id === form.currentUser);
     if (selectedUserData) {
         form.assignedUsersList.push(selectedUserData);
+            userSearch.value.boxClear();
     }
-    // console.log("selectUser:", form.selectedUser)
-    // console.log("selectUserLst:", form.assignedUsersList)
-}
+};
 
 const unassignUser = (userId) => {
     form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
-}
+};
 
 //コンボボックス用の変数設定
 let query = ref('')
-
-//担当者索ComboboxのinputBox内での名前検索
-let filteredUser = computed(() =>
-  query.value === ''
-    ? props.users
-    : props.users.filter((person) =>
-        person.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
-//、ユーザがコンボボックスにカスタムの値（リストにない値）を入力したときに表示するオプション
-// const queryPerson = computed(() => {
-//   return query.value === '' ? null : { id: null, name: query.value };
-// });
-//既存のリスト（filteredUser）からオプションを動的に生成して表示するためのもの
-const options = computed(() => {
-  return [{ id: null, name: '' }, ...filteredUser.value];
-})
-
 let selectedShip = ref({id: null, name: ''})
 //船検索ComboboxのinputBoxで船名検索
 let filteredship = computed(() =>
@@ -171,98 +155,25 @@ const storeproject = () => {
                                           <input type="text" id="pro_name" name="pro_name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 mr-6 leading-8 transition-colors duration-200 ease-in-out">                                    
                                         </div>
                                   </div>
-                                  <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                  <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         ◆　担当者
                                     <div class="flex flex-wrap sm:flex-row sm:space-x-0">
-                                        <div class="h-20 w-48 overflow-auto">
-                                          <div>
-                                              <ul>
-                                                  <li v-for="user in form.assignedUsersList" :key="user.id">
-                                                      {{ user.name }}
-                                                      <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
-                                                  </li>
-                                              </ul>
-                                          </div>
+                                      <div class="h-32 w-44  overflow-auto">
+                                        <div>
+                                            <ul>
+                                                <li v-for="user in form.assignedUsersList" :key="user.id">
+                                                    {{ user.name }}
+                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
+                                                </li>
+                                            </ul>
                                         </div>
-                                        <div class="flex flex-wrap sm:flex-row h-20 w-80">
-                                         <!-- 担当者検索コンボボックス　ここから -->
-                                          <button class="mr-4 ml-4 h-8 w-14 px-1.5 mt-6 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                          <Combobox v-model="form.selectedUser" class=" opacity-100 z-10 mt-6">
-                                            <div  class="relative ml-4" > 
-                                              <div
-                                              class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
-                                              >
-                                                <ComboboxInput 
-                                                  class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
-                                                  :displayValue="(person) => person?.name"
-                                                  @change="query = $event.target.value"
-                                                                                                                                          
-                                                />
-                                                <ComboboxButton
-                                                  class="absolute inset-y-0 right-0 flex items-center pr-2 opacity-100 z-10"
-                                                >
-                                                  <ChevronUpDownIcon
-                                                    class="h-5 w-5 text-gray-400"
-                                                    aria-hidden="true"
-                                                  />
-                                                </ComboboxButton>
-                                              </div>
-                                              <TransitionRoot
-                                                leave="transition ease-in duration-100"
-                                                leaveFrom="opacity-100"
-                                                leaveTo="opacity-0"
-                                                @after-leave="query = ''"
-                                                >
-                                                <ComboboxOptions
-                                                  class="absolute mt-1 max-h-60 w-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                                >
-                                                  <div
-                                                    v-if="filteredUser.length === 0 && query !== ''"
-                                                    class="relative cursor-default select-none py-2 px-4 text-gray-700"
-                                                  >
-                                                    名前が見つかりません.
-                                                  </div>
-                                                  <ComboboxOption
-                                                    v-for="person in options"
-                                                    as="template"
-                                                    :key="person.id"
-                                                    :value="person"
-                                                    v-slot="{ selected, active }"                                                  >
-                                                    <li
-                                                      class="relative cursor-default select-none py-2 pl-10 pr-4"
-                                                      :class="{
-                                                        'bg-teal-600 text-white': active,
-                                                        'text-gray-900': !active,
-                                                      }" 
-                                                    >
-                                                      <span
-                                                        class="block truncate"
-                                                        :class="{ 'font-medium': form.selectedUser, 'font-normal': !form.selectedUser }"
-                                                      >
-                                                        {{ person.name  || ' 選択なし '  }}
-                                                      </span>
-                                                      <span
-                                                        v-if="selected" 
-                                                        class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                                        :class="{ 'text-white': active, 'text-teal-600': !active }"
-                                                        
-                                                        >
-                                                        <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    </li>
-                                                  </ComboboxOption>
-                                                
-                                                </ComboboxOptions>
-                                              </TransitionRoot>
-                                            </div>
-                                          </Combobox>
-                                        <!-- 担当者検索コンボボックス　ここまで -->
-                                        
-                                        </div>
-
+                                      </div>
+                                      <div class="flex flex-wrap sm:flex-row w-80">
+                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
+                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
+                                      </div>
                                     </div> 
-                                  </div>
-
+                                  </div> 
                                 </div>
                             </div>
                           </div>
