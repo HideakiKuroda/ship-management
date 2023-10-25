@@ -688,7 +688,8 @@ const deleteFile = (attachmentId) => {
                                             </td>
                                             <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
                                             <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
-                                          </tr>
+                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
+                                         </tr>
                                         </tbody>
                                       </table>
                                     </div>

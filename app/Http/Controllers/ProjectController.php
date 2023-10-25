@@ -270,45 +270,50 @@ class ProjectController extends Controller
     {
         $project = Project::findOrFail($id);
         $files = $request->file('files');
+        $uploadedFiles = [];
+        $today=now();
         
         //  dd($files);
         foreach ($files as $file) {
          
-            $originalName = $file->getClientOriginalName();
-            $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
-            // dd($filetype);
-            $icon = '';
-            if ($filetype === 'xls'){$icon='/images/excel_xls_spreadsheet.png';}
-            elseif ($filetype === 'xlsx'){$icon='/images/excel_xls_spreadsheet.png';}
-            elseif ($filetype === 'xlsm'){$icon='/images/excel_xls_spreadsheet.png';}
-            elseif ($filetype === 'doc'){$icon='/images/word_document.png';}
-            elseif ($filetype === 'docx'){$icon='/images/word_document.png';}
-            elseif ($filetype === 'pdf'){$icon='/images/adobe_acrobat_pdf.png';}
-            elseif ($filetype === 'jpg'){$icon='/images/picture_image_photo_file.png';}
-            elseif ($filetype === 'zip'){$icon='/images/zip_file_winzip.png';}
-            elseif ($filetype === 'pptx'){$icon='/images/powerpoint_document.png';}
-            elseif ($filetype === 'pptm'){$icon='/images/powerpoint_document.png';}
-            else{$icon='/images/text_document.png';};
+        $originalName = $file->getClientOriginalName();
+        $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
+        // dd($filetype);
+        $icon = '';
+        if ($filetype === 'xls'){$icon='/images/excel_xls_spreadsheet.png';}
+        elseif ($filetype === 'xlsx'){$icon='/images/excel_xls_spreadsheet.png';}
+        elseif ($filetype === 'xlsm'){$icon='/images/excel_xls_spreadsheet.png';}
+        elseif ($filetype === 'doc'){$icon='/images/word_document.png';}
+        elseif ($filetype === 'docx'){$icon='/images/word_document.png';}
+        elseif ($filetype === 'pdf'){$icon='/images/adobe_acrobat_pdf.png';}
+        elseif ($filetype === 'jpg'){$icon='/images/picture_image_photo_file.png';}
+        elseif ($filetype === 'zip'){$icon='/images/zip_file_winzip.png';}
+        elseif ($filetype === 'pptx'){$icon='/images/powerpoint_document.png';}
+        elseif ($filetype === 'pptm'){$icon='/images/powerpoint_document.png';}
+        else{$icon='/images/text_document.png';};
 
-            // $filename = $file->storeAs("/projects/{$id}", $originalName);
-            // dd($filename);
-            $filename = Storage::put("projects/{$id}", $file);
-            $userId = Auth::id();
-            // データベースに記録
-            Pro_attachment::create([
-                'project_id' => $id,
-                'filename' => $filename,
-                'originname' => $originalName,
-                'user_id' =>  $userId,
-                'icon' => $icon,
-            ]);
+        // $filename = $file->storeAs("/projects/{$id}", $originalName);
+        // dd($filename);
+        $filename = Storage::put("projects/{$id}", $file);
+        $users =  Auth::user('id','name');
+        // データベースに記録
+        $newFile = Pro_attachment::create([
+            'project_id' => $id,
+            'filename' => $filename,
+            'originname' => $originalName,
+            'user_id' =>  $users->id,
+            'icon' => $icon,
+        ]);
+        // $uploadedFiles 配列に追加する前に user_name と created_at を追加
+        $newFile->users->name = $users->name;
+        $newFile->created_at = $today->toDateTimeString(); 
+        $newFile->title = '';
+        $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
         }
-
-        // projects.edit へリダイレクト
-        // return redirect()->route('projects.edit', $id)->with([
-            return redirect()->back()->withInput()->with([
+        return response()->json([
             'message' => 'ファイルをアップロードしました。',
-            'status' => 'success'
+            'status' => 'success',
+            'uploadedFiles' => $uploadedFiles ,
         ]);
     }
 
@@ -320,23 +325,19 @@ class ProjectController extends Controller
         if ($attachment) {
             // データベースからレコードを削除
             Pro_attachment::where('id', $attachData)->delete();
-            
             // ストレージからファイルを削除
             Storage::delete($attachment->filename);
-
             // return redirect()->route('projects.edit', $id)->with([
-            return redirect()->back()->with([
-            
+            return response()->json([
                 'message' => 'ファイルを削除しました。',
                 'status' => 'success'
             ]);
         }
-
         // return redirect()->route('projects.edit', $id)->with([
-            return redirect()->back()->with([
-            'message' => 'ファイルの削除に失敗しました。',
-            'status' => 'error'
-        ]);
+            return response()->json([
+                'message' => 'ファイルの削除に失敗しました。',
+                'status' => 'error'
+            ]);
     }
 
     //ダウンロードファイルの取得

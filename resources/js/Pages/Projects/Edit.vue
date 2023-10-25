@@ -171,33 +171,80 @@ const dropFiles = (event) => {
   uploading.value = true;
   uploadComplete.value = false;
 
-  if (window.confirm('入力内容を更新して、ファイルをアップロードしますか？')) {
+  if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
-    
-  const droppedFiles = event.dataTransfer.files;
-  Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
+    const droppedFiles = event.dataTransfer.files;
+    Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
 
-  Inertia.post(route('project.upload', { id: form.id }), formData, {
-    onBefore: () => {
-      // 何か処理
-    },
-    onSuccess: () => {
-      uploadComplete.value = true;
-    },
-    onError: () => {
-      // エラーハンドリング
-    },
-    onFinish: () => {
+    axios.post(route('project.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      console.log('attach:',props.project.users);
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
       uploading.value = false;
-    },
-  });
-} else {
-    // ユーザーがキャンセルした場合の処理（オプション）
-}};
+    });
+  }
+};
 const isPdf = (filename) => {
   const fileExtension = filename.split('.').pop().toLowerCase();
   return fileExtension === 'pdf';
 };
+
+
+const deleteFile = (attachmentId) => {
+  if (window.confirm('ファイルを削除しますか')) {
+    axios.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } })
+    .then(response => {
+      if (response.data.status === 'success') {
+        // 通知の表示や、必要に応じてリアクティブなデータの更新を行う
+        alert(response.data.message);
+        // attachments 配列から削除したファイルを削除
+        const index = form.attachments.findIndex(attachment => attachment.id === attachmentId);
+        if (index !== -1) {
+          form.attachments.splice(index, 1);
+        }        
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    });
+}};
+
+//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
+let query = ref('')
+const categorie = props.categories
+const curntCidx = computed(() => {
+  return props.categories.findIndex(cr => cr?.id === form.pro_category_id)
+})
+let selectedCategory = ref({id:categorie[curntCidx.value].id,name:categorie[curntCidx.value].name} || {id: null, name: ''})
+
+let filteredCategory = computed(() =>
+  query.value === ''
+    ? props.categories
+    : props.categories.filter((proType) =>
+      proType.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+
+const typeOptions = computed(() => {
+  return [{ id: null, name: '' }, ...filteredCategory.value];
+})
 
 const downloadFile = async (attachmentId,dp) => {
     try {
@@ -237,36 +284,6 @@ const downloadFile = async (attachmentId,dp) => {
         // エラーメッセージの表示などのエラーハンドリング
     }
 };
-
-const deleteFile = (attachmentId) => {
-  if (window.confirm('入力内容を更新して、ファイルを削除しますか')) {
-    
-    Inertia.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
-}};
-
-//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
-let query = ref('')
-const categorie = props.categories
-const curntCidx = computed(() => {
-  return props.categories.findIndex(cr => cr?.id === form.pro_category_id)
-})
-let selectedCategory = ref({id:categorie[curntCidx.value].id,name:categorie[curntCidx.value].name} || {id: null, name: ''})
-
-let filteredCategory = computed(() =>
-  query.value === ''
-    ? props.categories
-    : props.categories.filter((proType) =>
-      proType.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
-
-const typeOptions = computed(() => {
-  return [{ id: null, name: '' }, ...filteredCategory.value];
-})
-
 
 onMounted(() =>{
   // console.log('id:',props.project.users);
@@ -575,7 +592,8 @@ onMounted(() =>{
                                             </td>
                                             <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
                                             <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
-                                          </tr>
+                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
+                                       </tr>
                                         </tbody>
                                     </table>
                                     </div>
