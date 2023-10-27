@@ -103,7 +103,7 @@ Route::get('/', function () {
 
     $token = $user->createToken('test');
 
-    dd($token);
+    // dd($token);
 });
 
 require __DIR__.'/auth.php';

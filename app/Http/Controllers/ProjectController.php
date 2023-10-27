@@ -321,7 +321,7 @@ class ProjectController extends Controller
     {
         $attachData = $request->input('attachmentId');
         $attachment = Pro_attachment::where('id', $attachData)->first();
-        // dd($attachment);
+        //dd($attachment);
         if ($attachment) {
             // データベースからレコードを削除
             Pro_attachment::where('id', $attachData)->delete();
