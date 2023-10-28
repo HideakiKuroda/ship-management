@@ -6,6 +6,13 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+
+const csrf = ref('');
+
+onMounted(() => {
+  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+});
 
 defineProps({
     canResetPassword: {
@@ -38,6 +45,8 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
+            <input type="hidden" name="_token" :value="csrf">
+
             <div>
                 <InputLabel for="email" value="Email" />
 
@@ -49,6 +58,7 @@ const submit = () => {
                     required
                     autofocus
                     autocomplete="username"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
@@ -64,6 +74,7 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />

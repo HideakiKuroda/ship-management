@@ -5,6 +5,13 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+
+const csrf = ref('');
+
+onMounted(() => {
+  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+});
 
 const form = useForm({
     name: '',
@@ -25,6 +32,8 @@ const submit = () => {
         <Head title="Register" />
 
         <form @submit.prevent="submit">
+            <input type="hidden" name="_token" :value="csrf">
+
             <div>
                 <InputLabel for="name" value="Name" />
 
@@ -36,6 +45,7 @@ const submit = () => {
                     required
                     autofocus
                     autocomplete="name"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.name" />
@@ -51,6 +61,7 @@ const submit = () => {
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
@@ -66,6 +77,7 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
@@ -81,6 +93,7 @@ const submit = () => {
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password_confirmation" />
