@@ -10,6 +10,12 @@ import DateSerch from '@/Components/DateSerch.vue';
 import UserSerch from '@/Components/UserSerch.vue';
 import { nl2br } from '@/nl2br';
 
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
 const props = defineProps({
     ships: Array,
     users: Array,

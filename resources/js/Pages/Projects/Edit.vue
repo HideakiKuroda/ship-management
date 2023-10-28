@@ -25,6 +25,12 @@ import {
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid';
 import { nl2br } from '@/nl2br';
 
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
 const components = {
   VueCollapsiblePanelGroup,
   VueCollapsiblePanel,

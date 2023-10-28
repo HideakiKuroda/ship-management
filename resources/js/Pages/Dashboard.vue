@@ -7,9 +7,14 @@ import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/vue3';
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 const test = async () => {
   try {
     const response = await axios.post('/testtest', { 
+      headers: {
+        'X-CSRF-TOKEN': csrfToken
+      }
     });
     index.projects = response.data;
   } catch (error) {
