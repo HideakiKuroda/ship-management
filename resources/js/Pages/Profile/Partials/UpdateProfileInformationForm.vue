@@ -4,13 +4,6 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
-
-const csrf = ref('');
-
-onMounted(() => {
-  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-});
 
 defineProps({
     mustVerifyEmail: {
@@ -40,9 +33,7 @@ const form = useForm({
         </header>
 
         <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
-            <input type="hidden" name="_token" :value="csrf">
-
-            <div>
+             <div>
                 <InputLabel for="name" value="Name" />
 
                 <TextInput

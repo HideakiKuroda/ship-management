@@ -4,12 +4,6 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
-const csrf = ref('');
-
-onMounted(() => {
-  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-});
 
 const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
@@ -49,8 +43,6 @@ const updatePassword = () => {
         </header>
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
-            <input type="hidden" name="_token" :value="csrf">
-
             <div>
                 <InputLabel for="current_password" value="Current Password" />
 

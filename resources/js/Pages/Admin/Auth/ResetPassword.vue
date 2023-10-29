@@ -5,13 +5,6 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
-
-const csrf = ref('');
-
-onMounted(() => {
-  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-});
 
 const props = defineProps({
     email: {
@@ -43,8 +36,6 @@ const submit = () => {
         <Head title="Reset Password" />
 
         <form @submit.prevent="submit">
-            <input type="hidden" name="_token" :value="csrf">
-
             <div>
                 <InputLabel for="email" value="Email"  />
 

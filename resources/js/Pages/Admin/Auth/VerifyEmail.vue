@@ -3,13 +3,6 @@ import { computed } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
-
-const csrf = ref('');
-
-onMounted(() => {
-  csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-});
 
 const props = defineProps({
     status: {
@@ -40,9 +33,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
         </div>
 
         <form @submit.prevent="submit">
-            <input type="hidden" name="_token" :value="csrf">
-
-            <div class="mt-4 flex items-center justify-between">
+           <div class="mt-4 flex items-center justify-between">
                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" >
                     Resend Verification Email
                 </PrimaryButton>

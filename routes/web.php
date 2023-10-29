@@ -96,6 +96,6 @@ Route::get('/', function () {
     $user = Auth::loginUsingId(8);
 });
 
-Route::get('/{any?}', fn() => view('app')) -> where('any', '.+');
+
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
