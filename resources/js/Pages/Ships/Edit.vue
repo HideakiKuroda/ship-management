@@ -162,17 +162,24 @@ const handleFileChange = (inputName) => {
     }
 
     // ここでInertia.jsを使ってアップロード
-    Inertia.post(route('ship.upload', { id: form.id }), formData, {
-      // オプション：アップロードの進行状況が必要な場合はこちらを使用
-      onUploadProgress: (progressEvent) => {
-        uploadPercentage.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    axios.post(route('ship.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      // console.log('attach:',props.ship.users);
+      } else {
+        alert(response.data.message);
       }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
+      uploading.value = false;
     });
-
-    // アップロード完了のフラグをセット（Inertia.jsのPromiseが解決したら設定）
-    uploadComplete.value = true;
-  } else {
-    // ユーザーがキャンセルした場合の処理（オプション）
   }
 };
 
@@ -182,27 +189,30 @@ const dropFiles = (event) => {
 
   if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
+    const droppedFiles = event.dataTransfer.files;
+    Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
 
-  const droppedFiles = event.dataTransfer.files;
-  Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
-
-  Inertia.post(route('ship.upload', { id: form.id }), formData, {
-    onBefore: () => {
-      // 何か処理
-    },
-    onSuccess: () => {
-      uploadComplete.value = true;
-    },
-    onError: () => {
-      // エラーハンドリング
-    },
-    onFinish: () => {
+    axios.post(route('ship.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      // console.log('attach:',props.ship.users);
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
       uploading.value = false;
-    },
-  });
-} else {
-    // ユーザーがキャンセルした場合の処理（オプション）
-}};
+    });
+  }
+};
+
 
 // const downloadFile = async (attachmentId) => {
 //   try {

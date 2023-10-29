@@ -151,7 +151,7 @@ const handleFileChange = (inputName) => {
   }
 
   // 確認ダイアログを表示
-  if (window.confirm('入力内容を更新して、ファイルをアップロードしますか？')) {
+  if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
     
     for (let i = 0; i < files.length; i++) {
@@ -159,17 +159,24 @@ const handleFileChange = (inputName) => {
     }
 
     // ここでInertia.jsを使ってアップロード
-    Inertia.post(route('project.upload', { id: form.id }), formData, {
-      // オプション：アップロードの進行状況が必要な場合はこちらを使用
-      onUploadProgress: (progressEvent) => {
-        uploadPercentage.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    axios.post(route('project.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      // console.log('attach:',props.project.users);
+      } else {
+        alert(response.data.message);
       }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
+      uploading.value = false;
     });
-
-    // アップロード完了のフラグをセット（Inertia.jsのPromiseが解決したら設定）
-    uploadComplete.value = true;
-  } else {
-    // ユーザーがキャンセルした場合の処理（オプション）
   }
 };
 

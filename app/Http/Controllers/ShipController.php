@@ -274,7 +274,8 @@ class ShipController extends Controller
     {
         $ship = Ship::findOrFail($id);
         $files = $request->file('files');
-        
+        $uploadedFiles = [];
+        $today=now();
         // dd($files);
         foreach ($files as $file) {
          
@@ -297,23 +298,26 @@ class ShipController extends Controller
             // $filename = $file->storeAs("/ships/{$id}", $originalName);
             // dd($filename);
             $filename = Storage::put("ships/{$id}", $file);
-            $userId = Auth::id();
+            $users =  Auth::user('id','name');
             // データベースに記録
-            Ship_attachment::create([
+            $newFile = Ship_attachment::create([
                 'ship_id' => $id,
                 'filename' => $filename,
                 'originname' => $originalName,
-                'user_id' =>  $userId,
+                'user_id' =>  $users->id,
                 'icon' => $icon,
             ]);
-        }
-
-        // ships.edit へリダイレクト
-        // return redirect()->route('ships.edit', $id)->with([
-            return redirect()->back()->withInput()->with([
-            'message' => 'ファイルをアップロードしました。',
-            'status' => 'success'
-        ]);
+            // $uploadedFiles 配列に追加する前に user_name と created_at を追加
+            $newFile->users->name = $users->name;
+            $newFile->created_at = $today->toDateTimeString(); 
+            $newFile->title = '';
+            $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
+            }
+            return response()->json([
+                'message' => 'ファイルをアップロードしました。',
+                'status' => 'success',
+                'uploadedFiles' => $uploadedFiles ,
+           ]);
     }
 
     public function deleteFile(Request $request, $id)
