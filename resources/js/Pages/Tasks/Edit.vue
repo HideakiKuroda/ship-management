@@ -24,6 +24,10 @@ import {
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid';
 import { nl2br } from '@/nl2br';
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const components = {
   VueCollapsiblePanelGroup,

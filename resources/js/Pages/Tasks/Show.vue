@@ -11,6 +11,10 @@ import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import { nl2br } from '@/nl2br';
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const components = {
   VueCollapsiblePanelGroup,

@@ -14,6 +14,10 @@ import {
   ComboboxLabel
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const props = defineProps({
     users: Array,
