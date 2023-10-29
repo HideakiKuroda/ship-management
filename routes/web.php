@@ -73,10 +73,6 @@ Route::get('/', function () {
     ]);
 });
 
-// Route::get('register', function () {
-//     // registration logic
-// })->middleware('admin');
-
 Route::get('register', [RegisteredUserController::class, 'create'])->name('user.register')->middleware('checkRole:admin');
 Route::post('admin/register', [RegisteredUserController::class, 'store'])->name('register')->middleware('checkRole:admin');
 
@@ -91,8 +87,6 @@ Route::middleware('auth','admin')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/test', [App\Http\Controllers\TestController::class, 'create'])->name('test.create');
-
 Route::prefix('admin')->name('admin.')->group(function(){
     require __DIR__.'/admin.php';
 });
@@ -100,11 +94,8 @@ Route::prefix('admin')->name('admin.')->group(function(){
 Route::get('/', function () {
     // return view('welcome');
     $user = Auth::loginUsingId(8);
-
-    $token = $user->createToken('test');
-
-    // dd($token);
 });
 
+Route::get('/{any?}', fn() => view('app')) -> where('any', '.+');
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
