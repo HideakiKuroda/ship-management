@@ -61,15 +61,15 @@ const selectItem = async (userId) => {
                         <section class="text-gray-600 body-font">
                         <div class="container px-5 py-8 mx-auto">
                            <FlashMessage /> 
-                           <div class="flex pl-4 my-4 lg:w-2/3 w-full mx-auto">
+                           <div class="flex flex-col pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <!-- 担当者検索コンボボックス　ここから -->
-                            <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
-                            <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
+                            <div class="flex justify-between items-center mb-2 mt-1 flex-col md:flex-row">
+                            <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
                             <!-- 担当者検索コンボボックス　ここまで -->
 
-                            <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規船登録</Link>
+                            <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</Link>
                            </div>
-                          <div class="lg:w-2/3 w-full mx-auto overflow-auto">
+                          <div class="w-2/3 lg:w-full mx-auto overflow-auto">
                             <table class="table-auto w-full text-left whitespace-no-wrap">
                                 <thead>
                                 <tr>
