@@ -3,17 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { toRefs, reactive,ref, computed,onMounted,watch } from 'vue';
-//Comboboxのインポート
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxButton,
-  ComboboxOptions,
-  ComboboxOption,
-  TransitionRoot,
-  ComboboxLabel
-} from '@headlessui/vue'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
+import UserSerch from '@/Components/UserSerch.vue';
+
 // CSRFトークンをメタタグから取得
 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 // Axiosの設定
@@ -30,29 +21,11 @@ const ship = reactive({
     userId      :props.currentUser,
 });
 
-const user = props.users
-let selectedUser = ref({id: null, name: ''});
-let query = ref('')
-
-//担当者索ComboboxのinputBox内での名前検索
-let filteredUser = computed(() =>
-  query.value === ''
-    ? user
-    : user.filter((person) =>
-        person.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
-
-//担当者索Comboboxでリストから選んだ時の動作
-watch(selectedUser, (newValue, oldValue) => {
-  if (newValue && newValue !== oldValue) {
-    selectItem(newValue.id) 
-    console.log("selectUserId:", newValue.id)
-  }
-})
+const handleUserId = (currentUser) =>{
+  ship.userId = currentUser
+  selectItem(ship.userId)
+  //  console.log("handleUserId:", index.userId)
+}
 
 const selectItem = async (userId) => {
   try {
@@ -89,89 +62,11 @@ const selectItem = async (userId) => {
                         <div class="container px-5 py-8 mx-auto">
                            <FlashMessage /> 
                            <div class="flex pl-4 my-4 lg:w-2/3 w-full mx-auto">
-                                <!-- ユーザー選択ドロップダウン -->
-                            <div>
                             <!-- 担当者検索コンボボックス　ここから -->
-                            <div class="flex flex-col md:flex-row mt-2">
-                              <div class="flex flex-row ">
-                            <Combobox v-model="selectedUser" class=" opacity-100 z-10">
-                                <div  class="relative ml-4" > <ComboboxLabel class=" text-sm ">担当者選択:</ComboboxLabel>
-                                  <div
-                                  class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
-                                  >
-                                    <ComboboxInput 
-                                      class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
-                                      :displayValue="(person) => person.name"
-                                      @change="query = $event.target.value"
-                                      :value="selectedUser.name" 
-                                                                            
-                                    />
-                                    <ComboboxButton
-                                      class="absolute inset-y-0 right-0 flex items-center pr-2 opacity-100 z-10"
-                                    >
-                                      <ChevronUpDownIcon
-                                        class="h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </ComboboxButton>
-                                  </div>
-                                  <TransitionRoot
-                                    leave="transition ease-in duration-100"
-                                    leaveFrom="opacity-100"
-                                    leaveTo="opacity-0"
-                                    @after-leave="query = ''"
-                                     >
-                                    <ComboboxOptions
-                                      class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                    >
-                                      <div
-                                        v-if="filteredUser.length === 0 && query !== ''"
-                                        class="relative cursor-default select-none py-2 px-4 text-gray-700"
-                                      >
-                                        名前が見つかりません.
-                                      </div>
-                                      
-                                      <ComboboxOption
-                                        v-for="person in [{ id: null, name: '' }, ...filteredUser]"
-                                        as="template"
-                                        :key="person.id"
-                                        :value="person"
-                                        v-slot="{ selected, active }"
-                                                                                                                                                              
-                                      >
-                                        <li
-                                          class="relative cursor-default select-none py-2 pl-10 pr-4"
-                                          :class="{
-                                            'bg-teal-600 text-white': active,
-                                            'text-gray-900': !active,
-                                          }" 
-                                        >
-                                          <span
-                                            class="block truncate"
-                                            :class="{ 'font-medium': selectedUser, 'font-normal': !selectedUser }"
-                                          >
-                                            {{ person.name  || '全員'  }}
-                                          </span>
-                                          <span
-                                            v-if="selected" 
-                                            class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                            :class="{ 'text-white': active, 'text-teal-600': !active }"
-                                             
-                                            >
-                                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                                          </span>
-                                        </li>
-                                      </ComboboxOption>
-                                    
-                                    </ComboboxOptions>
-                                  </TransitionRoot>
-                                </div>
-                              </Combobox>
+                            <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
+                            <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
                             <!-- 担当者検索コンボボックス　ここまで -->
-                            </div>
-                            </div>
 
-                            </div>
                             <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">新規船登録</Link>
                            </div>
                           <div class="lg:w-2/3 w-full mx-auto overflow-auto">
@@ -206,6 +101,7 @@ const selectItem = async (userId) => {
                             </table>
                             </div>
                         </div>
+                      </div>
                         <!-- <Pagination :data="customers"/> -->
                         <!-- <Pagination :links="customers.links"></Pagination> -->
                         <!-- <Pagination :data="customers" :search="search"></Pagination> -->
