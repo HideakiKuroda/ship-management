@@ -49,7 +49,7 @@ class ProjectController extends Controller
         ->UserProject($userId);
         // Log::info($queryAll->toSql()); 
         
-        $projects = $queryAll->paginate(20)
+        $projects = $queryAll->paginate(12)
         ->withQueryString();
 
         
@@ -74,10 +74,12 @@ class ProjectController extends Controller
         ->EndOrNoProject($EndOrNo)
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate);
-        // Log::info('crtAddDate value:', ['value' => $crtAddDate]);
-        // Log::info('endAddDate value:', ['value' => $endAddDate]);
-        // Log::info($query->toSql()); 
-        $filtered = $query->Paginate(20);    
+         Log::info('crtDate value:', ['value' => $crtDate]);
+         Log::info('crtAddDate value:', ['value' => $crtAddDate]);
+         Log::info('endDate value:', ['value' => $endDate]);
+         Log::info('endAddDate value:', ['value' => $endAddDate]);
+         Log::info($query->toSql()); 
+        $filtered = $query->Paginate(12);    
        
         // ->withQueryString();
         return response()->json($filtered);

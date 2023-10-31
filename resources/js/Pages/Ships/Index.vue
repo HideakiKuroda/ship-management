@@ -55,41 +55,39 @@ const selectItem = async (userId) => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-full mx-auto sm:px-2 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <section class="text-gray-600 body-font">
+                      <section class="text-gray-600 body-font">
                         <div class="container px-5 py-8 mx-auto">
                            <FlashMessage /> 
-                           <div class="flex flex-col pl-4 my-4 lg:w-2/3 w-full mx-auto">
-                            <!-- 担当者検索コンボボックス　ここから -->
-                            <div class="flex justify-between items-center mb-2 mt-1 flex-col md:flex-row">
-                            <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
-                            <!-- 担当者検索コンボボックス　ここまで -->
-
-                            <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</Link>
+                          <div class="flex flex-col pl-4 my-4 lg:w-2/3 w-full mx-auto">
+                           <div class="mb-1 mt-1 flex-col md:flex-row">
+                             <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</Link>
                            </div>
-                          <div class="w-2/3 lg:w-full mx-auto overflow-auto">
-                            <table class="table-auto w-full text-left whitespace-no-wrap">
+                            <!-- 担当者検索コンボボックス　ここから -->
+                           <div class="mb-2 flex-col md:flex-row">
+                            <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
+                           </div>
+                           <!-- 担当者検索コンボボックス　ここまで -->
+                           <!-- PC用のテーブル表示はここから -->
+                           <div class="w-full lg:w-full mx-auto overflow-auto">
+                            <table class="table-fixed w-full text-left whitespace-no-wrap hidden sm:table">
                                 <thead>
-                                <tr>
-                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
-                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">船名</th>
+                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">★</th>
+                                    <th class="pr-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">船名</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">造船所</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">船番</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">担当者</th>
-                                </tr>
                                 </thead>
                                 <tbody>
                                  <tr  v-for="ship in ship.ships" :key="ship.id">
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-400" :href="route('ships.show', { ship:ship.id })"> {{ ship.id }} </Link></td>
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-400" :href="route('ships.show', { ship:ship.id })">{{ ship.name }} </Link></td>
+                                        <Link class="text-blue-500" :href="route('ships.show', { ship:ship.id })"> {{ ship.id }} </Link></td>
+                                    <td class="border-b-2 border-gray-200 pr-4 py-3">
+                                        <Link class="text-blue-500" :href="route('ships.show', { ship:ship.id })">{{ ship.name }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.yard }}</td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.ship_no }}</td>
-                                    <!-- <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.users.name  }}</td> -->
-                                    <!-- 担当者（ユーザー）列 -->
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                     <div v-for="user in ship.users">
                                         {{ user.name }}
@@ -99,16 +97,48 @@ const selectItem = async (userId) => {
                                  </tr>
                                 </tbody>
                             </table>
-                            </div>
+                           </div>
+                          <!-- PC用のテーブル表示はここまで -->
+                         </div> 
+                        </div>  <!-- Flashメッセージ・検索・テーブルのコンテナ -->
+             
+                    <!-- スマホ表示: 縦並び -->
+                     <div class="container ml-8 px-4">
+                       <div v-for="ship in ship.ships" :key="ship.id" class="block sm:hidden">
+                        <div class="mb-4">
+                            <strong>船名:</strong><br>
+                            <span>
+                                <Link class="text-blue-500" :href="route('ships.show', { ship:ship.id })"> {{ ship.id }} </Link>
+                                &emsp;&emsp;
+                                <Link class="text-blue-500 font-bold text-lg" :href="route('ships.show', { ship:ship.id })">{{ ship.name }} </Link>
+                            </span>
                         </div>
-                      </div>
+                        <div class="mb-4 border-b-2 border-gray-200">
+                            <strong>造船所&emsp;&emsp;船番&emsp;&emsp;&emsp;担当者:</strong><br>
+                            <div class="flex flex-row">
+                                <span class="block">{{ ship.yard }}&emsp;&emsp;&emsp;{{ ship.ship_no }}&emsp;&emsp;&emsp;</span>
+                                <div class="flex flex-col">
+                                    <div v-for="user in ship.users" :key="user.id" class="block">{{ user.name }}</div>
+                                </div>
+                            </div>
+                        </div >
+                        </div>
+                     </div>
+                     <!-- スマホ表示: 縦並び -->
+      
                         <!-- <Pagination :data="customers"/> -->
                         <!-- <Pagination :links="customers.links"></Pagination> -->
                         <!-- <Pagination :data="customers" :search="search"></Pagination> -->
-                        </section>
-                    </div>
+                  </section>
                 </div>
             </div>
         </div>
+    </div>
     </AuthenticatedLayout>
 </template>
+<style scoped>
+strong {
+  font-weight: bold;
+}
+</style>
+

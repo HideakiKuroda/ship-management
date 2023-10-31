@@ -345,6 +345,7 @@ const displayVesselData = (vessel) => {
                              
                             
                            </div>
+                         <div class="hidden sm:block"> 
                           <div class="lg:w-2/3 w-full mx-auto overflow-auto">
                             <table class="table-auto w-full text-left whitespace-no-wrap ">
                                 <thead>
@@ -381,6 +382,7 @@ const displayVesselData = (vessel) => {
                             </table>
                             </div>
                         </div>
+                      </div>
                         <!-- <Pagination  -->
                           <div class="w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         <div class="card">
