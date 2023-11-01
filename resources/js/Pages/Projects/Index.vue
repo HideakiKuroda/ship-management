@@ -61,6 +61,7 @@ const index = reactive({
     crtAddDate  : null,
     endDate     : null,
     endAddDate  : null,
+    emitDate    : null,
      });
 
 const safeParseInt = (value) => {
@@ -101,40 +102,41 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     index.userId = userId;
   } else if($uOrS == 2) {
     index.shipId = shipId;
-  } else if($uOrS == 3) {
-    
-  }
+  } 
   const daysToAdd = safeParseInt(index.crtAddDate);
   // console.log("Parsed daysToAdd:", daysToAdd);
   let newDate = null;
+  let newendDate = null; 
   if (index.crtDate && index.EndOrNo !== 1){
     newDate = addDaysToDate(index.crtDate, daysToAdd);
+    index.crtDate;
     }else if(index.crtDate == null){
       newDate = null;
     }
-  let newendDate = null; 
   if (index.endDate && index.EndOrNo == 1){
     newendDate = addDaysToDate(index.endDate, daysToAdd);
+    index.endDate;
     }else if(index.endDate == null){
     newendDate = null;
     }
-  // console.log("newDate:", index.crtDate, newDate,index.endDate, newendDate);    
+  // console.log("newDate:", index.crtDate, newDate);    
+  // console.log("endDate:", index.endDate, newendDate);    
   try {
     const response = await axios.post('/projects/indexfilter', { 
       userId: index.userId, 
       shipId: index.shipId,
       EndOrNo: index.EndOrNo,
-      
       crtDate: index.crtDate,
       endDate: index.endDate,
       crtAddDate:newDate, 
       endAddDate :newendDate,
       page: page 
     });
-    console.log("credateSerch:", index.EndOrNo,index.crtDate,newDate)
-    console.log("enddateSerch:", index.EndOrNo,index.endAddDate,newDate)
+    // console.log("credateSerch:", index.EndOrNo,index.crtDate,newDate)
+    // console.log("enddateSerch:", index.EndOrNo,index.endDate,newendDate)
     index.projects = response.data;
     pagination.value = index.projects;
+   
   } catch (error) {
     console.error('Error:', error);
   }
@@ -143,21 +145,23 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
 
 const handleCategoryId = (categoryId) =>{
   index.EndOrNo = categoryId
-  selectItem(index.userId, index.shipId, 3)
+  handleSerchDate(index.emitDate)
+  // selectItem(index.userId, index.shipId, 3)
   // console.log("handleCategoryId:", index.EndOrNo)
 }
 
 const handleSerchDate = (serchDate) => {
+  index.emitDate = serchDate;
   if (index.EndOrNo !== 1){
-    index.crtDate = serchDate
-    index.endDate = null
+    index.crtDate = serchDate;
+    index.endDate = null;
   }
   else{
-    index.endDate = serchDate
-    index.crtDate = null
+    index.endDate = serchDate;
+    index.crtDate = null;
   }
   selectItem(index.userId, index.shipId, 3)
-   console.log("handleSerchDate:", index.crtDate,index.endDate)
+  //  console.log("handleSerchDate:", index.crtDate,index.endDate)
 }
 
 const handleTermD = (termD) => {

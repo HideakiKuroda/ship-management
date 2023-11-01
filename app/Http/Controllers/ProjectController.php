@@ -74,11 +74,11 @@ class ProjectController extends Controller
         ->EndOrNoProject($EndOrNo)
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate);
-         Log::info('crtDate value:', ['value' => $crtDate]);
-         Log::info('crtAddDate value:', ['value' => $crtAddDate]);
-         Log::info('endDate value:', ['value' => $endDate]);
-         Log::info('endAddDate value:', ['value' => $endAddDate]);
-         Log::info($query->toSql()); 
+        //  Log::info('crtDate value:', ['value' => $crtDate]);
+        //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
+        //  Log::info('endDate value:', ['value' => $endDate]);
+        //  Log::info('endAddDate value:', ['value' => $endAddDate]);
+        //  Log::info($query->toSql()); 
         $filtered = $query->Paginate(12);    
        
         // ->withQueryString();

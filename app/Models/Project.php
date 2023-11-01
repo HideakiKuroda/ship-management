@@ -101,19 +101,19 @@ class Project extends Model
         return $query;
     }  
     //作成日の日付範囲で検索
-    public function scopeDateCreateProject($query,$crtAddDate,$crtDate=null)
+    public function scopeDateCreateProject($query,$crtDate,$crtAddDate)
     {
         if(!empty($crtDate)){
-           return $query->whereBetween('created_at',[$crtDate,$crtAddDate]);
+           return $query->whereBetween("created_at",[$crtDate,$crtAddDate]);
         }
         return $query;
     
     }
     //完了日日付範囲で検索
-    public function scopeDateEndProject($query,$endAddDate,$endDate=null)
+    public function scopeDateEndProject($query,$endDate,$endAddDate)
     {
         if(!empty($endDate)){
-           return $query->whereBetween('completion',[$endDate,$endAddDate]);
+           return $query->whereBetween("completion",[$endDate,$endAddDate]);
         }
         return $query;
     }
