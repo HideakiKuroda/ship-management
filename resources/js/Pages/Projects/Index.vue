@@ -276,7 +276,7 @@ const displayVesselData = (vessel) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
-                    <div class="container px-5 py-8 mx-auto">
+                    <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
                       <div class="flex justify-end  lg:w-2/3">
                             <Link as="button" :href="route('projects.create')" class=" mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
@@ -408,7 +408,7 @@ const displayVesselData = (vessel) => {
                             </table>
                             </div>
                         <!-- スマホ用のリストここから  -->
-                        <div class="container ml-8 px-4">
+                        <div class="container ml-2 px-4">
                         <div v-for="project in index.projects.data" :key="project.id" class="block sm:hidden">
                        <div class="mb-4">
                           <strong>プロジェクト:</strong><br>
