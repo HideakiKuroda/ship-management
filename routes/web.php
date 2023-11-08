@@ -92,10 +92,10 @@ Route::prefix('admin')->name('admin.')->group(function(){
     require __DIR__.'/admin.php';
 });
 
-Route::get('/', function () {
-    // return view('welcome');
-    $user = Auth::loginUsingId(8);
-});
+// Route::get('/', function () {
+//     Route::inertia('welcome');
+//     $user = Auth::loginUsingId(8);
+// });
 Route::post('/', [AuthenticatedSessionController::class, 'destroy'])
                 ->middleware('auth')
                 ->name('logout');
