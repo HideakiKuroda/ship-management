@@ -9,6 +9,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
+use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 
@@ -95,7 +96,9 @@ Route::get('/', function () {
     // return view('welcome');
     $user = Auth::loginUsingId(8);
 });
-
+Route::post('/', [AuthenticatedSessionController::class, 'destroy'])
+                ->middleware('auth')
+                ->name('logout');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

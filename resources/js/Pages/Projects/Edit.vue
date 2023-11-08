@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref,onMounted,reactive, computed } from 'vue';
+import { ref,onMounted,reactive, computed,onBeforeUnmount,onUnmounted } from 'vue';
 //アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 //アコーディオン機能のCSS
@@ -104,10 +104,12 @@ const formatDate = (date) => {
 };
 
 const updateProject = id => {
+   
   form.pro_category_id =  selectedCategory.value.id
   Inertia.put(route('projects.update',{ project:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
+    freeListener();
   }
 
   const handleUserId = (currentUser) =>{
@@ -297,17 +299,61 @@ const downloadFile = async (attachmentId,dp) => {
         // エラーメッセージの表示などのエラーハンドリング
     }
 };
+const originalData = {};
+const isChanged = computed(() => {
+  return JSON.stringify(originalData) !== JSON.stringify(form);
+});
+
+const handleBeforeUnload = (event) => {
+  // console.log('isChanged1:',isChanged.value);
+  // 保存されていない変更がある場合、ユーザーに警告します
+  if (isChanged.value) {
+    event.preventDefault(); // 一部のブラウザではこれが必要です。
+    event.returnValue = ''; // 古いブラウザのサポートのために必要です
+  }
+};
+
+const beforeInertiaNavigation = (event) => {
+  // console.log('isChanged2:',isChanged);
+  if (isChanged) {
+    const confirmed = confirm('保存されていない変更がありせんか？。このまま続けますか？');
+    if (!confirmed) {
+      event.preventDefault();
+    }
+  }
+};
+
+let unregisterBeforeNavigation;
+const freeListener = () => {
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+  if (unregisterBeforeNavigation) {
+    unregisterBeforeNavigation();
+  }
+}
+
+onUnmounted(() => {
+  freeListener();
+});
+
+const isInitialized = ref(false);
 
 onMounted(() =>{
-  // console.log('id:',props.project.users);
+  if (!isInitialized.value) {
+    // ここで一度だけ実行したい初期化処理
+    originalData.value = JSON.stringify(form);
+    // 初期化が完了したとマーク
+    isInitialized.value = true;
+  }
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  unregisterBeforeNavigation = Inertia.on('before', beforeInertiaNavigation);
+  // console.log('originalData:',originalData.value);
 })
 
 </script>
 
 <template>
     <Head title="プロジェクトの詳細（編集）" />
-
-    <AuthenticatedLayout>
+     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細（編集）</h2>
         </template>
