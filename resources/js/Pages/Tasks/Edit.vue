@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref,onMounted,reactive, computed } from 'vue';
+import { ref,onMounted,reactive, computed,onUnmounted } from 'vue';
 //アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 //アコーディオン機能のCSS
@@ -24,10 +24,12 @@ import {
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid';
 import { nl2br } from '@/nl2br';
-// CSRFトークンをメタタグから取得
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-// Axiosの設定
-axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -52,9 +54,10 @@ const assignMassage = () => {
 const unassignMassage = (id, userId) => {
     if (userId !== form.loginUser.id) {
         // ユーザーIDがログインユーザーのIDと一致しない場合は削除を許可しない
-        alert('You can only delete your own messages.');
+        alert('本人以外は削除できる権限がありません。');
         return;
     }
+    
     // ユーザーIDがログインユーザーのIDと一致する場合は削除を実行
     form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
     form.deletedMessageIds.push(id); // 削除されたメッセージのIDを保存
@@ -101,7 +104,9 @@ const formatDate = (date) => {
 };
 
 const updateProject = id => {
+   
   form.pro_category_id =  selectedCategory.value.id
+  freeListener();
   Inertia.put(route('projects.update',{ project:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
@@ -150,23 +155,30 @@ const handleFileChange = (inputName) => {
   // 確認ダイアログを表示
   if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
-
+    
     for (let i = 0; i < files.length; i++) {
       formData.append('files[]', files[i]);
     }
 
     // ここでInertia.jsを使ってアップロード
-    Inertia.post(route('project.upload', { id: form.id }), formData, {
-      // オプション：アップロードの進行状況が必要な場合はこちらを使用
-      onUploadProgress: (progressEvent) => {
-        uploadPercentage.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    axios.post(route('project.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      // console.log('attach:',props.project.users);
+      } else {
+        alert(response.data.message);
       }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
+      uploading.value = false;
     });
-
-    // アップロード完了のフラグをセット（Inertia.jsのPromiseが解決したら設定）
-    uploadComplete.value = true;
-  } else {
-    // ユーザーがキャンセルした場合の処理（オプション）
   }
 };
 
@@ -176,31 +188,78 @@ const dropFiles = (event) => {
 
   if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
+    const droppedFiles = event.dataTransfer.files;
+    Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
 
-  const droppedFiles = event.dataTransfer.files;
-  Array.from(droppedFiles).forEach((file) => formData.append('files[]', file));
-
-  Inertia.post(route('project.upload', { id: form.id }), formData, {
-    onBefore: () => {
-      // 何か処理
-    },
-    onSuccess: () => {
-      uploadComplete.value = true;
-    },
-    onError: () => {
-      // エラーハンドリング
-    },
-    onFinish: () => {
+    axios.post(route('project.upload', { id: form.id }), formData)
+    .then(response => {
+      if (response.data.status === 'success') {
+        alert(response.data.message);
+        // 必要に応じてリアクティブなデータの更新や、新しいファイルの表示を行う
+      // 受け取った新しいファイルの情報をform.attachments配列に追加
+      form.attachments.push(...response.data.uploadedFiles);
+      console.log('attach:',props.project.users);
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    })
+    .finally(() => {
       uploading.value = false;
-    },
-  });
-} else {
-    // ユーザーがキャンセルした場合の処理（オプション）
-}};
+    });
+  }
+};
 const isPdf = (filename) => {
   const fileExtension = filename.split('.').pop().toLowerCase();
   return fileExtension === 'pdf';
 };
+
+
+const deleteFile = (attachmentId) => {
+  if (window.confirm('ファイルを削除しますか')) {
+    axios.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } })
+    .then(response => {
+      if (response.data.status === 'success') {
+        // 通知の表示や、必要に応じてリアクティブなデータの更新を行う
+        alert(response.data.message);
+        // attachments 配列から削除したファイルを削除
+        const index = form.attachments.findIndex(attachment => attachment.id === attachmentId);
+        if (index !== -1) {
+          form.attachments.splice(index, 1);
+        }        
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    });
+}};
+
+//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
+let query = ref('')
+const categorie = props.categories
+const curntCidx = computed(() => {
+  return props.categories.findIndex(cr => cr?.id === form.pro_category_id)
+})
+let selectedCategory = ref({id:categorie[curntCidx.value].id,name:categorie[curntCidx.value].name} || {id: null, name: ''})
+
+let filteredCategory = computed(() =>
+  query.value === ''
+    ? props.categories
+    : props.categories.filter((proType) =>
+      proType.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
+      )
+)
+
+const typeOptions = computed(() => {
+  return [{ id: null, name: '' }, ...filteredCategory.value];
+})
 
 const downloadFile = async (attachmentId,dp) => {
     try {
@@ -241,45 +300,45 @@ const downloadFile = async (attachmentId,dp) => {
     }
 };
 
-const deleteFile = (attachmentId) => {
-  if (window.confirm('ファイルを削除しますか')) {
-    Inertia.delete(route('project.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
-}};
+///変更を保存せずに移動するときなどにアラートを出す
+const originalData = {};
+const isChanged = computed(() => {
+  return JSON.stringify(originalData) !== JSON.stringify(form);
+});
 
-//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
-let query = ref('')
-const categorie = props.categories
-const curntCidx = computed(() => {
-  return props.categories.findIndex(cr => cr?.id === form.pro_category_id)
-})
-let selectedCategory = ref({id:categorie[curntCidx.value].id,name:categorie[curntCidx.value].name} || {id: null, name: ''})
+const confirmSave = (event) => {
+  if (isChanged.value) {
+    event.returnValue = "編集中のものは保存されませんが、よろしいですか？";
+    event.preventDefault();
+  }
+};
 
-let filteredCategory = computed(() =>
-  query.value === ''
-    ? props.categories
-    : props.categories.filter((proType) =>
-      proType.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
+let moveConfirm;
+const freeListener = () => {
+  window.removeEventListener("beforeunload", confirmSave);
+  if (moveConfirm) {
+    moveConfirm();
+  }
+}
 
-const typeOptions = computed(() => {
-  return [{ id: null, name: '' }, ...filteredCategory.value];
-})
+onUnmounted(() => {
+  freeListener();
+});
 
+onMounted(() => {
+  originalData.value = JSON.stringify(form);
+  window.addEventListener("beforeunload", confirmSave);
+  moveConfirm = Inertia.on('before', (event) => {
+      return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
+  });
+});
 
-onMounted(() =>{
-  // console.log('id:',props.project.users);
-})
 
 </script>
 
 <template>
     <Head title="プロジェクトの詳細（編集）" />
-
-    <AuthenticatedLayout>
+     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細（編集）</h2>
         </template>
@@ -314,26 +373,7 @@ onMounted(() =>{
                                <vue-collapsible-panel class="z-10">
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
                                 <template #content> 
-                                  <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        ◆　担当者
-                                    <div class="flex flex-wrap sm:flex-row sm:space-x-0">
-                                      <div class="h-50 w-44  overflow-auto">
-                                        <div>
-                                            <ul>
-                                                <li v-for="user in form.assignedUsersList" :key="user.id">
-                                                    {{ user.name }}
-                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                      </div>
-                                      <div class="flex flex-wrap sm:flex-row w-80">
-                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
-                                      </div>
-                                    </div> 
-                                  </div> 
-
+                                 
                                   <div class="flex flex-wrap sm:flex-row">
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
@@ -435,9 +475,28 @@ onMounted(() =>{
                                     </div>
                                     </div>
                                  </div>
-                                 koko?
+                
                                 </template>
                               </vue-collapsible-panel>
+                              <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        ◆　担当者
+                                    <div class="flex flex-wrap sm:flex-row sm:space-x-0">
+                                      <div class="h-32 w-44  overflow-auto">
+                                        <div>
+                                            <ul>
+                                                <li v-for="user in form.assignedUsersList" :key="user.id">
+                                                    {{ user.name }}
+                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                      </div>
+                                      <div class="flex flex-wrap sm:flex-row w-80">
+                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
+                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
+                                      </div>
+                                    </div> 
+                                  </div> 
 
                               <vue-collapsible-panel :expanded="true" class="z-0">
                               <template #title > タスク一覧 </template>
@@ -451,30 +510,26 @@ onMounted(() =>{
                                             <tr>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">期限</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録者</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
-                                            </tr>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
+                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                              <div>開始日</div>
+                                              <div>期限</div>
+                                              <div>完了</div>
+                                              </div>  
+                                              </th>
+                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr  v-for="task in props.project.tasks" :key="tasks.id" >
+                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
                                                   <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
                                                   <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                             <div class="flex flex-col md:flex-row justify-between">
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
-                                              
-                                              <!-- 担当者（ユーザー）列 -->
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                              <div v-for="user in task.users">
-                                                  {{ user.name }}
-                                              </div>
-                                              </td>
-                                              <!-- <td v-for="user in project.users"
-                                              class="border-b-2 border-gray-200 px-4 py-3">{{ user.name  }}</td> -->
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                            </div>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -482,6 +537,9 @@ onMounted(() =>{
                                     </div>
                                   </div>
                                 </div>
+                              <div class="flex justify-end">
+                              <Link as="button" :href="route('tasks.create')" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規タスク作成</Link>
+                              </div>
                               </template>
                               </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="true">
@@ -578,7 +636,8 @@ onMounted(() =>{
                                             </td>
                                             <td class="ml-3 w-1/3 rounded ">{{ attachment.originname }}</td>
                                             <td class="ml-3 w-1/5 rounded text-center">{{ formatDate(attachment.created_at) }}<br>{{ attachment.users.name }}</td>
-                                          </tr>
+                                            <td><button  class="w-10 h-6 text-xs bg-red-300  text-white font-semibold rounded hover:bg-red-400"  @click="deleteFile(attachment.id)">削除</button></td>
+                                       </tr>
                                         </tbody>
                                     </table>
                                     </div>

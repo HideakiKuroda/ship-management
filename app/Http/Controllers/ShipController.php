@@ -15,11 +15,10 @@ use App\Models\Ship_attachment;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis as LaravelRedis;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 
 class ShipController extends Controller
@@ -74,9 +73,10 @@ class ShipController extends Controller
      */
     public function store(StoreShipRequest $request)
     {
+     try {
         /** @var Ship|null */
         $ship = null;
-        LaravelRedis::transaction(function () use ($request, &$ship) {
+        DB::transaction(function () use ($request, &$ship) {
             $ship = Ship::Create([
                 'delivered' => $request->input('delivered'),
                 'ex_name' => $request->input('ex_name'),
@@ -100,6 +100,13 @@ class ShipController extends Controller
             'message' => '新しい船「' . $ship->name . '」を登録しました',
             'status' => 'success'
         ]);    
+        } catch (\Exception $e) {
+            // トランザクション失敗時のリダイレクト
+            return redirect()->route('ships.index')->with([
+                'message' => '船の登録に失敗しました',
+                'status' => 'error'
+            ]);
+        }
     }
 
     /**
@@ -153,8 +160,9 @@ class ShipController extends Controller
      */
     public function update(UpdateShipRequest $request, Ship $ship)
     {
+     try {
         $ship = Ship::findOrFail($ship->id);
-        LaravelRedis::transaction(function () use ($request, &$ship) {
+        DB::transaction(function () use ($request, &$ship) {
             // shipsテーブルの更新
             $ship->update([
                 'delivered' => $request->input('delivered'),
@@ -253,7 +261,14 @@ class ShipController extends Controller
             'message' => '更新しました。',
             'status' => 'success'
         ]);
+    } catch (\Exception $e) {
+        // トランザクション失敗時のリダイレクト
+        return redirect()->route('ships.show', $ship->id)->with([
+            'message' => '更新に失敗しました',
+            'status' => 'error'
+        ]);
     }
+}
 
     /**
      * Remove the specified resource from storage.

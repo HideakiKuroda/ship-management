@@ -62,11 +62,6 @@ class User extends Authenticatable
     return $this->belongsToMany(Project::class, 'pro_assignments');
     }
 
-    public function Tasks(): BelongsToMany
-    {
-    return $this->belongsToMany(Task::class, 'task_assignments');
-    }
-
     public function user_descriptions(): HasOne
     {
         return $this->hasOne(User_description::class);

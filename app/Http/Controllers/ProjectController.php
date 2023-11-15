@@ -15,12 +15,12 @@ use App\Models\Pro_description;
 use App\Models\Pro_category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis as LaravelRedis;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use app\Exceptions\Handler as Exception;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -119,10 +119,10 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
+        try {
         /** @var Project|null */
         $project = null;
-        try {
-            LaravelRedis::transaction(function () use ($request, &$project) {
+            DB::transaction(function () use ($request, &$project) {
                 // dd($request);
             $project = Project::Create([
                 'ship_id' => $request->input('shipId'),
@@ -203,9 +203,10 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-    //    dd($request);
+     try {
+            //    dd($request);
         $project = Project::findOrFail($project->id);
-        LaravelRedis::transaction(function () use ($request, &$project) {
+        DB::transaction(function () use ($request, &$project) {
         
         $project->update([
             'name'=>$request->input('name'),
@@ -252,13 +253,16 @@ class ProjectController extends Controller
     return redirect()->back()->withInput()->with([
         'message' => '更新しました。',
         'status' => 'success'
-    
-    // return redirect()->route('projects.edit', $project->id)->with([
-    //     'message' => '更新しました。',
-    //     'status' => 'success'
     ]);
 
+    } catch (\Exception $e) {
+        Log::error($e);
+        return redirect()->back()->withInput()->with([
+            'message' => '更新に失敗しました',
+            'status' => 'error'
+    ]);
     }
+}
 
     /**
      * Remove the specified resource from storage.

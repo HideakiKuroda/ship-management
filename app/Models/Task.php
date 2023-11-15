@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Project;
 use App\Models\Task_attachment;
+use App\Models\Task_description;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,8 +55,18 @@ class Task extends Model
         return $this->hasMany(Task_attachment::class);
     }
 
-    public function users(): BelongsToMany
+    public function Task_descriptions():HasMany
     {
-    return $this->belongsToMany(User::class, 'Task_assignments');
+        return $this->hasMany(Task_description::class);
+    }
+
+    public function users()
+    {
+        return $this->project->users();
+    }
+
+    public function ships()
+    {
+        return $this->project->ships();
     }
 }

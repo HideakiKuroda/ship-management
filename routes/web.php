@@ -54,7 +54,8 @@ Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->na
 // tasks関連のルート設定
 Route::resource('tasks', TaskController::class)
     ->middleware(['auth', 'verified']);
-        
+// Route::get('/task/tcreate/{project_id}/', [TaskController::class,'tcreate'])->name('task.tcreate')->middleware(['auth', 'verified']);
+         
 //ガントチャートのルート設定
 Route::middleware(['auth', 'verified'])
 ->group(function () {

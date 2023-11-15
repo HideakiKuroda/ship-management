@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref, reactive } from 'vue';
+import { ref,onMounted,reactive, computed,onUnmounted  } from 'vue';
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import axios from 'axios';
@@ -96,10 +96,15 @@ const form = reactive({         //内容をreactiveにform変数に収める
 
 
 const deleteItem = id => {
-    Inertia.delete(route('ships.destroy',{ ship:id }),{
-        onBefore: () => confirm('本当に削除しますか？')
-    })
-}
+  Inertia.delete(route('ships.destroy', { ship: id }), {
+  onBefore: () => {
+    if (confirm('本当に削除しますか？')) {
+      freeListener();
+      return true;
+    } else {
+      return false;
+    }}
+})};
 
 const formatDate = (date) => {
 //   if (!date) return "N/A";
@@ -108,7 +113,13 @@ const formatDate = (date) => {
 
 const updateShip = id => {
   Inertia.put(route('ships.update',{ ship:id }), form,{ 
-        onBefore: () => confirm('変更を更新します。OKでしょうか？')
+  onBefore: () => {
+    if (confirm('変更を更新します。OKでしょうか？')) {
+      freeListener();
+      return true;
+    } else {
+      return false;
+    }}
     })
   }
 
@@ -265,6 +276,42 @@ const downloadFile = async (attachmentId,dp) => {
         // エラーメッセージの表示などのエラーハンドリング
     }
 };
+///変更を保存せずに移動するときなどにアラートを出す
+const originalData = {};
+const isChanged = computed(() => {
+  return JSON.stringify(originalData) !== JSON.stringify(form);
+});
+
+const confirmSave = (event) => {
+  if (isChanged.value) {
+    event.returnValue = "編集中のものは保存されませんが、よろしいですか？";
+    event.preventDefault();
+  }
+};
+
+let moveConfirm;
+const freeListener = () => {
+  window.removeEventListener("beforeunload", confirmSave);
+  if (moveConfirm) {
+    moveConfirm();
+  }
+}
+
+const onListener = () => {
+  window.addEventListener("beforeunload", confirmSave);
+  moveConfirm = Inertia.on('before', (event) => {
+      return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
+  });
+}
+
+onUnmounted(() => {
+  freeListener();
+});
+
+onMounted(() => {
+  originalData.value = JSON.stringify(form);
+  onListener();
+});
 
 
 const deleteFile = (attachmentId) => {
