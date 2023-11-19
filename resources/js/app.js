@@ -54,6 +54,10 @@ import { createI18n } from 'vue-i18n';
 import ganttastic from '@infectoone/vue-ganttastic';
 import LaravelPermissionToVueJS from 'laravel-permission-to-vuejs'
 import PrimeVue from 'primevue/config';
+import 'flowbite';
+import VSwatches from 'vue3-swatches'
+import 'vue3-swatches/dist/style.css'
+
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -65,9 +69,9 @@ createInertiaApp({
         app.use(plugin);
         app.use(ZiggyVue, Ziggy);
         app.use(ganttastic);
+        app.use(VSwatches);
         // LaravelPermissionToVueJS プラグインを追加
         app.use(LaravelPermissionToVueJS);
-        
         // ここで i18n の設定も含めてあげる
         const messages = {
             ja: {

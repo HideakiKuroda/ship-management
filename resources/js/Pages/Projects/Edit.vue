@@ -357,7 +357,7 @@ onMounted(() => {
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         <span>◆</span><span class="pl-5">Project No.: {{ props.project.id }}</span><span class="pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
-                                        <label>Subject:</label> <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full" >
+                                        <label>Subject:</label> <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
                                     </div>
                                 </div>
 

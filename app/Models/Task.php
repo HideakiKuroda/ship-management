@@ -32,17 +32,13 @@ class Task extends Model
         'end_date',
 	    'deadline',
 	    'completion',
+        'priority',
      ];
 
 
     public function projects():BelongsTo
     {
         return $this->belongsTo(Project::class,'project_id');
-    }
-
-    public function parent():BelongsTo
-    {
-        return $this->belongsTo(Task::class, 'parent_id');
     }
 
     public function subtasks(): HasMany
@@ -55,7 +51,7 @@ class Task extends Model
         return $this->hasMany(Task_attachment::class);
     }
 
-    public function Task_descriptions():HasMany
+    public function task_descriptions():HasMany
     {
         return $this->hasMany(Task_description::class);
     }

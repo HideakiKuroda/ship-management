@@ -5,126 +5,71 @@ import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import {onMounted, computed,reactive,defineProps,ref,watch } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-//Comboboxのインポート
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxButton,
-  ComboboxOptions,
-  ComboboxOption,
-  TransitionRoot,
-  ComboboxLabel
-} from '@headlessui/vue'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
-import UserSerch from '@/Components/UserSerch.vue';
+import { initFlowbite } from 'flowbite'
+import { VSwatches } from 'vue3-swatches'
+import 'vue3-swatches/dist/style.css'
 
 const props = defineProps({
-    ships : Array,
-    currentUser: {
-        type: Object,
-        default: null,
-    },
-    categories : Array,
-    users :Array,
+    project : Object,
     errors: Object,
-})
+});
 
 const form = reactive({         //内容をreactiveにform変数に収める
-    selectedUser:       null,
-    assignedUsersList:  [],
-    name:               null, //Project名
-    shipId:             null,
-    pro_category_id:    null,
+    proName:            props.project.name,
+    projectId:          props.project.id,
+    assignedUsersList:  [...props.project.users],
+    ship:               props.project.ship,
+    name:               null, //Task名
     start_date:         null,
     end_date:           null,
-}) 
-
-onMounted(() => {
-            if (props.currentUser) {
-                form.assignedUsersList.push(props.currentUser);
-            }
-        })
+    deadline:           null,
+    priorityName:       null,
+    priorityColor:      null,
+    priority:           null,
+    color:              '#1CA085',
+}); 
 
 const formatDate = (date) => {
-//   if (!date) return "N/A";
+   if (!date) return "";
   return moment(date).format('YYYY年MM月DD日');
-}
-
-const handleUserId = (currentUser) =>{
-  form.currentUser = currentUser
-  // console.log("handleUserId:", index.userId)
-}
-
-const userIds = form.assignedUsersList.map(user => user.id);
-const userSearch = ref();
-const assignUser = () => {
-    const selectedUserData = props.users.find(user => user.id === form.currentUser);
-    if (selectedUserData) {
-        form.assignedUsersList.push(selectedUserData);
-            userSearch.value.boxClear();
-    }
 };
 
-const unassignUser = (userId) => {
-    form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
+const storetask = () => {
+  Inertia.post(route('tasks.store'), form) 
 };
 
-//コンボボックス用の変数設定
-let query = ref('')
-let selectedShip = ref({id: null, name: ''})
-//船検索ComboboxのinputBoxで船名検索
-let filteredship = computed(() =>
-  query.value === ''
-    ? props.ships
-    : props.ships.filter((vessel) =>
-        vessel.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
-
-const shipOptions = computed(() => {
-  return [{ id: null, name: '' }, ...filteredship.value];
-})
-
-//船検索Comboboxのリストに造船所と船番を表示するため
-const displayVesselData = (vessel) => {
-  if (vessel.id === null) {
-        return '選択なし';
+const handleChange = (event) => {
+  form.priority = event.target.value;
+    if(event.target.value == 1){ 
+      form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
+      form.priorityColor = 'bg-rose-100';
     }
-  return `${vessel.name} 　[ ${vessel.yard} ${vessel.ship_no} ]`;
-}
+    else if(event.target.value == 2){
+       form.priorityName = '優先度:② ※緊急度―大 ※重要度-小';
+       form.priorityColor = 'bg-yellow-100'
+      }
+    else if(event.target.value == 3){
+       form.priorityName = '優先度:③ ※緊急度―小 ※重要度-大';
+       form.priorityColor = 'bg-green-100'
+      }
+    else if(event.target.value == 4){
+       form.priorityName = '優先度:④ ※緊急度―小 ※重要度-小';
+       form.priorityColor = 'bg-blue-100';
+      }
+    else if(event.target.value == 5){
+       form.priorityName = '優先度：指定しない';
+       form.priorityColor = 'bg-gray-50';
+      };
+};
 
-//カテゴリー検索ComboboxのinputBoxでカテゴリー検索
-let selectedCategory = ref({id: null, name: ''})
+watch(form.color, (newValue, oldValue) => {
+  console.log('colorCode:', oldValue);
+  console.log('colorCode:', newValue);
+});
 
-let filteredCategory = computed(() =>
-  query.value === ''
-    ? props.categories
-    : props.categories.filter((proType) =>
-      proType.name
-          .toLowerCase()
-          .replace(/\s+/g, '')
-          .includes(query.value.toLowerCase().replace(/\s+/g, ''))
-      )
-)
-
-const typeOptions = computed(() => {
-  return [{ id: null, name: '' }, ...filteredCategory.value];
+onMounted(() => {
+    initFlowbite();
 })
-
-const storeproject = () => {
-  form.shipId = selectedShip.value.id
-  form.pro_category_id =  selectedCategory.value.id
-  Inertia.post(route('projects.store'), form) 
-  // console.log("selectUser:", form.assignedUsersList);
-  // console.log("projectName:", form.name);
-  // console.log("selectShip:", form.shipId);
-  // console.log("selectCategory:", form.pro_category_id);
-  // console.log("start_date:", formatDate(form.start_date));
-  // console.log("end_date:", formatDate(form.end_date));
-}
 
 </script>
 
@@ -141,222 +86,154 @@ const storeproject = () => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                     <BreezeValidationErrors :errors="errors" />  
-                    <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                      <section class="text-gray-600 body-font relative">
-                    
                         <div class="container px-5 pt-8 mx-auto">
-                          <div class="lg:w-2/3 md:w-2/3 mx-auto">
-                            <div class="m-2">
-                                
-                                <div class="flex flex-col p-2 ml-4">
-                                  <div id="pro_name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                      <label> ◆　タスク名 </label>
-                                        <div class="flex flex-wrap sm:flex-row sm:space-x-4">
-                                          <input type="text" id="pro_name" name="pro_name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 mr-6 leading-8 transition-colors duration-200 ease-in-out">                                    
-                                        </div>
-                                  </div>
-                                  <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        ◆　担当者
+                          <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
+                                   <div id="name" class="flex flex-wrap flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span><span class="md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
+                                        <span class="md:pl-8">Subject: {{ props.project.name }}</span>
+                                   </div>
+                                  <div id="name" class="flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                        ◆&nbsp;&nbsp;担当者
                                     <div class="flex flex-wrap sm:flex-row sm:space-x-0">
-                                      <div class="h-32 w-44  overflow-auto">
+                                      <div class=" overflow-auto">
                                         <div>
                                             <ul>
                                                 <li v-for="user in form.assignedUsersList" :key="user.id">
                                                     {{ user.name }}
-                                                    <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignUser(user.id)">削除</button>
                                                 </li>
                                             </ul>
                                         </div>
                                       </div>
-                                      <div class="flex flex-wrap sm:flex-row w-80">
-                                        <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
-                                      </div>
                                     </div> 
                                   </div> 
-                                </div>
-                            </div>
                           </div>
                         </div>
 
                         <div class="container px-5 py-0 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
-                             
-     
-                                  <div class="flex flex-wrap sm:flex-row">
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="shipSerch" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎船の選択：</label>
-                                      <!-- 船検索コンボボックス　ここから -->
-                                      <Combobox v-model="selectedShip" id="shipSerch" name="shipSerch" class=" opacity-100 z-0">
-                                            <div  class="relative mt-1" >
-                                              <div
-                                              class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
-                                              >
-                                                <ComboboxInput 
-                                                  class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
-                                                  :displayValue="(vessel) => vessel.name"
-                                                  @change="query = $event.target.value"
-                                                />
-                                                <ComboboxButton
-                                                  class="absolute inset-y-0 right-0 flex items-center pr-2 "
-                                                >
-                                                  <ChevronUpDownIcon
-                                                    class="h-5 w-5 text-gray-400"
-                                                    aria-hidden="true"
-                                                  />
-                                                </ComboboxButton>
-                                              </div>
-                                              <TransitionRoot
-                                                leave="transition ease-in duration-100"
-                                                leaveFrom="opacity-100"
-                                                leaveTo="opacity-0"
-                                                @after-leave="query = ''"
-                                              >
-                                                <ComboboxOptions
-                                                  class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                                >
-                                                  <div
-                                                    v-if="filteredship.length === 0 && query !== ''"
-                                                    class="relative cursor-default select-none py-2 px-4 text-gray-700"
-                                                  >
-                                                    名前が見つかりません.
-                                                  </div>
-
-                                                  <ComboboxOption
-                                                    v-for="vessel in shipOptions"
-                                                    as="template"
-                                                    :key="vessel.id"
-                                                    :value="vessel"
-                                                    v-slot="{ selected, active }" 
-                                                  
-                                                  >
-                                                    <li
-                                                      class="relative cursor-default select-none py-2 pl-10 pr-4"
-                                                      :class="{
-                                                        'bg-teal-600 text-white': active,
-                                                        'text-gray-900': !active,
-                                                      }"
-                                                    >
-                                                      <span
-                                                        class="block truncate"
-                                                        :class="{ 'font-medium': selectedShip, 'font-normal': !selectedShip }"
-                                                      >
-                                                        {{ displayVesselData(vessel)  || '全船'  }}
-                                                      </span>
-                                                      <span
-                                                        v-if="selected"
-                                                        class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                                        :class="{ 'text-white': active, 'text-teal-600': !active }"
-                                                      >
-                                                        <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    </li>
-                                                  </ComboboxOption>
-                                                </ComboboxOptions>
-                                              </TransitionRoot>
-                                            </div>
-                                          </Combobox>
-                                        <!-- 船検索コンボボックス　ここまで -->
-                                     </div>
-                                     <div class="flex flex-col p-2 ml-4">
-                                      <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
-                                      <!-- Category検索コンボボックス　ここから -->
-                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 z-0">
-                                            <div  class="relative mt-1" >
-                                              <div
-                                              class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
-                                              >
-                                                <ComboboxInput 
-                                                  class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
-                                                  :displayValue="(proType) => proType.name"
-                                                  @change="query = $event.target.value"
-                                                />
-                                                <ComboboxButton
-                                                  class="absolute inset-y-0 right-0 flex items-center pr-2 "
-                                                >
-                                                  <ChevronUpDownIcon
-                                                    class="h-5 w-5 text-gray-400"
-                                                    aria-hidden="true"
-                                                  />
-                                                </ComboboxButton>
-                                              </div>
-                                              <TransitionRoot
-                                                leave="transition ease-in duration-100"
-                                                leaveFrom="opacity-100"
-                                                leaveTo="opacity-0"
-                                                @after-leave="query = ''"
-                                              >
-                                                <ComboboxOptions
-                                                  class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                                                >
-                                                  <div
-                                                    v-if="filteredCategory.length === 0 && query !== ''"
-                                                    class="relative cursor-default select-none py-2 px-4 text-gray-700"
-                                                  >
-                                                    名前が見つかりません.
-                                                  </div>
-
-                                                  <ComboboxOption
-                                                    v-for="proType in typeOptions"
-                                                    as="template"
-                                                    :key="proType.id"
-                                                    :value="proType"
-                                                    v-slot="{ selected, active }" 
-                                                  
-                                                  >
-                                                    <li
-                                                      class="relative cursor-default select-none py-2 pl-10 pr-4"
-                                                      :class="{
-                                                        'bg-teal-600 text-white': active,
-                                                        'text-gray-900': !active,
-                                                      }"
-                                                    >
-                                                      <span
-                                                        class="block truncate"
-                                                        :class="{ 'font-medium': selectedCategory, 'font-normal': !selectedCategory }"
-                                                      >
-                                                        {{ proType.name  || '選択なし'  }}
-                                                      </span>
-                                                      <span
-                                                        v-if="selected"
-                                                        class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                                        :class="{ 'text-white': active, 'text-teal-600': !active }"
-                                                      >
-                                                        <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    </li>
-                                                  </ComboboxOption>
-                                                </ComboboxOptions>
-                                              </TransitionRoot>
-                                            </div>
-                                          </Combobox>
-                                        <!-- Category検索コンボボックス　ここまで -->
-                                     </div>
-
-
+                                  <div class="flex flex-wrap sm:flex-col">
+                                    <label>Task(内容):</label> 
+                                    <div class="flex flex-row p-2"> 
+                                      <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
+                                      <VSwatches v-model="form.color"/>  
+                                    </div>
+                                  <div class="flex flex-col sm:flex-row p-2 ml-4"> 
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="start" class="rounded  w-32 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎開始日（予定）：</label>
                                       <input type="date" id="start" name="start" v-model="form.start_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
-                 
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
                                       <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
                                   
-                                    
-                                  
+                                    <div class="flex flex-col p-2 ml-4">
+                                      <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎期限：</label>
+                                      <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    </div>
                                   </div>
-                                                
-                        </div>
+                                  </div>
+                                  <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
+                                  >{{ form.priorityName }}</div>
+
+                                  
+                                  <button id="dropdownRadioHelperButton" data-dropdown-toggle="dropdownRadioHelper"  
+                                  :class="['border border-gray-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  ml-6 text-center inline-flex items-center', form.priorityColor]"
+                                  type="button"> 優先度を設定<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                                  </svg>
+                                  </button>
+
+                                  <!-- Dropdown menu -->
+                                  <div id="dropdownRadioHelper" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-60 dark:bg-gray-700 dark:divide-gray-600">
+                                      <ul  class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioHelperButton">
+                                        <li>
+                                          <div class="flex p-2 rounded hover:bg-rose-200 bg-rose-100">
+                                            <div class="flex items-center h-5">
+                                                <input id="helper-radio-1" name="helper-radio" type="radio" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
+                                                 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2
+                                                 dark:bg-gray-600 dark:border-gray-500" @change="handleChange">
+                                            </div>
+                                            <div class="ms-2 text-sm">
+                                                <label for="helper-radio-1" class="font-medium text-gray-900 dark:text-gray-300">
+                                                  <div>優先度①</div>
+                                                  <p id="helper-radio-text-1" class="text-xs font-normal text-gray-500 dark:text-gray-300">※緊急度-大 ※重要度-大</p>
+                                                </label>
+                                            </div>
+                                          </div>
+                                        </li>
+                                        <li>
+                                          <div class="flex p-2 rounded hover:bg-yellow-200 bg-yellow-100">
+                                            <div class="flex items-center h-5">
+                                                <input id="helper-radio-2" name="helper-radio" type="radio" value="2" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
+                                                 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2
+                                                 dark:bg-gray-600 dark:border-gray-500" @change="handleChange">
+                                            </div>
+                                            <div class="ms-2 text-sm">
+                                                <label for="helper-radio-2" class="font-medium text-gray-900 dark:text-gray-300">
+                                                  <div>優先度②</div>
+                                                  <p id="helper-radio-text-2" class="text-xs font-normal text-gray-500 dark:text-gray-300">※緊急度-大 ※重要度-小</p>
+                                                </label>
+                                            </div>
+                                          </div>
+                                        </li>
+                                        <li>
+                                          <div class="flex p-2 rounded hover:bg-green-200 bg-green-100">
+                                            <div class="flex items-center h-5">
+                                                <input id="helper-radio-3" name="helper-radio" type="radio" value="3" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
+                                                 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2
+                                                 dark:bg-gray-600 dark:border-gray-500" @change="handleChange">
+                                            </div>
+                                            <div class="ms-2 text-sm">
+                                                <label for="helper-radio-3" class="font-medium text-gray-900 dark:text-gray-300">
+                                                  <div>優先度③</div>
+                                                  <p id="helper-radio-text-3" class="text-xs font-normal text-gray-500 dark:text-gray-300">※緊急度-小 ※重要度-大</p>
+                                                </label>
+                                            </div>
+                                          </div>
+                                        </li>
+                                        <li>
+                                          <div class="flex p-2 rounded hover:bg-blue-200 bg-blue-100">
+                                            <div class="flex items-center h-5">
+                                                <input id="helper-radio-4" name="helper-radio" type="radio" value="4" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
+                                                 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2
+                                                 dark:bg-gray-600 dark:border-gray-500" @change="handleChange">
+                                            </div>
+                                            <div class="ms-2 text-sm">
+                                                <label for="helper-radio-4" class="font-medium text-gray-900 dark:text-gray-300">
+                                                  <div>優先度④</div>
+                                                  <p id="helper-radio-text-4" class="text-xs font-normal text-gray-500 dark:text-gray-300">※緊急度―小 ※重要度-小</p>
+                                                </label>
+                                            </div>
+                                          </div>
+                                        </li>
+                                        <li>
+                                          <div class="flex p-2 rounded hover:bg-gray-100 bg-gray-50">
+                                            <div class="flex items-center h-5">
+                                                <input id="helper-radio-5" name="helper-radio" type="radio" value="5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
+                                                 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2
+                                                 dark:bg-gray-600 dark:border-gray-500" @change="handleChange">
+                                            </div>
+                                            <div class="ms-2 text-sm">
+                                                <label for="helper-radio-5" class="font-medium text-gray-900 dark:text-gray-300">
+                                                  <div>その他</div>
+                                                  <p id="helper-radio-text-5" class="text-xs font-normal text-gray-500 dark:text-gray-300">特に優先度を指定しない</p>
+                                                </label>
+                                            </div>
+                                          </div>
+                                        </li>
+                                      </ul>
+                                  </div>
+                            </div>
                       </div>
                     </div>
                         <div class="container px-5 py-2 mx-auto">
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="storeproject" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
+                                  <button  @click="storetask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>
