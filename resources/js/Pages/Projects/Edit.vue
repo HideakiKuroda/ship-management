@@ -512,9 +512,9 @@ onMounted(() => {
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
                                               <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                              <div>作成日</div>
                                               <div>開始日</div>
                                               <div>期限</div>
-                                              <div>完了</div>
                                               </div>  
                                               </th>
                                              </tr>
@@ -522,13 +522,13 @@ onMounted(() => {
                                             <tbody>
                                             <tr  v-for="task in props.project.tasks" :key="task.id" >
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
                                              <div class="flex flex-col md:flex-row justify-between">
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
                                             </div>
                                             </tr>
                                             </tbody>

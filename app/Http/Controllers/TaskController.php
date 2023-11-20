@@ -51,6 +51,23 @@ class TaskController extends Controller
         // dd($users);
 
     }
+
+    public function subCreate(Request $request)
+    {
+        try {
+            $projectId = $request->query('project_id');
+            $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
+            
+            $loginUser = Auth::user('id','name'); 
+            // dd($project);
+            return Inertia::render('Tasks/Create', [
+                'project' => $project, 
+            ]);
+            } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+           // dd($e->getMessage());
+        }
+    }
     
 
     /**

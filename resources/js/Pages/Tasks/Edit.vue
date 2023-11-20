@@ -11,27 +11,47 @@ import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+import { nl2br } from '@/nl2br';
 import { initFlowbite } from 'flowbite'
+import { VSwatches } from 'vue3-swatches'
+import 'vue3-swatches/dist/style.css'
+
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
+const components = {
+  VueCollapsiblePanelGroup,
+  VueCollapsiblePanel,
+};
 
 const props = defineProps({
     task  : Object,
+    loginUser :  Object,
     errors: Object,
 });
 
 const form = reactive({         //内容をreactiveにform変数に収める
+    id:                 props.task.id,
     proName:            props.task.projects.name,
     projectId:          props.task.projects.id,
     assignedUsersList:  [...props.task.users],
     ship:               props.task.ships,
     assignedMassagesList: [...props.task.task_descriptions || []],
     subtasks:           [...props.task.subtasks],
+    attachments:        [...props.task.task_attachments],
+    loginUser:          props.loginUser,
+    deletedMessageIds:  [],  
     name:               props.task.name, 
     start_date:         props.task.start_date,
     end_date:           props.task.end_date,
     deadline:           props.task.deadline,
     priorityName:       null,
     priorityColor:      null,
-    priorityValue:      props.task.priority,   
+    priority:           props.task.priority, 
+    color:              props.task.color_id,
 }); 
 
 const formatDate = (date) => {
@@ -44,7 +64,7 @@ const storetask = () => {
 };
 
 const handleChange = (event) => {
-  form.priorityValue = event.target.value;
+  form.priority = event.target.value;
     if(event.target.value == 1){ 
       form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
       form.priorityColor = 'bg-rose-100';
@@ -66,9 +86,40 @@ const handleChange = (event) => {
        form.priorityColor = 'bg-gray-50';
       };
 };
-onMounted(() => {
-    initFlowbite();
-})
+// onMounted(() => {
+//     initFlowbite();  最下部に移動記載
+// })
+
+const updateTask = id =>{
+
+}
+
+const newMessage = ref('');
+
+const assignMassage = () => {
+  if (newMessage.value.trim() === '') return;
+  form.assignedMassagesList.push({
+    task_id:props.task.projects.id,
+    created_at: new Date().toISOString(),
+    users: { id: form.loginUser.id, name:form.loginUser.name }, // ここは現在ログインしているユーザーの名前を想定しています。
+    // user_id:form.loginUser.id,
+    // name:form.loginUser.name,
+    memo: newMessage.value.trim(),
+  });
+  newMessage.value = ''; 
+};
+
+const unassignMassage = (id, userId) => {
+    if (userId !== form.loginUser.id) {
+        // ユーザーIDがログインユーザーのIDと一致しない場合は削除を許可しない
+        alert('本人以外は削除できる権限がありません。');
+        return;
+    }
+    
+    // ユーザーIDがログインユーザーのIDと一致する場合は削除を実行
+    form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
+    form.deletedMessageIds.push(id); // 削除されたメッセージのIDを保存
+};
 
 //ファイル添付＆削除
 ///ファイル添付のスクリプト
@@ -177,6 +228,39 @@ const deleteFile = (attachmentId) => {
     });
 }};
 
+///変更を保存せずに移動するときなどにアラートを出す
+const originalData = {};
+const isChanged = computed(() => {
+  return JSON.stringify(originalData) !== JSON.stringify(form);
+});
+
+const confirmSave = (event) => {
+  if (isChanged.value) {
+    event.returnValue = "編集中のものは保存されませんが、よろしいですか？";
+    event.preventDefault();
+  }
+};
+
+let moveConfirm;
+const freeListener = () => {
+  window.removeEventListener("beforeunload", confirmSave);
+  if (moveConfirm) {
+    moveConfirm();
+  }
+}
+
+onUnmounted(() => {
+  freeListener();
+});
+
+onMounted(() => {
+  initFlowbite();
+  originalData.value = JSON.stringify(form);
+  window.addEventListener("beforeunload", confirmSave);
+  moveConfirm = Inertia.on('before', (event) => {
+      return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
+  });
+});
 
 
 </script>
@@ -198,8 +282,8 @@ const deleteFile = (attachmentId) => {
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
                             <div id="name" class="flex flex-wrap flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span><span class="md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
-                              <span class="md:pl-8">Subject: {{ props.project.name }}</span>
+                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.task.projects.id }}</span><span class="md:pl-5" v-if="props.task.ships.id!==null">Ship:【 {{ props.task.ships.name }} 】</span><br>
+                              <span class="md:pl-8">Subject: {{ props.task.projects.name }}</span>
                             </div>
                             <div id="name" class="flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                   ◆&nbsp;&nbsp;担当者
@@ -221,14 +305,17 @@ const deleteFile = (attachmentId) => {
                         <div class="container px-5 py-0 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
-                                  <div class="flex flex-wrap sm:flex-row">
-                                    <label>Task(内容):</label> <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
-
+                                  <div class="flex flex-wrap sm:flex-col">
+                                    <label>Task(内容):</label> 
+                                    <div class="flex flex-row p-2"> 
+                                      <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
+                                      <VSwatches v-model="form.color"/>  
+                                    </div>
+                                  <div class="flex flex-col sm:flex-row p-2 ml-4"> 
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="start" class="rounded  w-32 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎開始日（予定）：</label>
                                       <input type="date" id="start" name="start" v-model="form.start_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
-                 
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
                                       <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
@@ -239,8 +326,8 @@ const deleteFile = (attachmentId) => {
                                       <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div>
                                   </div>
-                                  <div 
-                                  :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
+                                  </div>
+                                  <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
                                   >{{ form.priorityName }}</div>
 
                                   
@@ -331,13 +418,13 @@ const deleteFile = (attachmentId) => {
                                         </li>
                                       </ul>
                                   </div>
-                                  <!-- //Dropdown menu -->
+                                   <!-- End Dropdown menu -->
                             </div>
                           </div>
                         </div>
                       <vue-collapsible-panel-group>
                         <vue-collapsible-panel :expanded="true" class="z-0">
-                              <template #title > タスク一覧 </template>
+                              <template #title > サブタスク一覧 </template>
                               <template #content> 
                                 <div class="flex flex-col">
                                   <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -350,9 +437,9 @@ const deleteFile = (attachmentId) => {
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
                                               <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                              <div>作成日</div>
                                               <div>開始日</div>
                                               <div>期限</div>
-                                              <div>完了</div>
                                               </div>  
                                               </th>
                                              </tr>
@@ -360,13 +447,13 @@ const deleteFile = (attachmentId) => {
                                             <tbody>
                                             <tr  v-for="task in props.task.subtasks" :key="task.id" >
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
                                              <div class="flex flex-col md:flex-row justify-between">
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
                                             </div>
                                             </tr>
                                             </tbody>
@@ -376,7 +463,7 @@ const deleteFile = (attachmentId) => {
                                   </div>
                                 </div>
                               <div class="flex justify-end">
-                              <Link as="button" :href="route('tasks.create', { project_id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規タスク作成</Link>
+                              <Link as="button" :href="route('tasks.subCreate', { _id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
                               </div>
                               </template>
                               </vue-collapsible-panel>
@@ -494,7 +581,7 @@ const deleteFile = (attachmentId) => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="storetask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
+                                  <button  @click="updateTask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>
