@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import {onMounted, computed,reactive,defineProps,ref,watch } from 'vue';
+import {onMounted, computed,reactive,ref,watch } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import { initFlowbite } from 'flowbite'
 import { VSwatches } from 'vue3-swatches'

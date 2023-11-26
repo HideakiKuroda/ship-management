@@ -45,16 +45,21 @@ Route::middleware(['auth', 'verified'])
     Route::get('/projects/{id}/downloadFile/', [ProjectController::class,'downloadFile'])->name('project.downloadFile');
     Route::get('/projects/{id}/getFileName/', [ProjectController::class,'getFileName'])->name('project.getFileName');
     Route::delete('/projects/{id}/deleteFile/', [ProjectController::class,'deleteFile'])->name('project.deleteFile');
-
 });    
 Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 
 
 // tasks関連のルート設定
-Route::resource('tasks', TaskController::class)
-    ->middleware(['auth', 'verified']);
-// Route::get('/task/tcreate/{project_id}/', [TaskController::class,'tcreate'])->name('task.tcreate')->middleware(['auth', 'verified']);
+Route::middleware(['auth', 'verified'])   
+->group(function () {
+    Route::resource('tasks', TaskController::class);
+    Route::get('/tasks/{task}/subCreate/', [TaskController::class,'subCreate'])->name('tasks.subCreate');
+    Route::post('/tasks/{id}/upload/', [TaskController::class,'upload'])->name('task.upload');
+    Route::get('/tasks/{id}/downloadFile/', [TaskController::class,'downloadFile'])->name('task.downloadFile');
+    Route::get('taskts/{id}/getFileName/', [TaskController::class,'getFileName'])->name('task.getFileName');
+    Route::delete('/tasks/{id}/deleteFile/', [TaskController::class,'deleteFile'])->name('task.deleteFile');
+});    
          
 //ガントチャートのルート設定
 Route::middleware(['auth', 'verified'])

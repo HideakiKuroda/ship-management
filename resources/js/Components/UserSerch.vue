@@ -22,7 +22,7 @@ const handleUserId = (currentUser) =>{
 
 
 
-import { ref,defineEmits,defineProps, computed,watch,defineExpose } from 'vue';
+import { ref, computed,watch } from 'vue';
 import {
   Combobox,
   ComboboxInput,

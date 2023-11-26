@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
 
 class Task extends Model
@@ -56,13 +57,5 @@ class Task extends Model
         return $this->hasMany(Task_description::class);
     }
 
-    public function users()
-    {
-        return $this->project->users();
-    }
-
-    public function ships()
-    {
-        return $this->project->ships();
-    }
+   
 }

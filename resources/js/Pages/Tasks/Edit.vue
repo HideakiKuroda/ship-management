@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link,router } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed,onUnmounted } from 'vue';
@@ -30,15 +30,16 @@ const components = {
 const props = defineProps({
     task  : Object,
     loginUser :  Object,
+    project :  Object,
     errors: Object,
 });
 
 const form = reactive({         //内容をreactiveにform変数に収める
     id:                 props.task.id,
-    proName:            props.task.projects.name,
+    proName:            props.project.name,
     projectId:          props.task.projects.id,
-    assignedUsersList:  [...props.task.users],
-    ship:               props.task.ships,
+    assignedUsersList:  [...props.project.users],
+    ship:               props.project.ships,
     assignedMassagesList: [...props.task.task_descriptions || []],
     subtasks:           [...props.task.subtasks],
     attachments:        [...props.task.task_attachments],
@@ -60,7 +61,7 @@ const formatDate = (date) => {
 };
 
 const storetask = () => {
-  Inertia.post(route('tasks.store'), form) 
+  router.post(route('tasks.store'), form) 
 };
 
 const handleChange = (event) => {
@@ -131,7 +132,7 @@ const uploadPercentage = ref(0);
 
 const handleFileChange = (inputName) => {
   let files;
-  
+  // console.log('upload:','1');
   if (inputName === 'file_upload1') {
     files = fileInput1.value.files;
   } else if (inputName === 'file_upload2') {
@@ -141,17 +142,17 @@ const handleFileChange = (inputName) => {
   if (!files || files.length === 0) {
     return;
   }
-
+  // console.log('upload:','2');
   // 確認ダイアログを表示
   if (window.confirm('ファイルをアップロードしますか？')) {
     const formData = new FormData();
-    
+    // console.log('upload:','3');
     for (let i = 0; i < files.length; i++) {
       formData.append('files[]', files[i]);
     }
-
+    // console.log('upload:','4');
     // ここでInertia.jsを使ってアップロード
-    axios.post(route('task.upload', { id: form.id }), formData)
+     axios.post(route('task.upload', { id: form.id }), formData)
     .then(response => {
       if (response.data.status === 'success') {
         alert(response.data.message);
@@ -266,11 +267,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="新規タスクの登録" />
+    <Head title="タスクの詳細・編集" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">新規タスクの登録</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">タスクの詳細・編集</h2>
         </template>
 
         <div class="py-12">
@@ -282,8 +283,8 @@ onMounted(() => {
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
                             <div id="name" class="flex flex-wrap flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.task.projects.id }}</span><span class="md:pl-5" v-if="props.task.ships.id!==null">Ship:【 {{ props.task.ships.name }} 】</span><br>
-                              <span class="md:pl-8">Subject: {{ props.task.projects.name }}</span>
+                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span><span class="md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
+                              <span class="md:pl-8">Subject: {{ props.project.name }}</span>
                             </div>
                             <div id="name" class="flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                   ◆&nbsp;&nbsp;担当者
@@ -422,6 +423,9 @@ onMounted(() => {
                             </div>
                           </div>
                         </div>
+                <div class="container px-5 py-0 mx-auto">
+                  <div class="lg:w-2/3 md:w-2/3 mx-auto">
+                    <div class="m-2">
                       <vue-collapsible-panel-group>
                         <vue-collapsible-panel :expanded="true" class="z-0">
                               <template #title > サブタスク一覧 </template>
@@ -463,7 +467,7 @@ onMounted(() => {
                                   </div>
                                 </div>
                               <div class="flex justify-end">
-                              <Link as="button" :href="route('tasks.subCreate', { _id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
+                              <Link as="button" :href="route('tasks.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
                               </div>
                               </template>
                               </vue-collapsible-panel>
@@ -574,9 +578,9 @@ onMounted(() => {
                             </vue-collapsible-panel>  
 
                             </vue-collapsible-panel-group>
-
-
-
+                        </div>
+                      </div>
+                    </div>
                         <div class="container px-5 py-2 mx-auto">
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">

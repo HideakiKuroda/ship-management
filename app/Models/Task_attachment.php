@@ -22,7 +22,7 @@ class Task_attachment extends Model
      ];
     public function tasks(): BelongsTo
     {
-        return $this->belongsTo(Task::class, 'task_id');
+        return $this->belongsTo(Task::class, 'task_id', 'id');
     }
 
     public function users()

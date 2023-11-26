@@ -117,17 +117,20 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
+        // dd($task);
         try {
-            $task->load('subtasks','task_attachments','task_descriptions','users','ships','projects');
+            $task->load('subtasks','task_attachments.users','task_descriptions','projects');
+            $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($task->project_id);
             $loginUser = Auth::user('id','name'); 
-            // dd($project);
+            // dd($task,$project);
             return Inertia::render('Tasks/Edit',[
                 'task'=>$task,
-                'loginUser'=>$loginUser
+                'loginUser'=>$loginUser,
+                'project'=>$project
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
-           // dd($e->getMessage());
+           dd($e->getMessage());
         }
     }
 

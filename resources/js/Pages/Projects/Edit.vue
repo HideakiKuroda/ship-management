@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link,router } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed,onUnmounted } from 'vue';
@@ -27,7 +27,6 @@ import { nl2br } from '@/nl2br';
 
 // CSRFトークンを取得
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
 // AxiosのデフォルトヘッダにCSRFトークンをセット
 axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
@@ -93,7 +92,7 @@ const form = reactive({
 
 
 const deleteItem = id => {
-    Inertia.delete(route('projects.destroy',{ project:id }),{
+    router.delete(route('projects.destroy',{ project:id }),{
         onBefore: () => confirm('本当に削除しますか？')
     })
 }
@@ -104,10 +103,9 @@ const formatDate = (date) => {
 };
 
 const updateProject = id => {
-   
   form.pro_category_id =  selectedCategory.value.id
   freeListener();
-  Inertia.put(route('projects.update',{ project:id }), form,{ 
+  router.put(route('projects.update',{ project:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
   }
