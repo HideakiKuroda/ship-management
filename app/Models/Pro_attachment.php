@@ -27,7 +27,7 @@ class Pro_attachment extends Model
          return $this->belongsTo(Project::class, 'project_id','id');
      }
  
-     public function users()
+     public function users(): BelongsTo
      {
      return $this->belongsTo(User::class, 'user_id','id');
      }

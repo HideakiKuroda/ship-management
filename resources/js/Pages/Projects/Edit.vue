@@ -339,6 +339,7 @@ onMounted(() => {
      <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細（編集）</h2>
+            <Link class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('projects.show', { project:form.id })">・・詳細に戻る </Link>
         </template>
 
         <div class="py-12">

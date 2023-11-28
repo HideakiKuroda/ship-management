@@ -60,39 +60,42 @@ const formatDate = (date) => {
   return moment(date).format('YYYY年MM月DD日');
 };
 
-const storetask = () => {
-  router.post(route('tasks.store'), form) 
-};
-
 const handleChange = (event) => {
   form.priority = event.target.value;
-    if(event.target.value == 1){ 
+  onMntHandleChange();
+};
+const onMntHandleChange = () => {
+    if(form.priority == 1){ 
       form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
       form.priorityColor = 'bg-rose-100';
     }
-    else if(event.target.value == 2){
+    else if(form.priority == 2){
        form.priorityName = '優先度:② ※緊急度―大 ※重要度-小';
        form.priorityColor = 'bg-yellow-100'
       }
-    else if(event.target.value == 3){
+    else if(form.priority == 3){
        form.priorityName = '優先度:③ ※緊急度―小 ※重要度-大';
        form.priorityColor = 'bg-green-100'
       }
-    else if(event.target.value == 4){
+    else if(form.priority == 4){
        form.priorityName = '優先度:④ ※緊急度―小 ※重要度-小';
        form.priorityColor = 'bg-blue-100';
       }
-    else if(event.target.value == 5){
+    else if(form.priority == 5){
        form.priorityName = '優先度：指定しない';
        form.priorityColor = 'bg-gray-50';
       };
 };
+
 // onMounted(() => {
 //     initFlowbite();  最下部に移動記載
 // })
 
 const updateTask = id =>{
-
+  freeListener();
+  router.put(route('tasks.update',{ task:id }), form,{ 
+        onBefore: () => confirm('変更を更新します。OKでしょうか？')
+    })
 }
 
 const newMessage = ref('');
@@ -100,7 +103,7 @@ const newMessage = ref('');
 const assignMassage = () => {
   if (newMessage.value.trim() === '') return;
   form.assignedMassagesList.push({
-    task_id:props.task.projects.id,
+    task_id:props.task.id,
     created_at: new Date().toISOString(),
     users: { id: form.loginUser.id, name:form.loginUser.name }, // ここは現在ログインしているユーザーの名前を想定しています。
     // user_id:form.loginUser.id,
@@ -255,6 +258,7 @@ onUnmounted(() => {
 });
 
 onMounted(() => {
+  onMntHandleChange();
   initFlowbite();
   originalData.value = JSON.stringify(form);
   window.addEventListener("beforeunload", confirmSave);
@@ -281,6 +285,7 @@ onMounted(() => {
                     <BreezeValidationErrors :errors="errors" />  
                      <section class="text-gray-600 body-font relative">
                         <div class="container px-5 pt-8 mx-auto">
+                          <FlashMessage  />
                           <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
                             <div id="name" class="flex flex-wrap flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                               <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span><span class="md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
@@ -467,7 +472,7 @@ onMounted(() => {
                                   </div>
                                 </div>
                               <div class="flex justify-end">
-                              <Link as="button" :href="route('tasks.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
+                              <Link as="button" :href="route('task.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
                               </div>
                               </template>
                               </vue-collapsible-panel>
@@ -482,7 +487,7 @@ onMounted(() => {
                                       <div class="flex justify-between items-center mt-1">
                                         <div class="text-xs">{{ formatDate(message.created_at) }}</div>
                                         <div class="flex justify-end">
-                                          <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignMassage(message.id,message.users.id)">削除</button>
+                                          <button class="mx-4 px-1.5 py-0 text-xs bg-red-300  text-white font-semibold rounded-full hover:bg-red-400" @click="unassignMassage(message.id,message.user_id)">削除</button>
                                         </div>
                                       </div>
                                        <div class="text-xs border-b border-gray-200">{{ message.users?.name }}</div>
@@ -585,7 +590,7 @@ onMounted(() => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="updateTask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
+                                  <button  @click="updateTask(form.id)" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>  
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>

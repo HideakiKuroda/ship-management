@@ -54,7 +54,7 @@ class Task extends Model
 
     public function task_descriptions():HasMany
     {
-        return $this->hasMany(Task_description::class);
+        return $this->hasMany(Task_description::class,'task_id');
     }
 
    

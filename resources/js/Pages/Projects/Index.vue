@@ -276,6 +276,7 @@ const displayVesselData = (vessel) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
+                        
                     <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
                       <div class="flex justify-end  lg:w-2/3">

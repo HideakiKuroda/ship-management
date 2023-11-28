@@ -113,6 +113,7 @@ onMounted(() =>{
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細☆</h2>
+            <Link :href="route('projects.index')" class="text-blue-600 text-sm italic underline underline-offset-1" >・・一覧に戻る</Link>
         </template>
 
         <div class="py-12">
@@ -124,6 +125,7 @@ onMounted(() =>{
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <FlashMessage  />
+                            
                              <div class="m-2">
                                 
                                 <div class="p-2">

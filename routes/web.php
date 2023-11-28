@@ -54,7 +54,7 @@ Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->na
 Route::middleware(['auth', 'verified'])   
 ->group(function () {
     Route::resource('tasks', TaskController::class);
-    Route::get('/tasks/{task}/subCreate/', [TaskController::class,'subCreate'])->name('tasks.subCreate');
+    Route::get('/tasks/{task}/subCreate/', [TaskController::class,'subCreate'])->name('task.subCreate');
     Route::post('/tasks/{id}/upload/', [TaskController::class,'upload'])->name('task.upload');
     Route::get('/tasks/{id}/downloadFile/', [TaskController::class,'downloadFile'])->name('task.downloadFile');
     Route::get('taskts/{id}/getFileName/', [TaskController::class,'getFileName'])->name('task.getFileName');

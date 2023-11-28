@@ -39,7 +39,6 @@ class TaskController extends Controller
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
             
             $loginUser = Auth::user('id','name'); 
-            // dd($project);
             return Inertia::render('Tasks/Create', [
                 'project' => $project, 
             ]);
@@ -47,9 +46,6 @@ class TaskController extends Controller
             Log::error($e->getMessage());
            // dd($e->getMessage());
         }
-
-        // dd($users);
-
     }
 
     public function subCreate(Request $request)
@@ -119,10 +115,9 @@ class TaskController extends Controller
     {
         // dd($task);
         try {
-            $task->load('subtasks','task_attachments.users','task_descriptions','projects');
+            $task->load('subtasks','task_attachments.users','task_descriptions.users','projects');
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($task->project_id);
             $loginUser = Auth::user('id','name'); 
-            // dd($task,$project);
             return Inertia::render('Tasks/Edit',[
                 'task'=>$task,
                 'loginUser'=>$loginUser,
@@ -139,7 +134,59 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        //
+        
+    try {
+        $task = Task::findOrFail($task->id);
+        DB::transaction(function () use ($request, &$task) {
+        $task->update([
+            'name' => $request->input('name'),
+            'color_id'=> $request->input('color'),
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+            'deadline' => $request->input('deadline'),
+            'priority' => $request->input('priority'),
+        ]);    
+        foreach ($request->attachments ?? [] as $attachData) {
+        Task_attachment::where('id', $attachData['id'])
+            ->where('task_id', $task->id)
+            ->update(['title' => $attachData['title']]);
+            // dd($attachData['title']);
+        }
+        // メモの同期
+        if ($request->has('deletedMessageIds')) {
+            $deletedMessageIds = $request->input('deletedMessageIds');
+            foreach ($deletedMessageIds as $id) {
+                Task_description::where('id', $id)->delete();
+            }
+        }
+        if ($request->has('assignedMassagesList')) {
+            $assignedMassagesList = $request->input('assignedMassagesList');
+            foreach ($assignedMassagesList as $messageData) {
+                // メモの更新または作成 
+                $task->task_descriptions()->updateOrCreate(
+                    ['id' => $messageData['id'] ?? null],
+                    [
+                    'task_id' => $messageData['task_id'],
+                    'memo' => $messageData['memo'],
+                    'user_id' => $messageData['users']['id'],
+                    ]
+                );
+            }
+        }
+        
+    });
+    return redirect()->back()->withInput()->with([
+        'message' => '更新しました。',
+        'status' => 'success'
+    ]);
+
+    } catch (\Exception $e) {
+        Log::error($e);
+        return redirect()->back()->withInput()->with([
+            'message' => '更新に失敗しました',
+            'status' => 'error'
+    ]);
+    }
     }
 
     /**
@@ -157,10 +204,8 @@ class TaskController extends Controller
         $files = $request->file('files');
         $uploadedFiles = [];
         $today=now();
-        
         //  dd($files);
         foreach ($files as $file) {
-         
         $originalName = $file->getClientOriginalName();
         $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
         // dd($filetype);
@@ -176,8 +221,6 @@ class TaskController extends Controller
         elseif ($filetype === 'pptx'){$icon='/images/powerpoint_document.png';}
         elseif ($filetype === 'pptm'){$icon='/images/powerpoint_document.png';}
         else{$icon='/images/text_document.png';};
-
-        // $filename = $file->storeAs("/tasks/{$id}", $originalName);
         // dd($filename);
         $filename = Storage::put("tasks/{$id}", $file);
         $users =  Auth::user('id','name');
@@ -201,7 +244,6 @@ class TaskController extends Controller
             'uploadedFiles' => $uploadedFiles ,
         ]);
     }
-
     public function deleteFile(Request $request, $id)
     {
         $attachData = $request->input('attachmentId');
@@ -224,7 +266,6 @@ class TaskController extends Controller
                 'status' => 'error'
             ]);
     }
-
     //アップロード＆ダウンロードファイルの操作
     public function downloadFile(Request $request, $id)
     {
@@ -237,10 +278,7 @@ class TaskController extends Controller
                 'Content-Disposition' => 'inline; filename="' . $attachment->originname . '"'
             ];
             return response()->file($filePath, $headers);
-            // return response()->download($filePath, $attachment->originname);
-            
         }
-        
         return response()->json(['message' => 'File not found'], 404);
     }
     //ダウンロードファイルの名前の取得
