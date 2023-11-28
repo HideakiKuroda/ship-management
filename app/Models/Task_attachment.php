@@ -22,10 +22,10 @@ class Task_attachment extends Model
      ];
     public function tasks(): BelongsTo
     {
-        return $this->belongsTo(Task::class, 'task_id');
+        return $this->belongsTo(Task::class, 'task_id', 'id');
     }
 
-    public function users()
+    public function users(): BelongsTo
     {
     return $this->belongsTo(User::class, 'user_id','id');
     }

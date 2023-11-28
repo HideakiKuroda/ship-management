@@ -11,6 +11,10 @@ import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import { nl2br } from '@/nl2br';
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -20,6 +24,7 @@ const components = {
 
 const props = defineProps({
   project : Object,
+  loginUser :  Object,
 })
 
 const deleteItem = id => {
@@ -77,9 +82,17 @@ const downloadFile = async (attachmentId,dp) => {
     }
 };
 
+const editOpen = () => {
+  if (props.project.users.some(user => user.id === props.loginUser.id)) {
+    Inertia.get(route('projects.edit', { project:props.project.id }));
+  } else {
+    alert('編集は担当者のみ可能です');
+  }  
+}
 
 onMounted(() =>{
-  // console.log('id:',props.project.users);
+   console.log('これ:',props.project.users);
+   console.log('は:',props.loginUser);
 })
 
 </script>
@@ -182,21 +195,26 @@ onMounted(() =>{
                                             <tr>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">期限</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
+                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                               <div>開始日</div>
+                                               <div>期限</div>
+                                               <div>完了</div>
+                                              </div>  
+                                            </th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr  v-for="task in props.project.tasks" :key="tasks.id" >
+                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
                                                   <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
                                                   <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                              <div class="flex flex-col md:flex-row justify-between">
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
-                                  
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                              </div>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -273,7 +291,7 @@ onMounted(() =>{
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                <Link as="button" :href="route('projects.edit', { project:props.project.id })" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
+                                  <button  @click="editOpen" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->

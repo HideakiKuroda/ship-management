@@ -33,7 +33,7 @@ const form = useForm({
         </header>
 
         <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
-            <div>
+             <div>
                 <InputLabel for="name" value="Name" />
 
                 <TextInput
@@ -44,6 +44,7 @@ const form = useForm({
                     required
                     autofocus
                     autocomplete="name"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.name" />
@@ -59,6 +60,7 @@ const form = useForm({
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />

@@ -26,7 +26,7 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
-            <div>
+               <div>
                 <InputLabel for="password" value="Password" />
                 <TextInput
                     id="password"
@@ -36,6 +36,7 @@ const submit = () => {
                     required
                     autocomplete="current-password"
                     autofocus
+                    
                 />
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>

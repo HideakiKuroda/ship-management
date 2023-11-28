@@ -20,7 +20,7 @@ class Pro_description extends Model
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    public function users()
+    public function users(): BelongsTo
     {
     return $this->belongsTo(User::class, 'user_id');
     }

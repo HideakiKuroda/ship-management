@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref,defineEmits,watch } from 'vue'
+import { ref,watch } from 'vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import {
@@ -143,6 +143,7 @@ const serchDate = ref('');
 const selectedPeriod = ref(term[0])
 const newTabIndex = ref(0)
 const termdays = ref(7)
+
 
 const emit = defineEmits([
   'update:categoryId',

@@ -20,9 +20,9 @@ class Task_description extends Model
         return $this->belongsTo(Task::class, 'task_id');
     }
 
-    public function users()
+    public function users(): BelongsTo
     {
-    return $this->belongsTo(User::class, 'user_id','id');
+    return $this->belongsTo(User::class, 'user_id');
     }
 
 }

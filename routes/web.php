@@ -9,6 +9,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
+use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,16 +45,22 @@ Route::middleware(['auth', 'verified'])
     Route::get('/projects/{id}/downloadFile/', [ProjectController::class,'downloadFile'])->name('project.downloadFile');
     Route::get('/projects/{id}/getFileName/', [ProjectController::class,'getFileName'])->name('project.getFileName');
     Route::delete('/projects/{id}/deleteFile/', [ProjectController::class,'deleteFile'])->name('project.deleteFile');
-
 });    
 Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 
 
 // tasks関連のルート設定
-Route::resource('tasks', TaskController::class)
-    ->middleware(['auth', 'verified']);
-        
+Route::middleware(['auth', 'verified'])   
+->group(function () {
+    Route::resource('tasks', TaskController::class);
+    Route::get('/tasks/{task}/subCreate/', [TaskController::class,'subCreate'])->name('task.subCreate');
+    Route::post('/tasks/{id}/upload/', [TaskController::class,'upload'])->name('task.upload');
+    Route::get('/tasks/{id}/downloadFile/', [TaskController::class,'downloadFile'])->name('task.downloadFile');
+    Route::get('taskts/{id}/getFileName/', [TaskController::class,'getFileName'])->name('task.getFileName');
+    Route::delete('/tasks/{id}/deleteFile/', [TaskController::class,'deleteFile'])->name('task.deleteFile');
+});    
+         
 //ガントチャートのルート設定
 Route::middleware(['auth', 'verified'])
 ->group(function () {
@@ -73,10 +80,6 @@ Route::get('/', function () {
     ]);
 });
 
-// Route::get('register', function () {
-//     // registration logic
-// })->middleware('admin');
-
 Route::get('register', [RegisteredUserController::class, 'create'])->name('user.register')->middleware('checkRole:admin');
 Route::post('admin/register', [RegisteredUserController::class, 'store'])->name('register')->middleware('checkRole:admin');
 
@@ -91,20 +94,17 @@ Route::middleware('auth','admin')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/test', [App\Http\Controllers\TestController::class, 'create'])->name('test.create');
-
 Route::prefix('admin')->name('admin.')->group(function(){
     require __DIR__.'/admin.php';
 });
 
-Route::get('/', function () {
-    // return view('welcome');
-    $user = Auth::loginUsingId(8);
-
-    $token = $user->createToken('test');
-
-    dd($token);
-});
+// Route::get('/', function () {
+//     Route::inertia('welcome');
+//     $user = Auth::loginUsingId(8);
+// });
+Route::post('/', [AuthenticatedSessionController::class, 'destroy'])
+                ->middleware('auth')
+                ->name('logout');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

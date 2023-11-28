@@ -1,8 +1,28 @@
 <script setup>
 
-/* <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId"/> */
+/*
 
-import { ref,defineEmits,defineProps, computed,watch,defineExpose } from 'vue';
+const props = defineProps({
+    users: Array,    --> ドロップダウンリストに表示するユーザーリスト
+});
+
+const XXXX = reactive({
+    users       :props.users,
+    userId      :props.currentUser,
+});
+
+const handleUserId = (currentUser) =>{
+  XXXX.userId = currentUser
+  selectItem(XXXX.userId)    ==>> ユーザーを選んだ時のメソッド
+}
+
+ <UserSerch :userId="XXXX.userId" :users="props.users" @update:currentUser="handleUserId"/> 
+ 
+ */
+
+
+
+import { ref, computed,watch } from 'vue';
 import {
   Combobox,
   ComboboxInput,
@@ -154,3 +174,4 @@ watch(selectedUser, (newValue, oldValue) => {
     </div>
 </div>
 </template>
+

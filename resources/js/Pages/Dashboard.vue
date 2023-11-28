@@ -6,6 +6,10 @@ import axios from 'axios';
 import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/vue3';
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const test = async () => {
   try {

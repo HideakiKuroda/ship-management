@@ -2,13 +2,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import { reactive,computed,ref,watch } from 'vue';
+import { reactive,computed,ref,watch, onMounted } from 'vue';
 import moment from 'moment';
 import axios from 'axios';
 import Paginator from 'primevue/paginator';
 import DateSerch from '@/Components/DateSerch.vue';
 import UserSerch from '@/Components/UserSerch.vue';
 import { nl2br } from '@/nl2br';
+
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
 const props = defineProps({
     ships: Array,
@@ -22,6 +28,28 @@ const formatDate = (date) => {
   return moment(date).format('YYYY年MM月DD日');
 };
 
+//レスポンシブ対応でpagenationの行数を変更
+const rows = ref([])
+const pageSize = ref(window.innerWidth <= 768 ? 10 : 20)
+const fetchData = async () => {
+  try {
+    const response = await axios.get('/getindex/indexfilter', {
+      params: { pageSize: pageSize.value }
+    })
+    rows.value = response.data.data
+  } catch (error) {
+    console.error('An error occurred while fetching the data:', error)
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
+
+window.addEventListener('resize', () => {
+  pageSize.value = window.innerWidth <= 768 ? 10 : 20
+})
+
 const index = reactive({
     ships       :props.ships,//ship全体
     users       :props.users,//user全体
@@ -33,6 +61,7 @@ const index = reactive({
     crtAddDate  : null,
     endDate     : null,
     endAddDate  : null,
+    emitDate    : null,
      });
 
 const safeParseInt = (value) => {
@@ -73,37 +102,41 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     index.userId = userId;
   } else if($uOrS == 2) {
     index.shipId = shipId;
-  } else if($uOrS == 3) {}
+  } 
   const daysToAdd = safeParseInt(index.crtAddDate);
   // console.log("Parsed daysToAdd:", daysToAdd);
   let newDate = null;
+  let newendDate = null; 
   if (index.crtDate && index.EndOrNo !== 1){
     newDate = addDaysToDate(index.crtDate, daysToAdd);
+    index.crtDate;
     }else if(index.crtDate == null){
       newDate = null;
     }
-  let newendDate = null; 
   if (index.endDate && index.EndOrNo == 1){
     newendDate = addDaysToDate(index.endDate, daysToAdd);
+    index.endDate;
     }else if(index.endDate == null){
     newendDate = null;
     }
-  // console.log("newDate:", index.crtDate, newDate,index.endDate, newendDate);    
+  // console.log("newDate:", index.crtDate, newDate);    
+  // console.log("endDate:", index.endDate, newendDate);    
   try {
     const response = await axios.post('/projects/indexfilter', { 
       userId: index.userId, 
       shipId: index.shipId,
       EndOrNo: index.EndOrNo,
-      
       crtDate: index.crtDate,
       endDate: index.endDate,
       crtAddDate:newDate, 
       endAddDate :newendDate,
       page: page 
     });
-    // console.log("dateSerch:", index.crtDate,newDate)
+    // console.log("credateSerch:", index.EndOrNo,index.crtDate,newDate)
+    // console.log("enddateSerch:", index.EndOrNo,index.endDate,newendDate)
     index.projects = response.data;
     pagination.value = index.projects;
+   
   } catch (error) {
     console.error('Error:', error);
   }
@@ -112,21 +145,23 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
 
 const handleCategoryId = (categoryId) =>{
   index.EndOrNo = categoryId
-  selectItem(index.userId, index.shipId, 3)
+  handleSerchDate(index.emitDate)
+  // selectItem(index.userId, index.shipId, 3)
   // console.log("handleCategoryId:", index.EndOrNo)
 }
 
 const handleSerchDate = (serchDate) => {
+  index.emitDate = serchDate;
   if (index.EndOrNo !== 1){
-    index.crtDate = serchDate
-    index.endDate = null
+    index.crtDate = serchDate;
+    index.endDate = null;
   }
   else{
-    index.endDate = serchDate
-    index.crtDate = null
+    index.endDate = serchDate;
+    index.crtDate = null;
   }
   selectItem(index.userId, index.shipId, 3)
-  // console.log("handleSerchDate:", index.crtDate,index.endDate)
+  //  console.log("handleSerchDate:", index.crtDate,index.endDate)
 }
 
 const handleTermD = (termD) => {
@@ -241,10 +276,14 @@ const displayVesselData = (vessel) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
-                    <div class="container px-5 py-8 mx-auto">
+                        
+                    <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
+                      <div class="flex justify-end  lg:w-2/3">
+                            <Link as="button" :href="route('projects.create')" class=" mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
+                          </div>
+
                         <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
-                            
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
                             <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
@@ -321,10 +360,6 @@ const displayVesselData = (vessel) => {
                                 </div>
                               </Combobox>
                             <!-- 船検索コンボボックス　ここまで -->
-                             
-                          <div class="flex justify-end">
-                            <Link as="button" :href="route('projects.create')" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
-                          </div>
                         </div>
 
 
@@ -340,8 +375,8 @@ const displayVesselData = (vessel) => {
                              
                             
                            </div>
-                          <div class="lg:w-2/3 w-full mx-auto overflow-auto">
-                            <table class="table-auto w-full text-left whitespace-no-wrap ">
+                          <div class="lg:w-3/4 w-full mx-auto overflow-auto">
+                            <table class="table-auto w-full text-left whitespace-no-wrap hidden sm:table ">
                                 <thead>
                                 <tr>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
@@ -368,14 +403,45 @@ const displayVesselData = (vessel) => {
                                         {{ user.name }}
                                     </div>
                                     </td>
-                                    <!-- <td v-for="user in project.users"
-                                    class="border-b-2 border-gray-200 px-4 py-3">{{ user.name  }}</td> -->
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(project.completion)  }}</td>
                                  </tr>
                                 </tbody>
                             </table>
                             </div>
+                        <!-- スマホ用のリストここから  -->
+                        <div class="container ml-2 px-4">
+                        <div v-for="project in index.projects.data" :key="project.id" class="block sm:hidden">
+                       <div class="mb-4">
+                          <strong>プロジェクト:</strong><br>
+                            <span>
+                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link>
+                                &emsp;&emsp;
+                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link>
+                            </span>
                         </div>
+                        <div class="mb-4">
+                          <strong>船名&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;担当:</strong><br>
+                            <div class="flex flex-row">
+                              <span class="block">
+                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link>
+                            </span>  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                             <div class="flex flex-col justify-end">
+                              <div  v-for="user in project.users" :key="user.id" class="block">{{ user.name }}</div>
+                            </div>
+  
+                          </div>
+                        </div>
+                        <div class="mb-4 border-b-2 border-gray-200">
+                          <strong>作成日:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;完了日:</strong><br>
+
+                          <span class="block">{{ formatDate(project.created_at) }}&emsp;&emsp;&emsp;
+                          {{ formatDate(project.completion)  }}</span>
+    
+                        </div>
+                       </div>
+                      </div>
+                        <!-- スマホ用のリストここまで  -->    
+                      </div>
                         <!-- <Pagination  -->
                           <div class="w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         <div class="card">

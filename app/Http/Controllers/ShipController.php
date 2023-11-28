@@ -15,11 +15,10 @@ use App\Models\Ship_attachment;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis as LaravelRedis;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 
 class ShipController extends Controller
@@ -74,9 +73,10 @@ class ShipController extends Controller
      */
     public function store(StoreShipRequest $request)
     {
+     try {
         /** @var Ship|null */
         $ship = null;
-        LaravelRedis::transaction(function () use ($request, &$ship) {
+        DB::transaction(function () use ($request, &$ship) {
             $ship = Ship::Create([
                 'delivered' => $request->input('delivered'),
                 'ex_name' => $request->input('ex_name'),
@@ -100,6 +100,13 @@ class ShipController extends Controller
             'message' => '新しい船「' . $ship->name . '」を登録しました',
             'status' => 'success'
         ]);    
+        } catch (\Exception $e) {
+            // トランザクション失敗時のリダイレクト
+            return redirect()->route('ships.index')->with([
+                'message' => '船の登録に失敗しました',
+                'status' => 'error'
+            ]);
+        }
     }
 
     /**
@@ -153,8 +160,9 @@ class ShipController extends Controller
      */
     public function update(UpdateShipRequest $request, Ship $ship)
     {
+     try {
         $ship = Ship::findOrFail($ship->id);
-        LaravelRedis::transaction(function () use ($request, &$ship) {
+        DB::transaction(function () use ($request, &$ship) {
             // shipsテーブルの更新
             $ship->update([
                 'delivered' => $request->input('delivered'),
@@ -253,7 +261,14 @@ class ShipController extends Controller
             'message' => '更新しました。',
             'status' => 'success'
         ]);
+    } catch (\Exception $e) {
+        // トランザクション失敗時のリダイレクト
+        return redirect()->route('ships.show', $ship->id)->with([
+            'message' => '更新に失敗しました',
+            'status' => 'error'
+        ]);
     }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -274,7 +289,8 @@ class ShipController extends Controller
     {
         $ship = Ship::findOrFail($id);
         $files = $request->file('files');
-        
+        $uploadedFiles = [];
+        $today=now();
         // dd($files);
         foreach ($files as $file) {
          
@@ -297,23 +313,26 @@ class ShipController extends Controller
             // $filename = $file->storeAs("/ships/{$id}", $originalName);
             // dd($filename);
             $filename = Storage::put("ships/{$id}", $file);
-            $userId = Auth::id();
+            $users =  Auth::user('id','name');
             // データベースに記録
-            Ship_attachment::create([
+            $newFile = Ship_attachment::create([
                 'ship_id' => $id,
                 'filename' => $filename,
                 'originname' => $originalName,
-                'user_id' =>  $userId,
+                'user_id' =>  $users->id,
                 'icon' => $icon,
             ]);
-        }
-
-        // ships.edit へリダイレクト
-        // return redirect()->route('ships.edit', $id)->with([
-            return redirect()->back()->withInput()->with([
-            'message' => 'ファイルをアップロードしました。',
-            'status' => 'success'
-        ]);
+            // $uploadedFiles 配列に追加する前に user_name と created_at を追加
+            $newFile->users->name = $users->name;
+            $newFile->created_at = $today->toDateTimeString(); 
+            $newFile->title = '';
+            $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
+            }
+            return response()->json([
+                'message' => 'ファイルをアップロードしました。',
+                'status' => 'success',
+                'uploadedFiles' => $uploadedFiles ,
+           ]);
     }
 
     public function deleteFile(Request $request, $id)

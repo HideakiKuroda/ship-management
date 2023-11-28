@@ -38,7 +38,7 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
-            <div>
+             <div>
                 <InputLabel for="email" value="Email" />
 
                 <TextInput
@@ -49,6 +49,7 @@ const submit = () => {
                     required
                     autofocus
                     autocomplete="username"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
@@ -64,6 +65,7 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />

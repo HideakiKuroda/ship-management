@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link,router } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref,onMounted } from 'vue';
@@ -11,6 +11,10 @@ import "@dafcoe/vue-collapsible-panel/dist/vue-collapsible-panel.css";
 import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import { nl2br } from '@/nl2br';
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// Axiosの設定
+axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 
 const components = {
   VueCollapsiblePanelGroup,
@@ -20,10 +24,11 @@ const components = {
 
 const props = defineProps({
   project : Object,
+  loginUser :  Object,
 })
 
 const deleteItem = id => {
-    Inertia.delete(route('projects.destroy',{ project:id }),{
+  router.delete(route('projects.destroy',{ project:id }),{
         onBefore: () => confirm('本当に削除しますか？')
     })
 }
@@ -77,9 +82,27 @@ const downloadFile = async (attachmentId,dp) => {
     }
 };
 
+const editOpen = () => {
+  if (props.project.users.some(user => user.id === props.loginUser.id)) {
+    router.get(route('projects.edit', { project:props.project.id }));
+  } else {
+    alert('編集は担当者のみ可能です');
+  }  
+}
+
+const editTask = (id) => {
+  if (props.project.users.some(user => user.id === props.loginUser.id)) {
+    console.log('Task_id:', id);
+    router.get(route('tasks.edit', { task:id }));
+  } else {
+    alert('編集は担当者のみ可能です');
+  }  
+}
+
 
 onMounted(() =>{
-  // console.log('id:',props.project.users);
+   console.log('これ:',props.project.users);
+   console.log('は:',props.loginUser);
 })
 
 </script>
@@ -90,6 +113,7 @@ onMounted(() =>{
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">プロジェクトの詳細☆</h2>
+            <Link :href="route('projects.index')" class="text-blue-600 text-sm italic underline underline-offset-1" >・・一覧に戻る</Link>
         </template>
 
         <div class="py-12">
@@ -101,6 +125,7 @@ onMounted(() =>{
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <FlashMessage  />
+                            
                              <div class="m-2">
                                 
                                 <div class="p-2">
@@ -194,9 +219,9 @@ onMounted(() =>{
                                             <tbody>
                                             <tr  v-for="task in props.project.tasks" :key="task.id" >
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })"> {{ task.id }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.show', { task:task.id })">{{ task.name }} </Link></td>
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
                                               <div class="flex flex-col md:flex-row justify-between">
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
@@ -278,7 +303,7 @@ onMounted(() =>{
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                <Link as="button" :href="route('projects.edit', { project:props.project.id })" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
+                                  <button  @click="editOpen" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->

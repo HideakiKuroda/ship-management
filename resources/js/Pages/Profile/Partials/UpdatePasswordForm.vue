@@ -4,7 +4,6 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
 
 const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
@@ -54,6 +53,7 @@ const updatePassword = () => {
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
+                    
                 />
 
                 <InputError :message="form.errors.current_password" class="mt-2" />
@@ -69,6 +69,7 @@ const updatePassword = () => {
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError :message="form.errors.password" class="mt-2" />
@@ -83,6 +84,7 @@ const updatePassword = () => {
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError :message="form.errors.password_confirmation" class="mt-2" />

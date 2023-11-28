@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Project;
 use App\Models\Task_attachment;
+use App\Models\Task_description;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
 
 class Task extends Model
@@ -31,17 +33,13 @@ class Task extends Model
         'end_date',
 	    'deadline',
 	    'completion',
+        'priority',
      ];
 
 
     public function projects():BelongsTo
     {
         return $this->belongsTo(Project::class,'project_id');
-    }
-
-    public function parent():BelongsTo
-    {
-        return $this->belongsTo(Task::class, 'parent_id');
     }
 
     public function subtasks(): HasMany
@@ -54,8 +52,10 @@ class Task extends Model
         return $this->hasMany(Task_attachment::class);
     }
 
-    public function users(): BelongsToMany
+    public function task_descriptions():HasMany
     {
-    return $this->belongsToMany(User::class, 'Task_assignments');
+        return $this->hasMany(Task_description::class,'task_id');
     }
+
+   
 }

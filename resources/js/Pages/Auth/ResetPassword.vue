@@ -47,6 +47,7 @@ const submit = () => {
                     required
                     autofocus
                     autocomplete="username"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
@@ -62,6 +63,7 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
@@ -77,6 +79,7 @@ const submit = () => {
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
+                    
                 />
 
                 <InputError class="mt-2" :message="form.errors.password_confirmation" />
