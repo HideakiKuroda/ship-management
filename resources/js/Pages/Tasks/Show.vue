@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import { ref,onMounted } from 'vue';
 //アコーディオン機能のインポート
@@ -25,10 +24,11 @@ const components = {
 const props = defineProps({
   project : Object,
   loginUser :  Object,
+  errors: Object,
 })
 
 const deleteItem = id => {
-    Inertia.delete(route('projects.destroy',{ project:id }),{
+  router.delete(route('projects.destroy',{ project:id }),{
         onBefore: () => confirm('本当に削除しますか？')
     })
 }
@@ -84,7 +84,7 @@ const downloadFile = async (attachmentId,dp) => {
 
 const editOpen = () => {
   if (props.project.users.some(user => user.id === props.loginUser.id)) {
-    Inertia.get(route('projects.edit', { project:props.project.id }));
+    router.get(route('projects.edit', { project:props.project.id }));
   } else {
     alert('編集は担当者のみ可能です');
   }  

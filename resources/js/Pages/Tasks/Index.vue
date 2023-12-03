@@ -19,8 +19,10 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 const props = defineProps({
     ships: Array,
     users: Array,
-    projects: Object,
+    tasks: Object,
     currentUser:  Number,
+    errors: Object,
+    
 });
 
 const formatDate = (date) => {
@@ -33,7 +35,7 @@ const rows = ref([])
 const pageSize = ref(window.innerWidth <= 768 ? 10 : 20)
 const fetchData = async () => {
   try {
-    const response = await axios.get('/getindex/indexfilter', {
+    const response = await axios.get('/getTask/indexfilter', {
       params: { pageSize: pageSize.value }
     })
     rows.value = response.data.data
@@ -53,7 +55,8 @@ window.addEventListener('resize', () => {
 const index = reactive({
     ships       :props.ships,//ship全体
     users       :props.users,//user全体
-    projects    :props.projects,
+    project     :props.tasks.projects,
+    tasks       :props.tasks,
     userId      :props.currentUser,
     shipId      : null,
     EndOrNo     : 0,
@@ -122,7 +125,7 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
   // console.log("newDate:", index.crtDate, newDate);    
   // console.log("endDate:", index.endDate, newendDate);    
   try {
-    const response = await axios.post('/projects/indexfilter', { 
+    const response = await axios.post('/tasks/indexfilter', { 
       userId: index.userId, 
       shipId: index.shipId,
       EndOrNo: index.EndOrNo,
@@ -134,8 +137,8 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     });
     // console.log("credateSerch:", index.EndOrNo,index.crtDate,newDate)
     // console.log("enddateSerch:", index.EndOrNo,index.endDate,newendDate)
-    index.projects = response.data;
-    pagination.value = index.projects;
+    index.tasks = response.data;
+    pagination.value = index.tasks;
    
   } catch (error) {
     console.error('Error:', error);
@@ -182,12 +185,12 @@ const handleUserId = (currentUser) =>{
 
 
 //ページネイションの設定
-const pagination = ref(props.projects);
+const pagination = ref(props.tasks);
 const first = ref(pagination.current_page);
 
 const changePage = async (page) => {
   try {
-    const response = await axios.get('/getindex/indexfilter', {
+    const response = await axios.get('/getTask/indexfilter', {
       params: {
         userId: index.userId, 
         shipId: index.shipId,
@@ -197,8 +200,8 @@ const changePage = async (page) => {
     });
     // console.log("selectCategoryId:", index.EndOrNo)
 
-    index.projects = response.data;
-    pagination.value = index.projects;
+    index.tasks = response.data;
+    pagination.value = index.tasks;
   } catch (error) {
     console.error("Error fetching data:", error);
   }
@@ -253,21 +256,16 @@ const displayVesselData = (vessel) => {
   return `${vessel.name} 　[ ${vessel.yard} ${vessel.ship_no} ]`;
 }
 
-// onMounted(() => {
-//   // console.log('props.users:', props.users);
-//   //   console.log(props.projects.data)
-// })
-
 
 </script>
 
 <template>
-    <Head title="プロジェクト一覧" />
+    <Head title="タスク一覧" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                プロジェクト一覧
+                タスク一覧
             </h2>
         </template>
 
@@ -276,12 +274,10 @@ const displayVesselData = (vessel) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
+                        
                     <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
-                      <div class="flex justify-end  lg:w-2/3">
-                            <Link as="button" :href="route('projects.create')" class=" mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
-                          </div>
-
+                  
                         <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
@@ -387,45 +383,45 @@ const displayVesselData = (vessel) => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                 <tr  v-for="project in index.projects.data" :key="project.id" >
+                                 <tr  v-for="task in index.tasks.data" :key="task.id" >
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link></td>
+                                        <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link></td>
+                                        <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.projects.ships.name }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link></td>
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(project.created_at) }}</td>
+                                        <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
+                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
                                     
                                     <!-- 担当者（ユーザー）列 -->
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                    <div v-for="user in project.users">
+                                    <div v-for="user in task.projects.users">
                                         {{ user.name }}
                                     </div>
                                     </td>
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(project.completion)  }}</td>
+                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
                                  </tr>
                                 </tbody>
                             </table>
                             </div>
                         <!-- スマホ用のリストここから  -->
                         <div class="container ml-2 px-4">
-                        <div v-for="project in index.projects.data" :key="project.id" class="block sm:hidden">
+                        <div v-for="task in index.tasks.data" :key="task.id" class="block sm:hidden">
                        <div class="mb-4">
                           <strong>プロジェクト:</strong><br>
                             <span>
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link>
+                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link>
                                 &emsp;&emsp;
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link>
+                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link>
                             </span>
                         </div>
                         <div class="mb-4">
                           <strong>船名&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;担当:</strong><br>
                             <div class="flex flex-row">
                               <span class="block">
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link>
+                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.projects.ships.name }} </Link>
                             </span>  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
                              <div class="flex flex-col justify-end">
-                              <div  v-for="user in project.users" :key="user.id" class="block">{{ user.name }}</div>
+                              <div  v-for="user in task.projects.users" :key="user.id" class="block">{{ user.name }}</div>
                             </div>
   
                           </div>
@@ -433,8 +429,8 @@ const displayVesselData = (vessel) => {
                         <div class="mb-4 border-b-2 border-gray-200">
                           <strong>作成日:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;完了日:</strong><br>
 
-                          <span class="block">{{ formatDate(project.created_at) }}&emsp;&emsp;&emsp;
-                          {{ formatDate(project.completion)  }}</span>
+                          <span class="block">{{ formatDate(task.created_at) }}&emsp;&emsp;&emsp;
+                          {{ formatDate(task.completion)  }}</span>
     
                         </div>
                        </div>

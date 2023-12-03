@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import {onMounted, computed,reactive,ref,watch } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
@@ -26,7 +25,6 @@ const form = reactive({         //内容をreactiveにform変数に収める
     priorityName:       null,
     priorityColor:      null,
     priority:           null,
-    color:              '#1CA085',
 }); 
 
 const formatDate = (date) => {
@@ -35,7 +33,7 @@ const formatDate = (date) => {
 };
 
 const storetask = () => {
-  Inertia.post(route('tasks.store'), form) 
+  router.post(route('tasks.store'), form) 
 };
 
 const handleChange = (event) => {
@@ -117,7 +115,6 @@ onMounted(() => {
                                     <label>Task(内容):</label> 
                                     <div class="flex flex-row p-2"> 
                                       <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
-                                      <VSwatches v-model="form.color"/>  
                                     </div>
                                   <div class="flex flex-col sm:flex-row p-2 ml-4"> 
                                     <div class="flex flex-col p-2 ml-4">

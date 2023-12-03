@@ -1,9 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link,router } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
-import { ref,onMounted,reactive, computed,onUnmounted } from 'vue';
+import { ref,onMounted,reactive ,computed,onUnmounted,watch } from 'vue';
 //アコーディオン機能のインポート
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
 //アコーディオン機能のCSS
@@ -55,6 +54,36 @@ const form = reactive({         //内容をreactiveにform変数に収める
     color:              props.task.color_id,
 }); 
 
+const cssCol = ref('')
+const color_id =  ref('')
+
+const colToCss = (col) => {
+if(col ==''){cssCol.value = ''}
+else if(col =='#1FBC9C'){cssCol.value = 'bg-emerald-300'}
+else if(col =='#1CA085'){cssCol.value = 'bg-emerald-500 text-slate-100'}
+else if(col =='#2ECC70'){cssCol.value = 'bg-green-300'}
+else if(col =='#27AF60'){cssCol.value = 'bg-green-500 text-slate-100'}
+
+else if(col =='#3398DB'){cssCol.value = 'bg-sky-400'}
+else if(col =='#2980B9'){cssCol.value = 'bg-sky-500 text-slate-100'}
+else if(col =='#A463BF'){cssCol.value = 'bg-purple-500 text-slate-100'}
+else if(col =='#8E43AD'){cssCol.value = 'bg-purple-600 text-slate-100'}
+
+else if(col =='#3D556E'){cssCol.value = 'bg-cyan-800 text-slate-100'}
+else if(col =='#222F3D'){cssCol.value = 'bg-cyan-900 text-slate-100'}  
+else if(col =='#F2C511'){cssCol.value = 'bg-yellow-300'}
+else if(col =='#F39C19'){cssCol.value = 'bg-amber-400'}
+
+else if(col =='#E84B3C'){cssCol.value = 'bg-red-400'} 
+else if(col =='#C0382B'){cssCol.value = 'bg-red-600 text-slate-100'}
+else if(col =='#DDE6E8'){cssCol.value = 'bg-slate-100'}
+else if(col =='#BDC3C8'){cssCol.value = 'bg-slate-200'}; 
+} 
+
+watch(color_id,(newColor) =>{
+  colToCss(newColor)
+})
+
 const formatDate = (date) => {
    if (!date) return "";
   return moment(date).format('YYYY年MM月DD日');
@@ -64,6 +93,7 @@ const handleChange = (event) => {
   form.priority = event.target.value;
   onMntHandleChange();
 };
+
 const onMntHandleChange = () => {
     if(form.priority == 1){ 
       form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
@@ -93,6 +123,7 @@ const onMntHandleChange = () => {
 
 const updateTask = id =>{
   freeListener();
+  form.color = color_id.value ;
   router.put(route('tasks.update',{ task:id }), form,{ 
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
@@ -258,11 +289,13 @@ onUnmounted(() => {
 });
 
 onMounted(() => {
+  color_id.value = form.color;
+  colToCss(form.color);
   onMntHandleChange();
   initFlowbite();
   originalData.value = JSON.stringify(form);
   window.addEventListener("beforeunload", confirmSave);
-  moveConfirm = Inertia.on('before', (event) => {
+  moveConfirm = router.on('before', (event) => {
       return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
   });
 });
@@ -276,6 +309,7 @@ onMounted(() => {
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">タスクの詳細・編集</h2>
+            <Link class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('projects.edit', { project:form.projectId })">・・プロジェクトに戻る </Link>
         </template>
 
         <div class="py-12">
@@ -312,10 +346,11 @@ onMounted(() => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
                                   <div class="flex flex-wrap sm:flex-col">
-                                    <label>Task(内容):</label> 
+                                    <label class="text-rose-600">Task No.{{ props.task.id }}&nbsp;(内容) :</label> 
                                     <div class="flex flex-row p-2"> 
-                                      <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
-                                      <VSwatches v-model="form.color"/>  
+                                      <input type="text" id="name" name="name" v-model="form.name" :class="['pl-2 w-full rounded',cssCol ]" >
+                                      <VSwatches v-model="color_id" /> 
+                                      <!-- <button @click="colToCss(form.color)">change</button>  -->
                                     </div>
                                   <div class="flex flex-col sm:flex-row p-2 ml-4"> 
                                     <div class="flex flex-col p-2 ml-4">

@@ -40,6 +40,9 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('projects.index')" :active="route().current('ships')">
                                     プロジェクト一覧
                                 </NavLink>
+                                <NavLink :href="route('tasks.index')" :active="route().current('ships')">
+                                    タスク一覧
+                                </NavLink>
                             </div>
                         </div>
 
@@ -127,6 +130,9 @@ const showingNavigationDropdown = ref(false);
                             船舶一覧
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('projects.index')" :active="route().current('ships')">
+                            プロジェクト一覧
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('tasks.index')" :active="route().current('ships')">
                             プロジェクト一覧
                         </ResponsiveNavLink>
                     </div>

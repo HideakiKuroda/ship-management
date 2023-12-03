@@ -1,11 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import axios from 'axios';
-import { Inertia } from '@inertiajs/inertia';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import { Link } from '@inertiajs/vue3';
 // CSRFトークンをメタタグから取得
 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 // Axiosの設定

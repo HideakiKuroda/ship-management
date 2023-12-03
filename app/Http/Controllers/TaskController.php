@@ -24,10 +24,68 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Task $task)
     {
-        //
+        $userId = auth()->id();
+        $EndOrNo = 0;
+        $shipId = null;
+        $crtDate = null;
+        $crtAddDate = null;
+        $endDate = null;
+        $endAddDate = null;
+        //部門　18　の人だけを抽出
+        $users = User::whereHas('user_descriptions.departments', function ($query) {
+            $query->where('departments.id', 18);
+        })->select('id', 'name')->get();
+        $ships = Ship::select('id','name','yard','ship_no')->get();
+        // $projectId = $task->query('project_id');
+        // $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
+
+
+        $queryAll = Task::query()->with(['projects.ships:id,name','projects.users:id,name'])
+        ->EndOrNoTask($EndOrNo) //0:未完了　1:完了
+        ->ShipTask($shipId)
+        ->DateCreateTask($crtDate,$crtAddDate)
+        ->DateEndTask($endDate,$endAddDate)
+        ->UserTask($userId);
+        // Log::info($queryAll->toSql()); 
+        
+        $tasks = $queryAll->paginate(12)
+        ->withQueryString();
+
+        
+        return Inertia::render('Tasks/Index', [
+            'ships' => $ships,
+            'currentUser' => $userId, 
+            'users' => $users,
+            'tasks' => $tasks
+        ]);
     }
+    public function indexfilter(Request $request) {
+        $userId =  $request->userId;
+        $EndOrNo = $request->EndOrNo;
+        $shipId = $request->shipId;
+        $crtDate = $request->crtDate;
+        $crtAddDate = $request->crtAddDate;
+        $endDate = $request->endDate;
+        $endAddDate = $request->endAddDate;
+        $query = Task::query()->with(['projects.ships:id,name','projects.users:id,name'])
+        ->UserTask($userId)
+        ->ShipTask($shipId)
+        ->EndOrNoTask($EndOrNo)
+        ->DateCreateTask($crtDate,$crtAddDate)
+        ->DateEndTask($endDate,$endAddDate);
+        //  Log::info('crtDate value:', ['value' => $crtDate]);
+        //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
+        //  Log::info('endDate value:', ['value' => $endDate]);
+        //  Log::info('endAddDate value:', ['value' => $endAddDate]);
+        //  Log::info($query->toSql()); 
+        $filtered = $query->Paginate(12);    
+       
+        // ->withQueryString();
+        return response()->json($filtered);
+    }
+
 
     /**
      * Show the form for creating a new resource.

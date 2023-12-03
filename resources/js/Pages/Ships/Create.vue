@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import { reactive } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
@@ -28,7 +27,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
 }) ;
 
 const storeShip = () => {
-    Inertia.post(route('ships.store'), form) 
+    router.post(route('ships.store'), form) 
 };
 
 const formatDate = (date) => {

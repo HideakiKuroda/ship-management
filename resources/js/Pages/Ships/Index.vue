@@ -13,6 +13,7 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
 const props = defineProps({
     users: Array,
     ships: Array,
+    errors: Object,
 });
 
 const ship = reactive({

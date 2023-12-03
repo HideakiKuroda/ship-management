@@ -60,6 +60,8 @@ Route::middleware(['auth', 'verified'])
     Route::get('taskts/{id}/getFileName/', [TaskController::class,'getFileName'])->name('task.getFileName');
     Route::delete('/tasks/{id}/deleteFile/', [TaskController::class,'deleteFile'])->name('task.deleteFile');
 });    
+Route::post('/tasks/indexfilter/', [TaskController::class,'indexfilter'])->name('task.indexfilter')->middleware(['auth', 'verified']);
+Route::get('getTask/indexfilter', [TaskController::class,'indexfilter'])->name('task.indexfilter')->middleware(['auth', 'verified']);
          
 //ガントチャートのルート設定
 Route::middleware(['auth', 'verified'])

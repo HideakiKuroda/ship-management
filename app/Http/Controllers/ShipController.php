@@ -347,19 +347,16 @@ class ShipController extends Controller
             // ストレージからファイルを削除
             Storage::delete($attachment->filename);
 
-            // return redirect()->route('ships.edit', $id)->with([
-            return redirect()->back()->with([
-            
+            return response()->json([
                 'message' => 'ファイルを削除しました。',
                 'status' => 'success'
             ]);
         }
-
-        // return redirect()->route('ships.edit', $id)->with([
-            return redirect()->back()->with([
-            'message' => 'ファイルの削除に失敗しました。',
-            'status' => 'error'
-        ]);
+        // return redirect()->route('tasks.edit', $id)->with([
+            return response()->json([
+                'message' => 'ファイルの削除に失敗しました。',
+                'status' => 'error'
+            ]);
     }
 
     //ダウンロードファイル（バイナリー）の取得

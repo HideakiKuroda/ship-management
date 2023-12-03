@@ -21,6 +21,7 @@ const props = defineProps({
     users: Array,
     projects: Object,
     currentUser:  Number,
+    errors: Object,
 });
 
 const formatDate = (date) => {

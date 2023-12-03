@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link,router } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed,onUnmounted } from 'vue';
 //アコーディオン機能のインポート
@@ -326,7 +325,7 @@ onUnmounted(() => {
 onMounted(() => {
   originalData.value = JSON.stringify(form);
   window.addEventListener("beforeunload", confirmSave);
-  moveConfirm = Inertia.on('before', (event) => {
+  moveConfirm = router.on('before', (event) => {
       return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
   });
 });

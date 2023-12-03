@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, Link, router } from '@inertiajs/vue3';
 import moment from 'moment';
 import {onMounted, computed,reactive,ref,watch } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
@@ -117,7 +116,7 @@ const typeOptions = computed(() => {
 const storeproject = () => {
   form.shipId = selectedShip.value.id
   form.pro_category_id =  selectedCategory.value.id
-  Inertia.post(route('projects.store'), form) 
+  router.post(route('projects.store'), form) 
   // console.log("selectUser:", form.assignedUsersList);
   // console.log("projectName:", form.name);
   // console.log("selectShip:", form.shipId);

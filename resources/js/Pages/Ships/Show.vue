@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
 import moment from 'moment';
 import { ref } from 'vue';
 //アコーディオン機能のインポート
@@ -22,10 +21,11 @@ const components = {
 
 const props = defineProps({
     ship : Object,
+    errors: Object,
 })
 
 const deleteItem = id => {
-    Inertia.delete(route('ships.destroy',{ ship:id }),{
+  router.delete(route('ships.destroy',{ ship:id }),{
         onBefore: () => confirm('本当に削除しますか？')
     })
 }

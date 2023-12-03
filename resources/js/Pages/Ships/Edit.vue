@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed,onUnmounted  } from 'vue';
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
@@ -96,7 +95,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
 
 
 const deleteItem = id => {
-  Inertia.delete(route('ships.destroy', { ship: id }), {
+  router.delete(route('ships.destroy', { ship: id }), {
   onBefore: () => {
     if (confirm('本当に削除しますか？')) {
       freeListener();
@@ -112,7 +111,7 @@ const formatDate = (date) => {
 };
 
 const updateShip = id => {
-  Inertia.put(route('ships.update',{ ship:id }), form,{ 
+  router.put(route('ships.update',{ ship:id }), form,{ 
   onBefore: () => {
     if (confirm('変更を更新します。OKでしょうか？')) {
       freeListener();
@@ -224,15 +223,6 @@ const dropFiles = (event) => {
   }
 };
 
-
-// const downloadFile = async (attachmentId) => {
-//   try {
-//     const response = await Inertia.get(route('ship.downloadFile', { id: form.id }), { attachmentId: attachmentId });
-//     // その他の処理
-//   } catch (error) {
-//     console.error("An error occurred:", error);
-//   }
-// };
 const isPdf = (filename) => {
   const fileExtension = filename.split('.').pop().toLowerCase();
   return fileExtension === 'pdf';
@@ -299,7 +289,7 @@ const freeListener = () => {
 
 const onListener = () => {
   window.addEventListener("beforeunload", confirmSave);
-  moveConfirm = Inertia.on('before', (event) => {
+  moveConfirm = router.on('before', (event) => {
       return confirm("編集中のものがある場合、保存されませんがよろしいですか？");
   });
 }
@@ -314,9 +304,30 @@ onMounted(() => {
 });
 
 
+// const deleteFile = (attachmentId) => {
+//   if (window.confirm('ファイルを削除しますか')) {
+//     router.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
+// }};
+
 const deleteFile = (attachmentId) => {
   if (window.confirm('ファイルを削除しますか')) {
-    Inertia.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } });
+    axios.delete(route('ship.deleteFile', { id: form.id }), { data: { attachmentId: attachmentId } })
+    .then(response => {
+      if (response.data.status === 'success') {
+        // 通知の表示や、必要に応じてリアクティブなデータの更新を行う
+        alert(response.data.message);
+        // attachments 配列から削除したファイルを削除
+        const index = form.attachments.findIndex(attachment => attachment.id === attachmentId);
+        if (index !== -1) {
+          form.attachments.splice(index, 1);
+        }        
+      } else {
+        alert(response.data.message);
+      }
+    })
+    .catch(error => {
+      alert('何らかのエラーが発生しました。');
+    });
 }};
 
 </script>
