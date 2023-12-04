@@ -43,6 +43,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
     delivered:          props.ship.delivered,
     gross_tonn:         props.ship.gross_tonn,
     issueInspCert:      props.ship.issueInspCert,
+    expiry_date:        props.ship.expiry_date,
     
     official_number:    props.ship.summaries.official_number,
     signal_code:        props.ship.summaries.signal_code,
@@ -468,6 +469,11 @@ const deleteFile = (attachmentId) => {
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="issueInspCert" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎定期検査完了日：</label>
                                       <input type="date" id="issueInspCert" name="issueInspCert" v-model="form.issueInspCert" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                    </div> 
+
+                                    <div class="flex flex-col p-2 ml-4">
+                                      <label for="expiry_date" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎定期検査期限：</label>
+                                      <input type="date" id="expiry_date" name="expiry_date" v-model="form.expiry_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div> 
 
                                   </div>

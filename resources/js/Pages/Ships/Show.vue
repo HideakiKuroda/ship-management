@@ -199,6 +199,13 @@ const downloadFile = async (attachmentId,dp) => {
                                             {{ formatDate(props.ship.issueInspCert) }}
                                       </div>
                                     </div> 
+
+                                    <div class="p-2 ml-4">
+                                      <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎定期検査期限：</label>
+                                      <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                            {{ formatDate(props.ship.expiry_date) }}
+                                      </div>
+                                    </div> 
                                   </div>
                                 </template>
                               </vue-collapsible-panel>

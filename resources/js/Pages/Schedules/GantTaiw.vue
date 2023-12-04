@@ -7,7 +7,7 @@ import moment from 'moment'; //npm install moment でインストール要
 const start_month = ref('2022-04');
 const end_month = ref('2031-03');
 const block_size = ref(20);
-const block_number = ref('');
+// const block_number = ref(0);
 const calendars = ref([]);
 const inner_width = ref(''); //追加
 const inner_height = ref('');
@@ -27,6 +27,23 @@ const leftResizing = ref(false);
 const rightResizing = ref(false);
 const width = ref('');
 const task = ref('');
+
+const getDays = (year, month, block_number) => {
+    const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+    let days = [];
+    let date = moment(`${year}-${month}-01`);
+    let num = date.daysInMonth();
+    for (let i = 0; i < num; i++) {
+      days.push({
+        day: date.date(),
+        dayOfWeek: dayOfWeek[date.day()],
+        block_number
+      })
+      date.add(1, 'day');
+      block_number++;
+    }
+    return days;
+  }   
 
 const getMonths = (year, block_number) => {
   let months = [];

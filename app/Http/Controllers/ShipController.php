@@ -175,6 +175,7 @@ class ShipController extends Controller
                 'ship_no' => $request->input('ship_no'),
                 'yard' => $request->input('yard'),
                 'issueInspCert' => $request->input('issueInspCert'),
+                'expiry_date' => $request->input('expiry_date'),
             ]);
         
             // summariesテーブルの更新
