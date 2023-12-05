@@ -16,27 +16,21 @@ class Schedule extends Model
 
     protected $fillable = [
         'ship_id',
-        'pro_category_id',
-        'category_no',
-        'project_id',
-        'legal_start',
-        'legal_dline',
-        'start_date',
-        'end_date',
-         ];
+        'interim_start1',
+        'interim_dline1',
+        'Periodic_start1',
+        'Periodic_dline1',
+        'interim_start2',
+        'interim_dline2',
+        'Periodic_start2',
+        'Periodic_dline2',
+       ];
 
 
-    public function pro_categories():BelongsTo
-    {
-        return $this->belongsTo(Pro_category::class, 'pro_category_id');
-    }
-    public function ships():BelongsTo
-    {
-        return $this->belongsTo(Ship::class, 'ship_id');
-    }
-    public function projects(): HasOne
-    {
-        return $this->hasOne(Project::class, 'project_id');
-    }
+
+       public function ships(): BelongsTo
+       {
+           return $this->belongsTo(Ship::class);
+       }
 
 }

@@ -19,7 +19,6 @@ const form = reactive({         //内容をreactiveにform変数に収める
     assignedUsersList:  [...props.project.users],
     ship:               props.project.ship,
     name:               null, //Task名
-    start_date:         null,
     end_date:           null,
     deadline:           null,
     priorityName:       null,
@@ -117,10 +116,6 @@ onMounted(() => {
                                       <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
                                     </div>
                                   <div class="flex flex-col sm:flex-row p-2 ml-4"> 
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="start" class="rounded  w-32 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎開始日（予定）：</label>
-                                      <input type="date" id="start" name="start" v-model="form.start_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
                                       <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    

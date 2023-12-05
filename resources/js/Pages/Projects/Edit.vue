@@ -496,50 +496,7 @@ onMounted(() => {
                                     </div> 
                                   </div> 
 
-                              <vue-collapsible-panel :expanded="true" class="z-0">
-                              <template #title > タスク一覧 </template>
-                              <template #content> 
-                                <div class="flex flex-col">
-                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                      <div class="overflow-hidden">
-                                        <table class="min-w-full text-left text-sm font-light">
-                                          <thead>
-                                            <tr>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
-                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
-                                              <div>作成日</div>
-                                              <div>開始日</div>
-                                              <div>期限</div>
-                                              </div>  
-                                              </th>
-                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
-                                             <div class="flex flex-col md:flex-row justify-between">
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
-                                            </div>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              <div class="flex justify-end">
-                              <Link as="button" :href="route('tasks.create', { project_id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規タスク作成</Link>
-                              </div>
-                              </template>
-                              </vue-collapsible-panel>
+                             
                             <vue-collapsible-panel :expanded="true">
                            <template #title> メモ一覧 </template>
                             <template #content>
@@ -645,7 +602,50 @@ onMounted(() => {
 
                             </template>  
                             </vue-collapsible-panel>  
-
+                            <vue-collapsible-panel :expanded="true" class="z-0">
+                              <template #title > タスク一覧 </template>
+                              <template #content> 
+                                <div class="flex flex-col">
+                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                      <div class="overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light">
+                                          <thead>
+                                            <tr>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
+                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                              <div>作成日</div>
+                                              <div>終了予定</div>
+                                              <div>期限</div>
+                                              </div>  
+                                              </th>
+                                             </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
+                                             <div class="flex flex-col md:flex-row justify-between">
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.end_date) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                            </div>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              <div class="flex justify-end">
+                              <Link as="button" :href="route('tasks.create', { project_id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規タスク作成</Link>
+                              </div>
+                              </template>
+                              </vue-collapsible-panel>
                             </vue-collapsible-panel-group>
                         </div>                        
                         </div>

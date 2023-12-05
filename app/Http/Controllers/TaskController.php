@@ -138,7 +138,6 @@ class TaskController extends Controller
                 'project_id' => $request->input('projectId'),
                 'name' => $request->input('name'),
                 'color_id'=> $request->input('color'),
-                'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
                 'deadline' => $request->input('deadline'),
                 'priority' => $request->input('priority'),
@@ -199,7 +198,6 @@ class TaskController extends Controller
         $task->update([
             'name' => $request->input('name'),
             'color_id'=> $request->input('color'),
-            'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
             'deadline' => $request->input('deadline'),
             'priority' => $request->input('priority'),

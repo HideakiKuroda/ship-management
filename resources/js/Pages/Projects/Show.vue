@@ -166,9 +166,9 @@ onMounted(() =>{
                                     </div>
                                     
                                     <div class="p-2 ml-4">
-                                      <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎開始日（予定）：</label>
+                                      <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎作成日：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                            {{ formatDate(props.project.start_date) }}
+                                            {{ formatDate(props.project.created_at) }}
                                       </div>
                                     </div>
                                     <div class="p-2 ml-4">
@@ -196,47 +196,6 @@ onMounted(() =>{
                               </vue-collapsible-panel>
 
                               <vue-collapsible-panel :expanded="true">
-                              <template #title> タスク一覧 </template>
-                              <template #content> 
-                                <div class="flex flex-col">
-                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                      <div class="overflow-hidden">
-                                        <table class="min-w-full text-left text-sm font-light">
-                                          <thead>
-                                            <tr>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
-                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
-                                               <div>開始日</div>
-                                               <div>期限</div>
-                                               <div>完了</div>
-                                              </div>  
-                                            </th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
-                                              <div class="flex flex-col md:flex-row justify-between">
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
-                                              </div>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </template>
-                              </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="true">
                               <template #title> メモ一覧 </template> 
                               <!-- props.project.pro_descriptions -->
                               <template #content>
@@ -290,9 +249,49 @@ onMounted(() =>{
                                   </div>
                                 </div>
                               </div>
-
                             </template>  
                             </vue-collapsible-panel>  
+                            <vue-collapsible-panel :expanded="true">
+                              <template #title> タスク一覧 </template>
+                              <template #content> 
+                                <div class="flex flex-col">
+                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                      <div class="overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light">
+                                          <thead>
+                                            <tr>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
+                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                               <div>作成日</div>
+                                               <div>終了予定</div>
+                                               <div>完了</div>
+                                              </div>  
+                                            </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr  v-for="task in props.project.tasks" :key="task.id" >
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
+                                              <div class="flex flex-col md:flex-row justify-between">
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.end_date) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
+                                              </div>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </template>
+                              </vue-collapsible-panel>
 
                             </vue-collapsible-panel-group>
                         </div>                        

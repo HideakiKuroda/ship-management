@@ -47,11 +47,6 @@ class Ship extends Model
     {
         return $this->hasMany(Project::class);
     }
-    public function schedules(): HasMany
-    {
-        return $this->hasMany(Schedule::class);
-    }
-
     public function ship_owners(): HasMany
     {
         return $this->hasMany(Ship_owner::class);
@@ -90,6 +85,11 @@ class Ship extends Model
     public function ship_attachments(): HasMany
     {
         return $this->hasMany(Ship_attachment::class);
+    }
+
+    public function schedules(): HasOne
+    {
+        return $this->hasOne(Schedule::class);
     }
 
 

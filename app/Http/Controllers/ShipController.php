@@ -19,7 +19,8 @@ use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use DateTime;
+use Exception;
 
 class ShipController extends Controller
 {
@@ -92,6 +93,7 @@ class ShipController extends Controller
             $ship->summaries()->create();
             $ship->summary2s()->create();
             $ship->concerneds()->create();
+            $ship->schedules()->create();
             $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
             $ship->users()->sync($userIds);
         });
@@ -141,7 +143,7 @@ class ShipController extends Controller
             ->select('id','name')
             ->get();
 
-            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments.users');
+            $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments.users','schedules');
             //   dd($ship);
             return Inertia::render('Ships/Edit',[
                 'ship' => $ship, 
@@ -385,5 +387,90 @@ class ShipController extends Controller
         }
 
         return response()->json(['message' => 'File not found'], 404);
+    }
+
+    function calculateInspectionDates(UpdateShipRequest $request, Ship $ship) {
+        try {
+            $ship = Ship::findOrFail($ship->id);
+            DB::transaction(function () use ($request, &$ship) {
+                $shipType = $ship-> navigation_area_id;
+                $baseDate = $ship->expiry_date;
+                $dates = new DateTime($baseDate);
+                $inspectionPeriods = [];
+        if($baseDat != null && $shipType != null ){        
+
+            
+            if ($shipType == 1) {
+                $dates->modify('-72 months')->format('Y-m-d');
+                $inspectionPeriods['midterm1'] = [
+                    'start' => $dates->modify('+33 months')->format('Y-m-d'),
+                    'end' => $dates->modify('+6 months')->format('Y-m-d'),
+                ];
+        
+                $inspectionPeriods['regular1'] = [
+                    'end' => $dates->modify('+33 months')->format('Y-m-d'),
+                    'start' => $dates->modify('-3 months')->format('Y-m-d'),
+                ];
+        
+                $inspectionPeriods['midterm2'] = [
+                    'start' => $dates->modify('+36 months')->format('Y-m-d'),
+                    'end' => $dates->modify('+6 months')->format('Y-m-d'),
+                ];
+        
+                $inspectionPeriods['regular2'] = [
+                    'end' => $dates->modify('+33 months')->format('Y-m-d'),
+                    'start' => $dates->modify('-3 months')->format('Y-m-d'),
+                ];
+        
+            } elseif ($shipType !== 1) {
+                $dates->modify('-60 months')->format('Y-m-d');
+                $inspectionPeriods['midterm1'] = [
+                    'start' => $dates->modify('+21 months')->format('Y-m-d'),
+                    'end' => $dates->modify('+18 months')->format('Y-m-d'),
+                ];
+        
+                $inspectionPeriods['regular1'] = [
+                    'end' => $dates->modify('+21 months')->format('Y-m-d'),
+                    'start' => $dates->modify('-3 months')->format('Y-m-d'),
+                ];
+        
+                   
+                $inspectionPeriods['midterm2'] = [
+                    'start' => $dates->modify('+24 months')->format('Y-m-d'),
+                    'end' => $dates->modify('+18 months')->format('Y-m-d'),
+                ];
+        
+                $inspectionPeriods['regular2'] = [
+                    'end' => $dates->modify('+21 months')->format('Y-m-d'),
+                    'start' => $dates->modify('-3 months')->format('Y-m-d'),
+                ];
+                } else {
+                    throw new Exception('Invalid ship type provided.');
+                }
+                $ship->schedules->update([
+                    'interim_start1' => $inspectionPeriods['midterm1']['start'],
+                    'interim_dline1' => $inspectionPeriods['midterm1']['end'],
+                    'Periodic_start1' => $inspectionPeriods['regular1']['start'],
+                    'Periodic_dline1' => $inspectionPeriods['regular1']['end'],
+                    'interim_start2' => $inspectionPeriods['midterm2']['start'],
+                    'interim_dline2' => $inspectionPeriods['midterm2']['end'],
+                    'Periodic_start2' => $inspectionPeriods['regular2']['start'],
+                    'Periodic_dline2' => $inspectionPeriods['regular2']['end'],
+                ]);
+            }
+            });
+            // dd($ownerData);
+            return redirect()->back()->with([
+                'message' => '更新しました。',
+                'status' => 'success'
+            ]);
+        
+        } catch (\Exception $e) {
+            // トランザクション失敗時のリダイレクト
+            return redirect()->back()->with([
+                'message' => '更新できませんでした。航海区域、定期検査期限の入力を確認ください。'. $e->getMessage(),
+                'status' => 'error'
+            ]);
+        }
     }
 }

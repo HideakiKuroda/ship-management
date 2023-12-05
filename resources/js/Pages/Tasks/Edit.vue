@@ -45,7 +45,6 @@ const form = reactive({         //内容をreactiveにform変数に収める
     loginUser:          props.loginUser,
     deletedMessageIds:  [],  
     name:               props.task.name, 
-    start_date:         props.task.start_date,
     end_date:           props.task.end_date,
     deadline:           props.task.deadline,
     priorityName:       null,
@@ -346,17 +345,13 @@ onMounted(() => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
                                   <div class="flex flex-wrap sm:flex-col">
-                                    <label class="text-rose-600">Task No.{{ props.task.id }}&nbsp;(内容) :</label> 
+                                    <label class="text-rose-600">Task No.{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}&nbsp;&nbsp;(内容) :</label> 
                                     <div class="flex flex-row p-2"> 
                                       <input type="text" id="name" name="name" v-model="form.name" :class="['pl-2 w-full rounded',cssCol ]" >
                                       <VSwatches v-model="color_id" /> 
                                       <!-- <button @click="colToCss(form.color)">change</button>  -->
                                     </div>
                                   <div class="flex flex-col sm:flex-row p-2 ml-4"> 
-                                    <div class="flex flex-col p-2 ml-4">
-                                      <label for="start" class="rounded  w-32 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎開始日（予定）：</label>
-                                      <input type="date" id="start" name="start" v-model="form.start_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
-                                    </div>
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
                                       <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
@@ -467,51 +462,7 @@ onMounted(() => {
                   <div class="lg:w-2/3 md:w-2/3 mx-auto">
                     <div class="m-2">
                       <vue-collapsible-panel-group>
-                        <vue-collapsible-panel :expanded="true" class="z-0">
-                              <template #title > サブタスク一覧 </template>
-                              <template #content> 
-                                <div class="flex flex-col">
-                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                      <div class="overflow-hidden">
-                                        <table class="min-w-full text-left text-sm font-light">
-                                          <thead>
-                                            <tr>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
-                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
-                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
-                                              <div>作成日</div>
-                                              <div>開始日</div>
-                                              <div>期限</div>
-                                              </div>  
-                                              </th>
-                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr  v-for="task in props.task.subtasks" :key="task.id" >
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">
-                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
-                                             <div class="flex flex-col md:flex-row justify-between">
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.start_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
-                                            </div>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              <div class="flex justify-end">
-                              <Link as="button" :href="route('task.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
-                              </div>
-                              </template>
-                              </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="true">
+                         <vue-collapsible-panel :expanded="true">
                            <template #title> メモ一覧 </template>
                             <template #content>
                               <div class="flex flex-col">
@@ -617,6 +568,51 @@ onMounted(() => {
                             </template>  
                             </vue-collapsible-panel>  
 
+                            <vue-collapsible-panel :expanded="true" class="z-0">
+                              <template #title > サブタスク一覧 </template>
+                              <template #content> 
+                                <div class="flex flex-col">
+                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                                      <div class="overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light">
+                                          <thead>
+                                            <tr>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
+                                              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
+                                              <div class="flex flex-col md:flex-row justify-between md:pr-16">
+                                              <div>作成日</div>
+                                              <div>終了日</div>
+                                              <div>期限</div>
+                                              </div>  
+                                              </th>
+                                             </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr  v-for="task in props.task.subtasks" :key="task.id" >
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                  <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
+                                             <div class="flex flex-col md:flex-row justify-between">
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.end_date) }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
+                                            </div>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              <div class="flex justify-end">
+                              <Link as="button" :href="route('task.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
+                              </div>
+                              </template>
+                              </vue-collapsible-panel>
+  
                             </vue-collapsible-panel-group>
                         </div>
                       </div>

@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])
     Route::get('/ships/{id}/downloadFile/', [ShipController::class,'downloadFile'])->name('ship.downloadFile');
     Route::get('/ships/{id}/getFileName/', [ShipController::class,'getFileName'])->name('ship.getFileName');
     Route::delete('/ships/{id}/deleteFile/', [ShipController::class,'deleteFile'])->name('ship.deleteFile');
+    Route::put('/ships/{ship}/', [ShipController::class,'calculateInspectionDates'])->name('ship.inspectionDates');
     
 });    
 Route::get('getship/shipfilter', [ShipController::class,'shipfilter'])->name('ships.shipfilter')->middleware(['auth', 'verified']);

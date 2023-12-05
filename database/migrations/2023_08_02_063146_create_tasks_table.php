@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('color_id')->nullable();
             $table->boolean('ganttchart')->default(false);
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();;
+            $table->date('end_date')->nullable();;
             $table->date('deadline')->nullable();
             $table->date('completion')->nullable();
             $table->integer('priority')->default(5);

@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ship_id')->constrained();
-            $table->foreignId('pro_category_id')->nullable()->constrained();
-            $table->integer('category_no')->nullable(); //カテゴリーに対して何回目か
-            $table->string('yard')->nullable();
-            $table->text('memo')->nullable();
-            $table->foreignId('project_id')->nullable()->constrained();
-            $table->date('legal_start')->nullable();
-            $table->date('legal_dline')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->foreignId('ship_id')
+                        ->constrained()
+                        ->onUpdate('cascade')
+                        ->onDelete('cascade');
+            $table->date('interim_start1')->nullable();
+            $table->date('interim_dline1')->nullable();
+            $table->date('Periodic_start1')->nullable();
+            $table->date('Periodic_dline1')->nullable();
+            $table->date('interim_start2')->nullable();
+            $table->date('interim_dline2')->nullable();
+            $table->date('Periodic_start2')->nullable();
+            $table->date('Periodic_dline2')->nullable();
             $table->timestamps();
         });
     }

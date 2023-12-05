@@ -29,7 +29,6 @@ class Task extends Model
         'name',
         'color_id',
         'ganttchart',
-        'start_date',
         'end_date',
 	    'deadline',
 	    'completion',

@@ -112,7 +112,8 @@ const formatDate = (date) => {
 };
 
 const updateShip = id => {
-  router.put(route('ships.update',{ ship:id }), form,{ 
+  
+  router.put(route('ship.update',{ ship:id }), form,{ 
   onBefore: () => {
     if (confirm('変更を更新します。OKでしょうか？')) {
       freeListener();
@@ -121,6 +122,22 @@ const updateShip = id => {
       return false;
     }}
     })
+  }
+
+  const upSchedule = id => {
+    if (form.selectedNavigationArea !== null && form.expiry_date !== null ){
+    router.put(route('ship.inspectionDates',{ ship:id }), form,{ 
+  onBefore: () => {
+    if (confirm('ドックスケジュールを更新します！')) {
+      freeListener();
+      return true;
+    } else {
+      return false;
+    }}
+    })
+  } else {
+    if (confirm('航行区域または定期検査期限の入力がありません')){}
+  }
   }
 
 const userIds = form.assignedUsersList.map(user => user.id);
@@ -475,6 +492,19 @@ const deleteFile = (attachmentId) => {
                                       <label for="expiry_date" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎定期検査期限：</label>
                                       <input type="date" id="expiry_date" name="expiry_date" v-model="form.expiry_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
                                     </div> 
+
+                                    <div class="flex flex-col p-2 ml-4">
+                                     <button @click="upSchedule(form.id)" class="flex mx-auto text-white bg-indigo-400 border-0 mt-5 py-2 px-2 focus:outline-none hover:bg-indigo-500 rounded ">ドックスケジュール</button>  
+                                   </div>
+
+                                   <div class="flex flex-col p-2 ml-4">
+                                    <label v-if="props.ship.schedules?.Periodic_dline1 == null"
+                                    class="text-justify text-sm font-medium text-red-500 underline mt-7">ドックスケジュール未入力</label>
+                                     <label v-else-if="props.ship.expiry_date == props.ship.schedules?.Periodic_dline1"
+                                    class="text-justify text-sm font-medium text-indigo-600 underline mt-7">ドックスケジュール更新済み</label>
+                                    <label v-else-if="props.ship.expiry_date !== props.ship.schedules?.Periodic_dline1"
+                                    class="text-justify text-sm font-medium text-red-400 underline mt-7">ドックスケジュール未更新</label>
+                                   </div>
 
                                   </div>
                                 </template>
