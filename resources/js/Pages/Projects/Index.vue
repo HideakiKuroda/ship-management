@@ -273,7 +273,7 @@ const displayVesselData = (vessel) => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-3/4 mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
@@ -287,7 +287,7 @@ const displayVesselData = (vessel) => {
                         <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
-                            <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
+                            <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-20"/>
                             <!-- 担当者検索コンボボックス　ここまで -->
 
                             <!-- 船検索コンボボックス　ここから -->
@@ -412,27 +412,27 @@ const displayVesselData = (vessel) => {
                         <!-- スマホ用のリストここから  -->
                         <div class="container ml-2 px-4">
                         <div v-for="project in index.projects.data" :key="project.id" class="block sm:hidden">
-                       <div class="mb-4">
-                          <strong>プロジェクト:</strong><br>
-                            <span>
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link>
-                                &emsp;&emsp;
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link>
-                            </span>
-                        </div>
                         <div class="mb-4">
-                          <strong>船名&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;担当:</strong><br>
-                            <div class="flex flex-row">
-                              <span class="block">
-                              <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link>
-                            </span>  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-                             <div class="flex flex-col justify-end">
-                              <div  v-for="user in project.users" :key="user.id" class="block">{{ user.name }}</div>
-                            </div>
-  
+                            <strong>プロジェクト:</strong><br>
+                              <span>
+                                <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link>
+                                  &emsp;&emsp;
+                                <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link>
+                              </span>
                           </div>
-                        </div>
-                        <div class="mb-4 border-b-2 border-gray-200">
+                          <div class="mb-4">
+                            <strong>船名&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;担当:</strong><br>
+                              <div class="flex flex-row">
+                                <span class="block">
+                                <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link>
+                              </span>  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                              <div class="flex flex-col justify-end">
+                                <div  v-for="user in project.users" :key="user.id" class="block">{{ user.name }}</div>
+                              </div>
+    
+                            </div>
+                          </div>
+                          <div class="mb-4 border-b-2 border-gray-200">
                           <strong>作成日:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;完了日:</strong><br>
 
                           <span class="block">{{ formatDate(project.created_at) }}&emsp;&emsp;&emsp;
@@ -444,7 +444,7 @@ const displayVesselData = (vessel) => {
                         <!-- スマホ用のリストここまで  -->    
                       </div>
                         <!-- <Pagination  -->
-                          <div class="w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                          <div class="lg:w-3/4 mx-auto sm:px-6 lg:px-8 justify-center gap-x-1.5 rounded-md bg-white py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         <div class="card">
                             <Paginator 
                             v-model:first="first"

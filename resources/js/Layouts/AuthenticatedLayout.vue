@@ -133,7 +133,7 @@ const showingNavigationDropdown = ref(false);
                             プロジェクト一覧
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('tasks.index')" :active="route().current('ships')">
-                            プロジェクト一覧
+                            タスク一覧
                         </ResponsiveNavLink>
                     </div>
 

@@ -9,6 +9,7 @@ import { VSwatches } from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 
 const props = defineProps({
+    task  : Object,
     project : Object,
     errors: Object,
 });
@@ -18,6 +19,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
     projectId:          props.project.id,
     assignedUsersList:  [...props.project.users],
     ship:               props.project.ship,
+    taskId:             props.task?.id,
     name:               null, //Task名
     end_date:           null,
     deadline:           null,

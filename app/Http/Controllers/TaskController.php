@@ -47,7 +47,8 @@ class TaskController extends Controller
         ->ShipTask($shipId)
         ->DateCreateTask($crtDate,$crtAddDate)
         ->DateEndTask($endDate,$endAddDate)
-        ->UserTask($userId);
+        ->UserTask($userId)
+        ->latest();
         // Log::info($queryAll->toSql()); 
         
         $tasks = $queryAll->paginate(12)
@@ -74,7 +75,8 @@ class TaskController extends Controller
         ->ShipTask($shipId)
         ->EndOrNoTask($EndOrNo)
         ->DateCreateTask($crtDate,$crtAddDate)
-        ->DateEndTask($endDate,$endAddDate);
+        ->DateEndTask($endDate,$endAddDate)
+        ->latest();
         //  Log::info('crtDate value:', ['value' => $crtDate]);
         //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
         //  Log::info('endDate value:', ['value' => $endDate]);
@@ -99,6 +101,7 @@ class TaskController extends Controller
             $loginUser = Auth::user('id','name'); 
             return Inertia::render('Tasks/Create', [
                 'project' => $project, 
+                
             ]);
             } catch (\Throwable $e) {
             Log::error($e->getMessage());
@@ -106,24 +109,22 @@ class TaskController extends Controller
         }
     }
 
-    public function subCreate(Request $request)
+    public function subCreate(Task $task)
     {
         try {
-            $projectId = $request->query('project_id');
+            $projectId = $task->project_id;
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
-            
+
             $loginUser = Auth::user('id','name'); 
-            // dd($project);
             return Inertia::render('Tasks/Create', [
                 'project' => $project, 
+                'task' => $task,
             ]);
             } catch (\Throwable $e) {
             Log::error($e->getMessage());
            // dd($e->getMessage());
         }
     }
-    
-
     /**
      * Store a newly created resource in storage.
      */
@@ -136,6 +137,7 @@ class TaskController extends Controller
                 // dd($request);
             $task = Task::Create([
                 'project_id' => $request->input('projectId'),
+                'parent_id' => $request->input('taskId'),
                 'name' => $request->input('name'),
                 'color_id'=> $request->input('color'),
                 'end_date' => $request->input('end_date'),

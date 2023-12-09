@@ -46,7 +46,8 @@ class ProjectController extends Controller
         ->ShipProject($shipId)
         ->DateCreateProject($crtDate,$crtAddDate)
         ->DateEndProject($endDate,$endAddDate)
-        ->UserProject($userId);
+        ->UserProject($userId)
+        ->latest();
         // Log::info($queryAll->toSql()); 
         
         $projects = $queryAll->paginate(12)
@@ -73,7 +74,8 @@ class ProjectController extends Controller
         ->ShipProject($shipId)
         ->EndOrNoProject($EndOrNo)
         ->DateCreateProject($crtDate,$crtAddDate)
-        ->DateEndProject($endDate,$endAddDate);
+        ->DateEndProject($endDate,$endAddDate)
+        ->latest();
         //  Log::info('crtDate value:', ['value' => $crtDate]);
         //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
         //  Log::info('endDate value:', ['value' => $endDate]);
@@ -157,7 +159,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         try {
-            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions.users');
+            $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
             $loginUser = Auth::user('id','name'); 
             // dd($project);
             return Inertia::render('Projects/Show',['project' => $project,'loginUser'=>$loginUser]);
@@ -181,7 +183,7 @@ class ProjectController extends Controller
             ->get();
             $ships = Ship::select('id','name')->get();
             $categories = Pro_category::select('id','name')->get();
-            $project->load('users','pro_attachments.users','tasks','pro_categories','ships','pro_descriptions.users');
+            $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
                 // dd($project);
             $loginUser = Auth::user('id','name');  
             // dd($loginUser);  

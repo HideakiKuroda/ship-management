@@ -52,9 +52,9 @@ class Project extends Model
 
     public function tasks():HasMany
     {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(Task::class)->whereNull('parent_id');
     }
-
+    
     public function pro_categories():BelongsTo
     {
         return $this->belongsTo(Pro_category::class, 'pro_category_id');
@@ -117,7 +117,8 @@ class Project extends Model
         }
         return $query;
     }
-    
+
+        
 }
 
 

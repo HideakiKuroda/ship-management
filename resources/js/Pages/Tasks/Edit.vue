@@ -308,7 +308,8 @@ onMounted(() => {
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">タスクの詳細・編集</h2>
-            <Link class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('projects.edit', { project:form.projectId })">・・プロジェクトに戻る </Link>
+            <Link v-if="props.task.parent_id == null" class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('projects.edit', { project:form.projectId })">・・プロジェクトに戻る </Link>
+            <Link v-else class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('tasks.edit', { task:props.task.parent_id })">・・親のタスクに戻る </Link>
         </template>
 
         <div class="py-12">
@@ -320,11 +321,20 @@ onMounted(() => {
                         <div class="container px-5 pt-8 mx-auto">
                           <FlashMessage  />
                           <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
-                            <div id="name" class="flex flex-wrap flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span><span class="md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
-                              <span class="md:pl-8">Subject: {{ props.project.name }}</span>
+                            <div  :class="{
+                              'bg-blue-50': props.task.parent_id == null,
+                              'bg-gray-100': props.task.parent_id != null
+                            }"
+                            id="name" class="flex flex-wrap flex-auto md:w-1/2 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span>
+                              <span class=" md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span>
+                              <span class=" md:pl-8">Subject: {{ props.project.name }}</span>
                             </div>
-                            <div id="name" class="flex-auto md:w-1/2  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                            <div  :class="{
+                              'bg-blue-50': props.task.parent_id == null,
+                              'bg-gray-100': props.task.parent_id != null
+                            }"
+                            id="name" class="flex-auto md:w-1/2 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                   ◆&nbsp;&nbsp;担当者
                               <div class="flex flex-wrap sm:flex-row sm:space-x-0">
                                 <div class=" overflow-auto">
@@ -345,11 +355,11 @@ onMounted(() => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
                                   <div class="flex flex-wrap sm:flex-col">
-                                    <label class="text-rose-600">Task No.{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}&nbsp;&nbsp;(内容) :</label> 
+                                    <label v-if="props.task.parent_id == null" class="text-rose-600">Task No.{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}<br>(内容) :</label> 
+                                    <label v-else class="text-indigo-600">Sub Task No.&nbsp;{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}&nbsp;&nbsp;（親）Task No.{{ props.task.parent_id }}<br>(内容) :</label> 
                                     <div class="flex flex-row p-2"> 
                                       <input type="text" id="name" name="name" v-model="form.name" :class="['pl-2 w-full rounded',cssCol ]" >
                                       <VSwatches v-model="color_id" /> 
-                                      <!-- <button @click="colToCss(form.color)">change</button>  -->
                                     </div>
                                   <div class="flex flex-col sm:flex-row p-2 ml-4"> 
                                     <div class="flex flex-col p-2 ml-4">
@@ -567,15 +577,12 @@ onMounted(() => {
 
                             </template>  
                             </vue-collapsible-panel>  
-
+                            <div v-if="props.task.parent_id == null">
                             <vue-collapsible-panel :expanded="true" class="z-0">
                               <template #title > サブタスク一覧 </template>
                               <template #content> 
-                                <div class="flex flex-col">
-                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                      <div class="overflow-hidden">
-                                        <table class="min-w-full text-left text-sm font-light">
+                                <div class="flex flex-col overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light whitespace-no-wrap hidden sm:table">
                                           <thead>
                                             <tr>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
@@ -583,8 +590,8 @@ onMounted(() => {
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
                                               <div class="flex flex-col md:flex-row justify-between md:pr-16">
                                               <div>作成日</div>
-                                              <div>終了日</div>
                                               <div>期限</div>
+                                              <div>完了日</div>
                                               </div>  
                                               </th>
                                              </tr>
@@ -597,22 +604,46 @@ onMounted(() => {
                                                   <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
                                              <div class="flex flex-col md:flex-row justify-between">
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.end_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline)  }}</td>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
+                                              <td v-if="task.completion !== null"
+                                              class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion) }}</td>
+                                              <td v-else
+                                              class="border-b-2 border-gray-200 px-4 py-3">未完了</td>
                                             </div>
-                                            </tr>
-                                            </tbody>
+                                           </tr>
+                                          </tbody>
                                         </table>
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                      <!-- スマホ用のリストここから  -->
+                                      <div class="container ml-2 px-4">
+                                      <div v-for="task in props.task.subtasks" :key="task.id" class="block sm:hidden">
+                                       <div class="mb-4">
+                                          <strong>ID:&emsp;&emsp; タスク名:</strong><br>
+                                            <span>
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.id }}</Link>
+                                                &emsp;&emsp;
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link>
+                                            </span>
+                                        </div>
+                                        <div class="mb-4">
+                                        <strong>作成:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;期限:</strong><br>
+                                        <span class="block">{{ formatDate(task.created_at) }}&emsp;&emsp;&emsp;
+                                          {{ formatDate(task.deadline) }}</span>
+                                        </div>
+                                        <div class="mb-4 border-b-2 border-gray-200">
+                                        <strong>完了:</strong><br>
+                                        <span class="block">{{ formatDate(task.completion) }}</span>
+                                        </div>
+
+
+                                      </div>
+                                      </div> 
                               <div class="flex justify-end">
                               <Link as="button" :href="route('task.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
                               </div>
                               </template>
                               </vue-collapsible-panel>
-  
+                              </div>
                             </vue-collapsible-panel-group>
                         </div>
                       </div>

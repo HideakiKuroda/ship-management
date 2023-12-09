@@ -43,7 +43,7 @@ class Task extends Model
 
     public function subtasks(): HasMany
     {
-        return $this->hasMany(Task::class, 'parent_id');
+        return $this->hasMany(Task::class, 'parent_id')->whereNotNull('parent_id');
     }
 
     public function task_attachments(): HasMany

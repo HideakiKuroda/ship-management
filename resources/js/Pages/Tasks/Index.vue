@@ -270,7 +270,7 @@ const displayVesselData = (vessel) => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-3/4 mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
@@ -281,7 +281,7 @@ const displayVesselData = (vessel) => {
                         <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
-                            <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-10"/>
+                            <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-20"/>
                             <!-- 担当者検索コンボボックス　ここまで -->
 
                             <!-- 船検索コンボボックス　ここから -->
@@ -375,8 +375,9 @@ const displayVesselData = (vessel) => {
                                 <thead>
                                 <tr>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
+                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id(親)</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">船名</th>
-                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">プロジェクト</th>
+                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">作成日</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">担当者</th>
                                     <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
@@ -386,6 +387,7 @@ const displayVesselData = (vessel) => {
                                  <tr  v-for="task in index.tasks.data" :key="task.id" >
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                         <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
+                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ task.parent_id }}</td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                         <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.projects.ships.name }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
@@ -407,7 +409,7 @@ const displayVesselData = (vessel) => {
                         <div class="container ml-2 px-4">
                         <div v-for="task in index.tasks.data" :key="task.id" class="block sm:hidden">
                        <div class="mb-4">
-                          <strong>プロジェクト:</strong><br>
+                          <strong>タスク:</strong><br>
                             <span>
                               <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link>
                                 &emsp;&emsp;
@@ -438,7 +440,7 @@ const displayVesselData = (vessel) => {
                         <!-- スマホ用のリストここまで  -->    
                       </div>
                         <!-- <Pagination  -->
-                          <div class="w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                          <div class="lg:w-3/4 mx-auto sm:px-6 lg:px-8  justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         <div class="card">
                             <Paginator 
                             v-model:first="first"

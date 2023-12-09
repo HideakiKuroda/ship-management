@@ -139,7 +139,7 @@ onMounted(() =>{
   
                         
                         <div class="container px-5 py-0 mx-auto">
-                          <div class="lg:w-2/3 md:w-2/3 mx-auto">
+                          <div class="lg:w-3/4 md:w-full mx-auto">
                             <div class="m-2">
 
                               <div>
@@ -254,23 +254,20 @@ onMounted(() =>{
                             <vue-collapsible-panel :expanded="true">
                               <template #title> タスク一覧 </template>
                               <template #content> 
-                                <div class="flex flex-col">
-                                  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                      <div class="overflow-hidden">
-                                        <table class="min-w-full text-left text-sm font-light">
+                                      <div class="flex flex-col overflow-hidden">
+                                        <table class="min-w-full text-left text-sm font-light whitespace-no-wrap hidden sm:table">
                                           <thead>
                                             <tr>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">id</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">タスク名</th>
                                               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">
                                               <div class="flex flex-col md:flex-row justify-between md:pr-16">
-                                               <div>作成日</div>
-                                               <div>終了予定</div>
-                                               <div>完了</div>
+                                              <div>作成日</div>
+                                              <div>期限</div>
+                                              <div>完了日</div>
                                               </div>  
-                                            </th>
-                                            </tr>
+                                              </th>
+                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr  v-for="task in props.project.tasks" :key="task.id" >
@@ -278,18 +275,86 @@ onMounted(() =>{
                                                   <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })"> {{ task.id }} </Link></td>
                                               <td class="border-b-2 border-gray-200 px-4 py-3">
                                                   <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link></td>
-                                              <div class="flex flex-col md:flex-row justify-between">
+                                             <div class="flex flex-col md:flex-row justify-between">
                                               <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.created_at) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.end_date) }}</td>
-                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion)  }}</td>
-                                              </div>
-                                            </tr>
+                                              <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.deadline) }}</td>
+                                              <td v-if="task.completion !== null"
+                                              class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(task.completion) }}</td>
+                                              <td v-else
+                                              class="border-b-2 border-gray-200 px-4 py-3">未完了</td>
+                                            </div>
+                                             <!-- サブタスクの表示 -->
+                                                 <div v-if="task.subtasks !== null" class="flex flex-col  bg-gray-100 rounded-tl rounded-bl ">
+                                                 <tr  v-for="subtask in task.subtasks" :key="subtask.id">
+                                                  <div>
+                                                  <td class="border-b-2 border-gray-200 px-4 py-3">
+                                                    <Link class="text-blue-600" :href="route('tasks.edit', { task:subtask.id })">{{ subtask.id }}</Link></td>
+                                                  <td class="border-b-2 border-gray-200 px-4 py-3">{{ subtask.name }}</td>
+                                                 </div>
+                                                 
+                                                  <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(subtask.created_at) }}</td>
+                                                 
+                                                  <td v-if="subtask.deadline !== null"
+                                                  class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(subtask.deadline) }}</td>
+                                                  <td v-else
+                                                  class="border-b-2 border-gray-200 px-4 py-3">N/A</td>
+
+
+                                                  <td v-if="subtask.completion !== null"
+                                                  class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(subtask.completion) }}</td>
+                                                  <td v-else
+                                                  class="border-b-2 border-gray-200 px-4 py-3">未完了</td></tr>
+                                                </div> 
+                                              </tr>
                                             </tbody>
                                         </table>
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                      <!-- スマホ用のリストここから  -->
+                                      <div class="container ml-2 px-4">
+                                      <div v-for="task in props.project.tasks" :key="task.id" class="block sm:hidden">
+                                       <div class="mb-4">
+                                          <strong>ID:&emsp;&emsp; タスク名:</strong><br>
+                                            <span>
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.id }}</Link>
+                                                &emsp;&emsp;
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:task.id })">{{ task.name }} </Link>
+                                            </span>
+                                        </div>
+                                        <div class="mb-4">
+                                        <strong>作成:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;期限:</strong><br>
+                                        <span class="block">{{ formatDate(task.created_at) }}&emsp;&emsp;&emsp;
+                                          {{ formatDate(task.deadline) }}</span>
+                                        </div>
+                                        <div class="mb-4 border-b-2 border-gray-200">
+                                        <strong>完了:</strong><br>
+                                        <span class="block">{{ formatDate(task.completion) }}</span>
+                                        </div>
+
+                                        <div class="container ml-2 px-4  bg-gray-100 rounded-tl rounded-bl ">
+                                      <div v-for="subtask in task.subtasks" :key="subtask.id" >
+                                       <div class="mb-4">
+                                          <strong>ID:&emsp;&emsp; サブタスク名:</strong><br>
+                                            <span>
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:subtask.id })">{{ subtask.id }}</Link>
+                                                &emsp;&emsp;
+                                              <Link class="text-blue-600" :href="route('tasks.edit', { task:subtask.id })">{{ subtask.name }} </Link>
+                                            </span>
+                                        </div>
+                                        <div class="mb-4">
+                                        <strong>作成:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;期限:</strong><br>
+                                        <span class="block">{{ formatDate(subtask.created_at) }}&emsp;&emsp;&emsp;
+                                          {{ formatDate(subtask.deadline) }}</span>
+                                        </div>
+                                        <div class="mb-4 border-b-2 border-gray-200">
+                                        <strong>完了:</strong><br>
+                                        <span class="block">{{ formatDate(subtask.completion) }}</span>
+
+                                        </div>
+                                      </div>
+                                      </div> 
+                                      </div>
+                                      </div> 
+
                               </template>
                               </vue-collapsible-panel>
 
