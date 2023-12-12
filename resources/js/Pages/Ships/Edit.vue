@@ -113,7 +113,7 @@ const formatDate = (date) => {
 
 const updateShip = id => {
   
-  router.put(route('ship.update',{ ship:id }), form,{ 
+  router.put(route('ships.update',{ ship:id }), form,{ 
   onBefore: () => {
     if (confirm('変更を更新します。OKでしょうか？')) {
       freeListener();
@@ -494,7 +494,7 @@ const deleteFile = (attachmentId) => {
                                     </div> 
 
                                     <div class="flex flex-col p-2 ml-4">
-                                     <button @click="upSchedule(form.id)" class="flex mx-auto text-white bg-indigo-400 border-0 mt-5 py-2 px-2 focus:outline-none hover:bg-indigo-500 rounded ">ドックスケジュール</button>  
+                                     <button @click="upSchedule(props.ship.id)" class="flex mx-auto text-white bg-indigo-400 border-0 mt-5 py-2 px-2 focus:outline-none hover:bg-indigo-500 rounded ">ドックスケジュール</button>  
                                    </div>
 
                                    <div class="flex flex-col p-2 ml-4">

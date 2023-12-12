@@ -25,7 +25,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
     deadline:           null,
     priorityName:       null,
     priorityColor:      null,
-    priority:           null,
+    priority:           5,
 }); 
 
 const formatDate = (date) => {

@@ -69,8 +69,6 @@ Route::middleware(['auth', 'verified'])
 ->group(function () {
 Route::inertia('/ganttChart','Schedules/GanttChart');
 Route::inertia('/ganttw','Schedules/GantTaiw');
-Route::inertia('/test12','Projects/test');
-Route::inertia('/test22','Projects/test2');
 });    
 
 

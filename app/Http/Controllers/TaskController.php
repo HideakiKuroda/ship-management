@@ -134,7 +134,6 @@ class TaskController extends Controller
         $task = null;
         try {
             DB::transaction(function () use ($request,&$task) {
-                // dd($request);
             $task = Task::Create([
                 'project_id' => $request->input('projectId'),
                 'parent_id' => $request->input('taskId'),

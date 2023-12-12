@@ -324,16 +324,16 @@ onMounted(() => {
                             <div  :class="{
                               'bg-blue-50': props.task.parent_id == null,
                               'bg-gray-100': props.task.parent_id != null
-                            }"
-                            id="name" class="flex flex-wrap flex-auto md:w-1/2 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                              <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span>
-                              <span class=" md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span>
-                              <span class=" md:pl-8">Subject: {{ props.project.name }}</span>
-                            </div>
-                            <div  :class="{
-                              'bg-blue-50': props.task.parent_id == null,
-                              'bg-gray-100': props.task.parent_id != null
-                            }"
+                              }"
+                              id="name" class="flex flex-wrap flex-auto md:w-1/2 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                                <span class="flex flex-nowrap md:pl-5">◆&nbsp;&nbsp;Project No.: {{ props.project.id }}</span>
+                                <span class=" md:pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span>
+                                <span class=" md:pl-8">Subject: {{ props.project.name }}</span>
+                              </div>
+                              <div  :class="{
+                                'bg-blue-50': props.task.parent_id == null,
+                                'bg-gray-100': props.task.parent_id != null
+                              }"
                             id="name" class="flex-auto md:w-1/2 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                   ◆&nbsp;&nbsp;担当者
                               <div class="flex flex-wrap sm:flex-row sm:space-x-0">
@@ -496,8 +496,7 @@ onMounted(() => {
                                         <button class="mr-4 mt-2 h-8 w-20 px-0 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500 " @click="assignMassage">追加</button>
                                       </div>
                                     </div>
-                                    </div>
-                                  
+                                  </div>
                                 </div>
                               </div>
                             </template>
@@ -522,15 +521,15 @@ onMounted(() => {
                                   <label @dragover.prevent @drop.prevent="dropFiles" 
                                       class=" invisible md:visible flex justify-center w-full h-0 md:h-32  px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
                                       <span class="flex items-center space-x-2">
-                                          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
-                                              stroke="currentColor" stroke-width="2">
-                                              <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                          </svg>
-                                          <span class="font-medium text-gray-600">
-                                            ドラッグ＆ドロップでファイルをアップロード or 
-                                              <span class="text-blue-600 underline">ファイル選択</span>
-                                          </span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                                          stroke="currentColor" stroke-width="2">
+                                          <path stroke-linecap="round" stroke-linejoin="round"
+                                           d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <span class="font-medium text-gray-600">
+                                          ドラッグ＆ドロップでファイルをアップロード or 
+                                          <span class="text-blue-600 underline">ファイル選択</span>
+                                        </span>
                                       </span>
                                       <input type="file" name="file_upload2" class="hidden" multiple ref="fileInput2"  @change="handleFileChange('file_upload2')">
                                   </label>

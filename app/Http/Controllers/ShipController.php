@@ -391,15 +391,15 @@ class ShipController extends Controller
 
     function calculateInspectionDates(UpdateShipRequest $request, Ship $ship) {
         try {
+            // dd($ship);
             $ship = Ship::findOrFail($ship->id);
             DB::transaction(function () use ($request, &$ship) {
-                $shipType = $ship-> navigation_area_id;
+                $shipType = $ship->navigation_area_id;
                 $baseDate = $ship->expiry_date;
                 $dates = new DateTime($baseDate);
                 $inspectionPeriods = [];
-        if($baseDat != null && $shipType != null ){        
-
-            
+        if($baseDate!= null && $shipType!= null ){ 
+             
             if ($shipType == 1) {
                 $dates->modify('-72 months')->format('Y-m-d');
                 $inspectionPeriods['midterm1'] = [
@@ -457,7 +457,7 @@ class ShipController extends Controller
                     'Periodic_start2' => $inspectionPeriods['regular2']['start'],
                     'Periodic_dline2' => $inspectionPeriods['regular2']['end'],
                 ]);
-            }
+             } 
             });
             // dd($ownerData);
             return redirect()->back()->with([
