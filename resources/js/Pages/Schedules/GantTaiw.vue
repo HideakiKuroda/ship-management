@@ -1,11 +1,22 @@
 <script setup>
-import { ref, onMounted,computed, nextTick, onUnmounted } from 'vue';
-import moment from 'moment'; //npm install moment でインストール要
 
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { ref, onMounted,computed, onUnmounted } from 'vue';
+import moment from 'moment'; //npm install moment でインストール要
+import { Head, Link,router } from '@inertiajs/vue3';
+import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+
+
+const props = defineProps({
+  users : Array,
+  ships : Object,
+  errors: Object,
+})
 
 // reactive data
-const start_month = ref('2022-04');
-const end_month = ref('2031-03');
+const start_month = ref(moment().subtract(2, 'years'));
+// const end_month = ref(lastDay);
+const end_month = ref(moment().add(11, 'years'));
 const block_size = ref(20);
 // const block_number = ref(0);
 const calendars = ref([]);
@@ -14,10 +25,10 @@ const inner_height = ref('');
 const task_width = ref('');//追加
 const task_height = ref('');
 const taskElement = ref(null);
-const today = ref(moment());
+const today = ref(moment());   // moment()はデフォルト: 現在時刻
 const start_date = ref(moment(start_month.value));
 const calendar = ref(null); 
-const position_id = ref(''); 
+const position_id = ref(0); 
 const dragging = ref(false); 
 const pageX = ref('');
 const element = ref(null);
@@ -28,22 +39,12 @@ const rightResizing = ref(false);
 const width = ref('');
 const task = ref('');
 
-const getDays = (year, month, block_number) => {
-    const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
-    let days = [];
-    let date = moment(`${year}-${month}-01`);
-    let num = date.daysInMonth();
-    for (let i = 0; i < num; i++) {
-      days.push({
-        day: date.date(),
-        dayOfWeek: dayOfWeek[date.day()],
-        block_number
-      })
-      date.add(1, 'day');
-      block_number++;
-    }
-    return days;
-  }   
+const findEarliest = (list) => {
+  const dates = list.map(p => new Date(p.period2_end).getTime());
+  const maxDate = new Date(Math.max(...dates));
+  return maxDate;
+};
+// const lastDate =  new Date(moment(findEarliest(list2.value)));
 
 const getMonths = (year, block_number) => {
   let months = [];
@@ -81,11 +82,11 @@ const getCalendar = () => {
   return block_number;
 }
 
-const getWindowSize = () => {
+const getWindowSize = () => {       //ref="taskElement" をタグ内に設定して表示の高さ幅を抽出
   inner_width.value = window.innerWidth;
   inner_height.value = window.innerHeight;
   if(taskElement.value) {
-    task_width.value = taskElement.value.offsetWidth;
+    task_width.value = taskElement.value.offsetWidth; 
     task_height.value = taskElement.value.offsetHeight;
   }
 }
@@ -98,121 +99,137 @@ const calendarViewHeight = computed(()=>{
   return inner_height.value - task_height.value - 48 - 20;
 })
 
+//日数にblock_sizeをかけることでカレンダー領域の左端からの距離がわかります
+// - calendarViewWidth.value / 2 で画面端から真ん中へ
 const scrollDistance = computed(() => {
   let between_months = today.value.diff(start_date.value, 'months');
   return (between_months + 1) * block_size.value - calendarViewWidth.value / 2;
 })
 
-const categories = ref([
-  {
-    id: 1,
-    name: 'おふゆ',
-    collapsed: false,
-  },
-  {
-    id: 2,
-    name: 'そうや',
-    collapsed: false,
-  },
-]);
+//calendar要素のscollLeftにscrollDistanceプロパティの値を設定
+const todayPosition = () => {  //onMountedに設定し画面表示時に実行
+  if (calendar.value) {
+    calendar.value.scrollLeft = scrollDistance.value;
+  }
+};
 
-const tasks = ref([
-  {
-    id: 1,
-    category_id: 1,
-    name: '中間検査',
-    start_date: '2023-11',
-    end_date: '2024-03',
-    incharge_user: '北海曳船',
-  },
-  {
-    id: 2,
-    category_id: 1,
-    name: '合入渠',
-    start_date: '2023-10',
-    end_date: '2024-02',
-    incharge_user: '北海曳船',
-  },
-  {
-    id: 3,
-    category_id: 1,
-    name: '定期検査',
-    start_date: '2023-12',
-    end_date: '2024-04',
-    incharge_user: '北海曳船',
-},
-{
-    id: 4,
-    category_id: 1,
-    name: '合入渠',
-    start_date: '2023-08',
-    end_date: '2023-11',
-    incharge_user: '北海曳船',
-},
-{
-    id: 5,
-    category_id: 2,
-    name: '定期検査',
-    start_date: '2023-07',
-    end_date: '2023-12',
-    incharge_user: '石狩新港',
-},
-{
-    id: 6,
-    category_id: 2,
-    name: '合入渠',
-    start_date: '2023-06',
-    end_date: '2023-10',
-    incharge_user: '石狩新港',
-    },
-]);
+const formatDate = (date) => {
+   if (!date) return "";
+  return moment(date).format('YYYY-MM-DD');
+};
 
-const lists = computed(() => {
-  let lists = [];
-  categories.value.map(category => {
-    lists.push({ cat: 'category', ...category });
-    tasks.value.map(task => {
-      if (task.category_id === category.id) {
-        lists.push({ cat: 'task', ...task })
-      }
-    })
+const threeMonths = ref(moment().add(3, 'months'))
+
+const list1 = computed(() => {
+  return props.ships
+  .filter(ship => ship.schedules && ship.schedules.interim_dline1 != null) // null でない interim_dline1 を持つ船のみ処理
+  .map(ship => {
+    // 中間検査の日付を計算（過ぎた日付は除外し、近い日付を選択）
+    const interimDeadline = [ship.schedules.interim_dline1, ship.schedules.interim_dline2]
+      .map(d => moment(d))
+      .filter(d => d.isAfter(threeMonths))
+      .sort((a, b) => a.diff(today) - b.diff(today))[0];
+
+    // 定期検査の日付を計算（過ぎた日付は除外し、近い日付を選択）
+    const periodicDeadline = [ship.schedules.Periodic_dline1, ship.schedules.Periodic_dline2]
+      .map(d => moment(d))
+      .filter(d => d.isAfter(threeMonths))
+      .sort((a, b) => a.diff(today) - b.diff(today))[0];
+
+    return {
+      id: ship.id,
+      name: ship.name,   //船名
+      nav: ship.navigation_areas.name, //航行区域
+      del: ship.delivered,   //竣工
+      spys: moment(today).diff(moment(ship.delivered), 'years'),  //船齢
+      issue: ship.issueInspCert,   //定期完了
+      interim: interimDeadline ? interimDeadline.format('YYYY-MM-DD') : 'N/A',   //中間検査
+      period: periodicDeadline ? periodicDeadline.format('YYYY-MM-DD') : 'N/A', //定期検査
+    };
   });
-  return lists;
-})
+});
 
+const list2 = computed(() => {
+  return props.ships
+    .filter(ship => ship.schedules && ship.schedules.interim_dline1 != null)
+    .map(ship => {
+      const schedule = ship.schedules;
+
+    return {
+      id: ship.id,
+      interim1_start: schedule.interim_start1,
+      interim1_end: schedule.interim_dline1,
+      interim2_start: schedule.interim_start2,
+      interim2_end: schedule.interim_dline2,
+      period1_start: schedule.Periodic_start1,
+      period1_end: schedule.Periodic_dline1,
+      period2_start: schedule.Periodic_start2,
+      period2_end: schedule.Periodic_dline2,
+    };
+  });
+});
+
+const combinedData = computed(() => {
+  return list1.value.map(ship => {
+    const schedule = list2.value.find(s => s.id === ship.id) || {};
+
+    return {
+      // list1 からのデータ
+      shipInfo: ship,
+      // list2 からのスケジュール関連データ
+      schedule
+    };
+  });
+});
 
 const taskBars = computed(() => {
-  let top = 10;
-  let left;
-  let between;
-  let start;
-  let style;
-  return displayTasks.value.map(task => {
-    style = {}
-    if(task.cat === 'task'){
-      let date_from = moment(task.start_date);
-      let date_to = moment(task.end_date);
-      between = date_to.diff(date_from, 'months');
-      between++;
-      start = date_from.diff(start_date.value, 'months');
-      left = start * block_size.value;
-      style = {
+  let baseTop = 58; // 初期のトップ位置
+  let rowHeight = 48; // 各行の高さ
+
+  return displayTasks.value.map((data, index) => {
+      const createStyle = (start, end, rowOffset) => {
+      const date_from = moment(start);
+      const date_to = moment(end);
+      const between = date_to.diff(date_from, 'months') + 1;
+      const left = date_from.diff(start_date.value, 'months') * block_size.value;
+      const top = baseTop + (index * rowHeight) + (rowOffset * rowHeight);
+
+      return {
         top: `${top}px`,
-        left: `${left}px`,
+        left: `${left+180}px`,
         width: `${block_size.value * between}px`,
-      }
-    }
-    top = top + 40;
+      };
+    };
+    // 1行目: interim バー
+    const interim1Style = data.schedule.interim1_start ? createStyle(data.schedule.interim1_start, data.schedule.interim1_end, 0) : null;
+    const interim2Style = data.schedule.interim2_start ? createStyle(data.schedule.interim2_start, data.schedule.interim2_end, 0) : null;
+    const interim1 = data.schedule.interim1_start;
+    const interim2 = data.schedule.interim2_start;
+    // 2行目: period バー
+    const period1Style = data.schedule.period1_start ? createStyle(data.schedule.period1_start, data.schedule.period1_end, 1) : null;
+    const period2Style = data.schedule.period2_start ? createStyle(data.schedule.period2_start, data.schedule.period2_end, 1) : null;
+    const period1 = data.schedule.period1_start;
+    const period2 = data.schedule.period2_start;
+
+    baseTop = baseTop + 96;
     return {
-      style,
-      task
-    }
-  })
-})
+      shipInfo: data.shipInfo,
+      interim1Style,
+      interim2Style,
+      period1Style,
+      period2Style,
+      interim1,
+      interim2,
+      period1,
+      period2,
+      
+    };
+  });
+});
 
 const windowSizeCheck = (event) => {
-  let height = lists.value.length - position_id.value
-  if (event.deltaY > 0 && height * 40 > calendarViewHeight.value) {
+  let height = list1.value.length - position_id.value
+  if (event.deltaY > 0 && height * calendarViewHeight.value > calendarViewHeight.value) {
     position_id.value++
   } else if (event.deltaY < 0 && position_id.value !== 0) {
     position_id.value--
@@ -220,8 +237,8 @@ const windowSizeCheck = (event) => {
 }
 
 const displayTasks = computed(() => {
-  let display_task_number = Math.floor(calendarViewHeight.value / 40);
-  return lists.value.slice(position_id.value, position_id.value + display_task_number);
+  let display_task_number = Math.floor(calendarViewHeight.value);
+  return combinedData.value.slice(position_id.value, position_id.value + display_task_number);
 });
 
 const mouseDownMove = (task, event) => {
@@ -352,17 +369,20 @@ const dragTaskOver = (overTask) => {
 onMounted(() => {
   getCalendar();
   getWindowSize();
+  todayPosition();
   window.addEventListener('resize', getWindowSize);
   window.addEventListener('wheel', windowSizeCheck);
   window.addEventListener('mousemove', mouseMove);
   window.addEventListener('mouseup', stopDrag);
   window.addEventListener('mousemove', mouseResize);
 
-  console.log('mouseDownMove');
-  
-  nextTick().then(() => {
-     calendar.value.scrollLeft = scrollDistance.value;
-   });
+  // console.log('end_date',findEarliest(list2.value));
+  // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
+  // console.log('船データ',list1.value)
+  console.log('画面幅',calendarViewWidth.value)
+  // nextTick().then(() => {
+  //    calendar.value.scrollLeft = scrollDistance.value;
+  //  });
 })
 
 onUnmounted(() => {
@@ -380,70 +400,77 @@ defineExpose({ windowSizeCheck, displayTasks})
 
 
 <template>
-  <!-- ガントチャートのヘッダー部分 -->
-  <div id="gantt-header" class="h-12 p-2 flex items-center">
-    <h1 class="text-xl font-bold">スケジュール管理  {{ start_month }}  ～  {{ end_month }}</h1>
-  </div>
-  <div id="gantt-content" class="flex">
+ <Head title="ドックスケジュール" />
+
+<AuthenticatedLayout>
+    <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">ドックスケジュール  {{ start_month.format('YYYY年MM月') }}  ～  {{ end_month.format('YYYY年MM月') }}</h2>
+    </template>
+
+    <div class="py-12">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                <BreezeValidationErrors :errors="errors" />  
+                <!-- <form @submit.prevent="updateShip(form.id)" >   -->
+                 <section class="text-gray-600 body-font relative">
+
+
+   <div id="gantt-content" class="flex">
     <!-- ガントチャートのタスク領域 -->
     <div id="gantt-task">  
-      <div id="gantt-task-title" class="flex items-center bg-green-600 text-white h-20" ref="taskElement">
-        <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-32 h-full">
-        タスク
+      <div id="gantt-task-title" class="flex items-center bg-indigo-400 text-white h-16" ref="taskElement">
+        <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-60 h-full">
+        船名&emsp;＆&emsp;基本情報
       </div>
-      <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-20 h-full">
-          開始日
-      </div>
-      <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-20 h-full">
-          完了期限日
-      </div>
-      <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-20 h-full">
-          担当
-       </div>
-    </div>
+          </div>
+    <!-- ガントチャートのタスク領域 -->
     <div id="gantt-task-list" class="overflow-y-hidden" :style="`height:${calendarViewHeight}px`">
-      <div v-for="(task,index) in displayTasks" :key="index" class="flex h-10 border-b" 
-        @dragstart="dragTask" @dragoverr.prevent="dragTaskOver(task)" draggable="true">
-        <template v-if="task.cat === 'category'">
-          <div class="flex items-center font-bold w-full text-2xl pl-2">
-            {{task.name}}
+      <div v-for="(item,index) in displayTasks" :key="index" class="flex flex-col h-36 border-b"> 
+      <!-- <div v-for="(task,index) in list1" :style="taskBars.value && taskBars.value[index] ? { top: `${taskBars.value[index].top}px` } : {}" class="flex flex-col  h-32 border-b"> -->
+  <!-- タスクの情報を表示するコード -->
+        <!-- @dragstart="dragTask" @dragoverr.prevent="dragTaskOver(task)" draggable="true"> -->
+          <div class="flex items-center font-bold w-full text-xl pl-2">
+            {{item.shipInfo.name}}
           </div>
-        </template>
-        <template v-else>
-          <div class="border-r flex items-center font-bold w-32 text-sm pl-4">
-            {{task.name}}
+          <div class="border-r flex font-bold  text-sm pl-4">
+            竣工:{{formatDate(item.shipInfo.del)}}<br>航行区域:{{item.shipInfo.nav}}&emsp;&emsp;船齢：{{ item.shipInfo.spys }}年
           </div>
-          <div class="border-r flex items-center justify-center w-20 text-sm">
-            {{task.start_date}}
+          <div class="border-r flex  text-sm  pl-4">
+            定期検査完了：{{formatDate(item.shipInfo.issue)}}
           </div>
-          <div class="border-r flex items-center justify-center w-20 text-sm">
-            {{task.end_date}}
+          <div class="border-r flex   text-sm pl-4">
+            中間検査期限：{{formatDate(item.shipInfo.interim)}}
           </div>
-          <div class="border-r flex items-center justify-center w-20 text-sm">
-            {{task.incharge_user}}
+          <div class="border-r flex   text-sm pl-4">
+            定期検査期限：{{formatDate(item.shipInfo.period)}}
           </div>
-        </template>
-      </div>
+        </div>
     </div>
     </div> <!-- id="gantt-task"  -->
 
     <!-- ガントチャートのカレンダー領域 -->
     <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l" 
-          :style="`width:${calendarViewWidth}px`" ref="calendar">
-      <div id="gantt-date" class="h-20">
+          :style="`width:${calendarViewWidth}px`" 
+           ref="calendar">
+      <div id="gantt-date" class="h-16">
+        <!-- ここから　カレンダーの年数 -->
         <div id="gantt-year-month" class="relative h-8">
           <div v-for="(calendar,index) in calendars" :key="index">
             <div class="bg-indigo-700 text-white border-b border-r border-t h-8 absolute font-bold text-sm 
-            flex items-center justify-center" :style="`width:${calendar.calendar*block_size}px;left:${calendar.start_block_number*block_size}px`">
+            flex items-center justify-center" 
+            :style="`width:${calendar.calendar*block_size}px;left:${calendar.start_block_number*block_size}px`">
               {{calendar.date}}
             </div>
           </div>
         </div>
-        <!-- ここから -->
-        <div id="gantt-day" class="relative h-12">
+        <!-- ここから　カレンダーの月数 -->
+        <div id="gantt-day" class="relative h-8">
           <div v-for="(calendar,index) in calendars" :key="index">
             <div v-for="(month,index) in calendar.months" :key="index">
-              <div class="border-r border-b h-12 absolute flex items-center justify-center flex-col font-bold text-xs"
+              <div class="border-r border-b h-8 absolute flex items-center justify-center flex-col font-bold text-xs"
+                :class="{'bg-blue-100': month.month === 4, 'bg-red-100': month.month === 3,
+                'bg-red-600 text-white': calendar.year===  today.year() && month.month === today.month() + 1}"
                 :style="`width:${block_size}px;left:${month.block_number*block_size}px`">
                 <span>{{ month.month }}</span> <!-- monthは0から始まるため1を加えます -->
               </div>
@@ -452,7 +479,7 @@ defineExpose({ windowSizeCheck, displayTasks})
         </div>
         <!-- ここまで -->
         <div id="gantt-height" class="relative">
-        <!-- //追加 -->
+        <!-- //カレンダーの縦線 -->
           <div v-for="(calendar,index) in calendars" :key="index">
             <div v-for="(month,index) in calendar.months" :key="index">
               <div class="border-r border-b absolute" 
@@ -461,25 +488,37 @@ defineExpose({ windowSizeCheck, displayTasks})
               </div>
             </div>
           </div>
-          <div id="gantt-bar-area" class="relative"
-              :style="`width:${calendarViewWidth}px; height:${calendarViewHeight}px`">
-            <div v-for="(bar,index) in taskBars" :key="index">
-              <div :style="bar.style" class="rounded-lg absolute h-5 bg-yellow-200"
-                v-if="bar.task.cat === 'task'"  @mousedown="mouseDownMove(bar.task, $event)">
-                <div class="w-full h-full" style="pointer-events: none;"></div>
-                <!-- //以下を追加　四角いボタン -->
-                <div class="absolute w-2 h-2 bg-yellow-300 border border-black hover:bg-red-600 "
-                    style="top:6px;left:-6px;cursor: pointer;" 
-                    @mousedown.stop="mouseDownResize(bar.task,'left', $event)"></div>
-                <div class="absolute w-2 h-2 bg-yellow-300 border border-black hover:bg-red-600 "
-                     style="top:6px;right:-6px;cursor: pointer;" 
-                     @mousedown.stop="mouseDownResize(bar.task,'right', $event)"></div>
-              </div>
-            </div>  
+
+          <div id="gantt-bar-area" class="relative overflow-y-hiddn" :style="`width:${calendarViewWidth}px;height:${calendarViewHeight}px`">
+          <div v-for="(bar, index) in taskBars" :key="index" class="flex flex-col h-36">
+            <!-- 空の行（先頭行） -->
+            <div class="absolute h-5" :style="{ top: `${bar.top}px` }"></div>
+            <!-- Interim と Period のバー -->
+            <div :style="bar.interim1Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim1Style">
+              {{ bar.shipInfo.name}}&emsp;&emsp;中間①&emsp;{{formatDate(bar.interim1)}}～
+            </div>
+            <div :style="bar.interim2Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim2Style">
+              {{ bar.shipInfo.name}}&emsp;&emsp;中間②&emsp;{{formatDate(bar.interim2)}}～
+            </div>
+            <div :style="bar.period1Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period1Style">
+              {{ bar.shipInfo.name}}&emsp;&emsp;定期①&emsp;{{formatDate(bar.period1)}}～
+            </div>
+            <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style">
+              {{ bar.shipInfo.name}}&emsp;&emsp;定期②&emsp;{{formatDate(bar.period2)}}～
+            </div>
+            <div :style="`width:${calendarViewWidth*3.6}px`" class="h-full border-b "></div>
           </div>
+        </div>
         </div> <!--id="gantt-height"-->
       </div>  <!--id="gantt-date"-->
     </div>   <!-- id="gantt-calendar" -->
   </div>    <!-- id="gantt-content" カレンダーとタスクの両方 -->
+
+</section> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
   
 </template>

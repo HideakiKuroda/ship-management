@@ -281,10 +281,10 @@ const displayVesselData = (vessel) => {
                     <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
                       <div class="flex justify-end  lg:w-2/3">
-                            <Link as="button" :href="route('projects.create')" class=" mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
-                          </div>
+                        <Link as="button" :href="route('projects.create')" class=" mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">新規プロジェクト作成</Link>
+                      </div>
 
-                        <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
+                      <div class="flex flex-wrap sm:flex-row pl-4 my-4 lg:w-2/3 w-full mx-auto">
                             <!-- 担当者検索コンボボックス　ここから -->
                             <div class="flex justify-between items-center mt-1 flex-col md:flex-row">
                             <UserSerch :userId="index.userId" :users="props.users" @update:currentUser="handleUserId" class=" opacity-100 z-20"/>

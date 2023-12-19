@@ -34,6 +34,7 @@ class ScheduleSeeder extends Seeder
             [ 'ship_id' => 18,],
             [ 'ship_id' => 19,],
             [ 'ship_id' => 20,],
+            [ 'ship_id' => 21,],
             [ 'ship_id' => 22,],
             [ 'ship_id' => 23,],
             [ 'ship_id' => 24,],

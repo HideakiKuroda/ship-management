@@ -8,6 +8,7 @@ use App\Http\Controllers\ShipController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Models\Project;
@@ -65,11 +66,7 @@ Route::post('/tasks/indexfilter/', [TaskController::class,'indexfilter'])->name(
 Route::get('getTask/indexfilter', [TaskController::class,'indexfilter'])->name('task.indexfilter')->middleware(['auth', 'verified']);
          
 //ガントチャートのルート設定
-Route::middleware(['auth', 'verified'])
-->group(function () {
-Route::inertia('/ganttChart','Schedules/GanttChart');
-Route::inertia('/ganttw','Schedules/GantTaiw');
-});    
+Route::get('/schedules',[ScheduleController::class,'show'])->name('schedules.dock')->middleware(['auth', 'verified']);
 
 
 Route::get('/', function () {

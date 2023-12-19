@@ -89,7 +89,7 @@ class Ship extends Model
 
     public function schedules(): HasOne
     {
-        return $this->hasOne(Schedule::class);
+        return $this->hasOne(Schedule::class ,'ship_id','id');
     }
 
 
