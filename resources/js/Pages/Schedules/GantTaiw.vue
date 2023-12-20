@@ -141,6 +141,7 @@ const list1 = computed(() => {
       return ship.users.some(user => user.id == user_id.value); //slectedOperatSection
     })
     .filter(ship => {
+      //operat_section_id で絞込み
       if (slectedOperatSection.value == null) {
         return true; // すべてのshipを含める
       }
