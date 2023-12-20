@@ -4,12 +4,14 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ref, onMounted,computed, onUnmounted } from 'vue';
 import moment from 'moment'; //npm install moment でインストール要
 import { Head, Link,router } from '@inertiajs/vue3';
-import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+import BreezeValidationErrors from '@/Components/ValidationErrors.vue'  ;
+import UserSerch from '@/Components/UserSerch.vue';
 
 
 const props = defineProps({
   users : Array,
   ships : Object,
+  operatSections : Array,
   errors: Object,
 })
 
@@ -38,6 +40,13 @@ const leftResizing = ref(false);
 const rightResizing = ref(false);
 const width = ref('');
 const task = ref('');
+const user_id = ref();
+const slectedOperatSection = ref();
+
+const handleUserId = (currentUser) =>{
+  user_id.value = currentUser
+   console.log("handleUserId:", currentUser)
+}
 
 const findEarliest = (list) => {
   const dates = list.map(p => new Date(p.period2_end).getTime());
@@ -123,6 +132,20 @@ const threeMonths = ref(moment().add(3, 'months'))
 const list1 = computed(() => {
   return props.ships
   .filter(ship => ship.schedules && ship.schedules.interim_dline1 != null) // null でない interim_dline1 を持つ船のみ処理
+  .filter(ship => {
+      // user_idがnullの場合は、このフィルタを適用しない
+      if (user_id.value == null) {
+        return true; // すべてのshipを含める
+      }
+    // user_idがnullでない場合は、特定のユーザーIDでフィルタリング
+      return ship.users.some(user => user.id == user_id.value); //slectedOperatSection
+    })
+    .filter(ship => {
+      if (slectedOperatSection.value == null) {
+        return true; // すべてのshipを含める
+      }
+      return ship.operat_section_id == slectedOperatSection.value; //slectedOperatSection
+    })
   .map(ship => {
     // 中間検査の日付を計算（過ぎた日付は除外し、近い日付を選択）
     const interimDeadline = [ship.schedules.interim_dline1, ship.schedules.interim_dline2]
@@ -347,6 +370,10 @@ const dragTask = (dragTask) => {
   task.value = dragTask;
 }
 
+const handleBarClick = (bar) => {
+  console.log("クリックされたバーのデータ:", bar);
+}
+
 const dragTaskOver = (overTask) => {
   let deleteIndex;
   let addIndex;
@@ -379,7 +406,7 @@ onMounted(() => {
   // console.log('end_date',findEarliest(list2.value));
   // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
   // console.log('船データ',list1.value)
-  console.log('画面幅',calendarViewWidth.value)
+  // console.log('運航地域',props.ships.operat_sections)
   // nextTick().then(() => {
   //    calendar.value.scrollLeft = scrollDistance.value;
   //  });
@@ -403,10 +430,31 @@ defineExpose({ windowSizeCheck, displayTasks})
  <Head title="ドックスケジュール" />
 
 <AuthenticatedLayout>
-    <template #header>
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">ドックスケジュール  {{ start_month.format('YYYY年MM月') }}  ～  {{ end_month.format('YYYY年MM月') }}</h2>
+    <template #header >
+      <div class="flex flex-row">
+      <div class="font-semibold text-xl text-gray-800 leading-tight">ドックスケジュール  {{ start_month.format('YYYY年MM月') }}  ～  {{ end_month.format('YYYY年MM月') }}</div>
+      <!-- 担当者検索コンボボックス　ここから -->
+      <div class=" flex flex-row">
+        <UserSerch :userId="user_id" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
+      </div>
+    
+      <!-- 担当者検索コンボボックス　ここまで -->
+      <!-- 運航地域の絞込み　ここから -->
+      <div class="flex flex-col">
+        <label for="section" class="ml-4 w-28 leading-tight  text-justify text-sm text-gray-600">運航地域</label>
+        <div id="section" class=" w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" >
+        <!-- ユーザー選択ドロップダウン -->
+        <select class="rounded-lg  border border-indigo-300 h-10 w-40" v-model="slectedOperatSection">
+          <option  :value="null">※ 全地域 ※</option>
+          <option v-for="operatSection in props.operatSections" :key="operatSection.id" :value="operatSection.id">
+            {{ operatSection.section || '全地域'  }}
+            </option>
+        </select>
+      </div>  
+      </div>
+    </div>
+      <!-- 運航地域の絞込み　ここまで -->
     </template>
-
     <div class="py-12">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -494,19 +542,19 @@ defineExpose({ windowSizeCheck, displayTasks})
             <!-- 空の行（先頭行） -->
             <div class="absolute h-5" :style="{ top: `${bar.top}px` }"></div>
             <!-- Interim と Period のバー -->
-            <div :style="bar.interim1Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim1Style">
+            <div :style="bar.interim1Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim1Style" @dblclick="handleBarClick(bar)">
               {{ bar.shipInfo.name}}&emsp;&emsp;中間①&emsp;{{formatDate(bar.interim1)}}～
             </div>
-            <div :style="bar.interim2Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim2Style">
+            <div :style="bar.interim2Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim2Style" @dblclick="handleBarClick(bar)">
               {{ bar.shipInfo.name}}&emsp;&emsp;中間②&emsp;{{formatDate(bar.interim2)}}～
             </div>
-            <div :style="bar.period1Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period1Style">
+            <div :style="bar.period1Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period1Style" @dblclick="handleBarClick(bar)">
               {{ bar.shipInfo.name}}&emsp;&emsp;定期①&emsp;{{formatDate(bar.period1)}}～
             </div>
-            <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style">
+            <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="handleBarClick(bar)">
               {{ bar.shipInfo.name}}&emsp;&emsp;定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
-            <div :style="`width:${calendarViewWidth*3.6}px`" class="h-full border-b "></div>
+            <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
         </div>
         </div> <!--id="gantt-height"-->
