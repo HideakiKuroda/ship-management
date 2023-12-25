@@ -12,6 +12,7 @@ const props = defineProps({
   users : Array,
   ships : Object,
   operatSections : Array,
+  projects: Array,
   errors: Object,
 })
 
@@ -42,6 +43,7 @@ const width = ref('');
 const task = ref('');
 const user_id = ref();
 const slectedOperatSection = ref();
+const barColor = ref('bg-gray-400');
 
 const handleUserId = (currentUser) =>{
   user_id.value = currentUser
@@ -193,24 +195,61 @@ const list2 = computed(() => {
   });
 });
 
+const list3 = computed(() => {
+  // プロジェクトを ship_id に基づいてグループ化
+  const projectsByShipId = new Map();
+
+  props.projects.forEach(pro => {
+    if (pro.start_date && pro.end_date) {
+      const projectData = {
+        id: pro.id,
+        s_id: pro.ship_id,
+        name: pro.name,
+        category_id: pro.pro_category_id,
+        start_date: pro.start_date,
+        end_date: pro.end_date,
+      };
+
+      if (!projectsByShipId.has(pro.ship_id)) {
+        projectsByShipId.set(pro.ship_id, [projectData]);
+      } else {
+        projectsByShipId.get(pro.ship_id).push(projectData);
+      }
+    }
+  });
+
+  return projectsByShipId;
+});
+ 
+
 const combinedData = computed(() => {
   return list1.value.map(ship => {
     const schedule = list2.value.find(s => s.id === ship.id) || {};
+    const projects = list3.value.get(ship.id) || []; 
+   
 
     return {
       // list1 からのデータ
       shipInfo: ship,
       // list2 からのスケジュール関連データ
-      schedule
+      schedule,
+      // list3 からのプロジェクト関連データ
+      project: projects,
     };
   });
+});
+
+// 画面をスクロールしたときに各データのポジションを変更する
+const displayTasks = computed(() => {
+  let display_task_number = Math.floor(calendarViewHeight.value);
+  return combinedData.value.slice(position_id.value, position_id.value + display_task_number);
 });
 
 const taskBars = computed(() => {
   let baseTop = 58; // 初期のトップ位置
   let rowHeight = 48; // 各行の高さ
 
-  return displayTasks.value.map((data, index) => {
+  return displayTasks.value.map((data, index) => {    //スクロールに合わせた位置でタスクバー表示を変更dataにマップっされる
       const createStyle = (start, end, rowOffset) => {
       const date_from = moment(start);
       const date_to = moment(end);
@@ -224,16 +263,50 @@ const taskBars = computed(() => {
         width: `${block_size.value * between}px`,
       };
     };
-    // 1行目: interim バー
+    // 1行目: interim バー 中間検査
     const interim1Style = data.schedule.interim1_start ? createStyle(data.schedule.interim1_start, data.schedule.interim1_end, 0) : null;
     const interim2Style = data.schedule.interim2_start ? createStyle(data.schedule.interim2_start, data.schedule.interim2_end, 0) : null;
     const interim1 = data.schedule.interim1_start;
     const interim2 = data.schedule.interim2_start;
-    // 2行目: period バー
+    // 2行目: period バー　定期検査
     const period1Style = data.schedule.period1_start ? createStyle(data.schedule.period1_start, data.schedule.period1_end, 1) : null;
     const period2Style = data.schedule.period2_start ? createStyle(data.schedule.period2_start, data.schedule.period2_end, 1) : null;
     const period1 = data.schedule.period1_start;
     const period2 = data.schedule.period2_start;
+
+    const createProjectStyle = (project) => {
+      if (!project || !project.start_date || !project.end_date ) return null;
+    // プロジェクトカテゴリーに応じてトップ位置を調整
+    let rowOffset;
+          switch (project.category_id) {
+            case 1:
+              rowOffset = 1.2; // period1Styleと同じ高さ
+              break;
+            case 2:
+              rowOffset = 0.2; // interim1Styleと同じ高さ
+              break;
+            case 3:
+            case 4:
+              rowOffset = -0.7; // interim1Styleより16px上
+              break;
+            default:
+              rowOffset = -0.7; // 既定値
+          }
+          const pstyle = createStyle(project.start_date, project.end_date, rowOffset);
+          return {
+            pstyle,
+            id: project.id,
+            s_id:project.s_id,
+            name:project.name,
+            category_id: project.category_id,
+            start_date: project.start_date,
+            end_date: project.end_date,
+          }
+        };
+
+        // 各プロジェクトバーのスタイルを生成
+        const projectStyles = data.project.map(project => createProjectStyle(project));
+        console.log(projectStyles);
 
     baseTop = baseTop + 96;
     return {
@@ -246,7 +319,7 @@ const taskBars = computed(() => {
       interim2,
       period1,
       period2,
-      
+      projectStyles,
     };
   });
 });
@@ -259,11 +332,6 @@ const windowSizeCheck = (event) => {
     position_id.value--
   }
 }
-
-const displayTasks = computed(() => {
-  let display_task_number = Math.floor(calendarViewHeight.value);
-  return combinedData.value.slice(position_id.value, position_id.value + display_task_number);
-});
 
 const mouseDownMove = (task, event) => {
   if(event.button !== 0) return; // Ensure only the left mouse button initiates the drag.
@@ -394,6 +462,20 @@ const dragTaskOver = (overTask) => {
   }
 }
 
+const  getBarColor = (categoryId) => {
+  switch (categoryId) {
+    case 1:
+      return 'bg-red-400';
+    case 2:
+      return 'bg-yellow-500';
+    case 3:
+      return 'bg-blue-400';
+    case 4:
+      return 'bg-green-400';
+    default:
+      return 'bg-gray-400';
+}}
+
 onMounted(() => {
   getCalendar();
   getWindowSize();
@@ -404,9 +486,13 @@ onMounted(() => {
   window.addEventListener('mouseup', stopDrag);
   window.addEventListener('mousemove', mouseResize);
 
-  // console.log('end_date',findEarliest(list2.value));
+//   taskBars.value.forEach((task, index) => {
+//   console.log(`projectStyles for task ${index}:`, task.projectStyles);
+// });
+
+
   // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
-  // console.log('船データ',list1.value)
+  // console.log('ドックデータ',combinedData.value)
   // console.log('運航地域',props.ships.operat_sections)
   // nextTick().then(() => {
   //    calendar.value.scrollLeft = scrollDistance.value;
@@ -554,6 +640,13 @@ defineExpose({ windowSizeCheck, displayTasks})
             </div>
             <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="handleBarClick(bar)">
               {{ bar.shipInfo.name}}&emsp;&emsp;定期②&emsp;{{formatDate(bar.period2)}}～
+            </div>
+            <!-- プロジェクトバー（複数） -->
+            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles">
+              <div v-if="projectStyle.category_id == 1" >定期検査</div>
+              <div v-else-if="projectStyle.category_id == 2" >中間検査</div>
+              <div v-else-if="projectStyle.category_id == 3" >合入渠</div>
+              <div v-else-if="projectStyle.category_id == 4">補償入渠</div>
             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>

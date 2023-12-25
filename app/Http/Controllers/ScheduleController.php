@@ -7,12 +7,14 @@ use App\Models\Ship;
 use App\Models\User;
 use App\Models\Navigation_area;
 use App\Models\Operat_section;
+use App\Models\Project;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 use DateTime;
 use Exception;
 
@@ -36,11 +38,15 @@ class ScheduleController extends Controller
                       ->withDefault(); // ここでデフォルト値を設定
             }])
             ->get();
-            // dd($ships);
+            $projects = Project::whereHas('pro_categories', function ($query) {
+                $query->where('pro_categories.dock', 1);    
+            })->get();
+                // dd($projects);
             return Inertia::render('Schedules/GantTaiw',[
                 'users' => $users,
                 'ships' => $ships,
                 'operatSections' => $operatSections,
+                'projects' => $projects,
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
