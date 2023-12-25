@@ -36,17 +36,19 @@ class ScheduleController extends Controller
             'schedules' => function ($query) {
                 $query->select('ship_id', 'interim_start1', 'interim_dline1', 'Periodic_start1', 'Periodic_dline1', 'interim_start2', 'interim_dline2', 'Periodic_start2', 'Periodic_dline2')
                       ->withDefault(); // ここでデフォルト値を設定
-            }])
-            ->get();
+            }])->get();
+            
             $projects = Project::whereHas('pro_categories', function ($query) {
                 $query->where('pro_categories.dock', 1);    
-            })->get();
+            })->with(['users:id'])->get();
+            $loginUser = Auth::user('id','name'); 
                 // dd($projects);
             return Inertia::render('Schedules/GantTaiw',[
                 'users' => $users,
                 'ships' => $ships,
                 'operatSections' => $operatSections,
                 'projects' => $projects,
+                'loginUser' => $loginUser,
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());

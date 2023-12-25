@@ -14,6 +14,7 @@ const props = defineProps({
   operatSections : Array,
   projects: Array,
   errors: Object,
+  loginUser:  Object,
 })
 
 // reactive data
@@ -43,7 +44,6 @@ const width = ref('');
 const task = ref('');
 const user_id = ref();
 const slectedOperatSection = ref();
-const barColor = ref('bg-gray-400');
 
 const handleUserId = (currentUser) =>{
   user_id.value = currentUser
@@ -280,17 +280,17 @@ const taskBars = computed(() => {
     let rowOffset;
           switch (project.category_id) {
             case 1:
-              rowOffset = 1.2; // period1Styleと同じ高さ
+              rowOffset = 0.8; // period1Styleと同じ高さ
               break;
             case 2:
-              rowOffset = 0.2; // interim1Styleと同じ高さ
+              rowOffset = -0.2; // interim1Styleと同じ高さ
               break;
             case 3:
             case 4:
-              rowOffset = -0.7; // interim1Styleより16px上
+              rowOffset = -1; // interim1Styleより16px上
               break;
             default:
-              rowOffset = -0.7; // 既定値
+              rowOffset = -1; // 既定値
           }
           const pstyle = createStyle(project.start_date, project.end_date, rowOffset);
           return {
@@ -306,7 +306,7 @@ const taskBars = computed(() => {
 
         // 各プロジェクトバーのスタイルを生成
         const projectStyles = data.project.map(project => createProjectStyle(project));
-        console.log(projectStyles);
+        // console.log(projectStyles);
 
     baseTop = baseTop + 96;
     return {
@@ -323,6 +323,25 @@ const taskBars = computed(() => {
     };
   });
 });
+
+const getUserIds = (projectId) => {
+  // 特定のプロジェクトを見つける
+  const project = props.projects.find(p => p.id === projectId);
+  // プロジェクトが見つかった場合、関連するユーザーのIDリストを返す
+  if (project && project.users) {
+    return project.users.map(user => user.id);
+  }
+  // 関連するユーザーがいないか、プロジェクトが見つからない場合は空の配列を返す
+  return [];
+};
+
+const editOpen = (id) => {
+  if (getUserIds(id).some(userId => userId === props.loginUser.id)) {
+    router.get(route('projects.edit', { project:id }));
+  } else {
+    alert('編集は担当者のみ可能です');
+  }  
+}
 
 const windowSizeCheck = (event) => {
   let height = list1.value.length - position_id.value
@@ -642,11 +661,12 @@ defineExpose({ windowSizeCheck, displayTasks})
               {{ bar.shipInfo.name}}&emsp;&emsp;定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
             <!-- プロジェクトバー（複数） -->
-            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles">
-              <div v-if="projectStyle.category_id == 1" >定期検査</div>
-              <div v-else-if="projectStyle.category_id == 2" >中間検査</div>
-              <div v-else-if="projectStyle.category_id == 3" >合入渠</div>
-              <div v-else-if="projectStyle.category_id == 4">補償入渠</div>
+            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" 
+            :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles"  @dblclick="editOpen(projectStyle.id)">
+              <div v-if="projectStyle.category_id == 1" >{{ projectStyle.name }}</div>
+              <div v-else-if="projectStyle.category_id == 2" >{{ projectStyle.name }}</div>
+              <div v-else-if="projectStyle.category_id == 3" >{{ projectStyle.name }}</div>
+              <div v-else-if="projectStyle.category_id == 4">{{ projectStyle.name }}</div>
             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
