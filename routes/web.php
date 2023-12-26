@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])
 });    
 Route::post('/projects/indexfilter/', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
 Route::get('getindex/indexfilter', [ProjectController::class,'indexfilter'])->name('project.indexfilter')->middleware(['auth', 'verified']);
+// Route::get('/projects/{project}/getLink', [ProjectController::class,'getLink'])->name('project.getLink')->middleware(['auth', 'verified']);
 
 
 // tasks関連のルート設定

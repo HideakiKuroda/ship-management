@@ -15,6 +15,7 @@ const props = defineProps({
   projects: Array,
   errors: Object,
   loginUser:  Object,
+  hasRole:  Object,
 })
 
 // reactive data
@@ -336,10 +337,11 @@ const getUserIds = (projectId) => {
 };
 
 const editOpen = (id) => {
-  if (getUserIds(id).some(userId => userId === props.loginUser.id)) {
+  if (getUserIds(id).some(userId => userId === props.loginUser.id || props.hasRole == true)) {
+    
     router.get(route('projects.edit', { project:id }));
   } else {
-    alert('編集は担当者のみ可能です');
+    alert('編集は担当者とシステム管理者のみ可能です');
   }  
 }
 

@@ -200,6 +200,39 @@ class ProjectController extends Controller
         }
     }
 
+    // public function getLink(Project $project)
+    // {
+    //     try {
+    //         $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
+    //         $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
+    //             $query->whereIn('departments.id', $departmentIds);
+    //         })
+    //         ->select('id','name')
+    //         ->get();
+    //         $ships = Ship::select('id','name')->get();
+    //         $categories = Pro_category::select('id','name')->get();
+    //         $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
+    //             // dd($project);
+    //         $loginUser = Auth::user('id','name');  
+    //         // dd($loginUser);  
+    //         $editUrl = route('Projects/Edit', ['project' => $project->id]);
+    //         $projectdata = [
+    //             'project' => $project,
+    //             'users' => $users,
+    //             'ships' => $ships,
+    //             'categories'=>$categories,
+    //             'loginUser'=>$loginUser
+    //         ];
+    //         return response()->json([
+    //             'editUrl' => $editUrl,
+    //              'projectdata' => $projectdata,
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+    //         Log::error($e->getMessage());
+    //        // dd($e->getMessage());
+    //     }
+    // }
     /**
      * Update the specified resource in storage.
      */

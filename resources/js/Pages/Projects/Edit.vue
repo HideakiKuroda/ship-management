@@ -34,6 +34,8 @@ const components = {
   VueCollapsiblePanel,
 };
 
+
+
 const newMessage = ref('');
 
 const assignMassage = () => {

@@ -42,13 +42,15 @@ class ScheduleController extends Controller
                 $query->where('pro_categories.dock', 1);    
             })->with(['users:id'])->get();
             $loginUser = Auth::user('id','name'); 
-                // dd($projects);
+            $hasRole = Auth::user()->hasRole('admin');
+                // dd($role);
             return Inertia::render('Schedules/GantTaiw',[
                 'users' => $users,
                 'ships' => $ships,
                 'operatSections' => $operatSections,
                 'projects' => $projects,
                 'loginUser' => $loginUser,
+                'hasRole' => $hasRole,
             ]);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
@@ -56,6 +58,7 @@ class ScheduleController extends Controller
         }
         
     }
+   
     public function shipfilter(Request $request) {
         $userId =  $request->userId;
         $filtered = Ship::query()->select('id', 'name', 'delivered', 'issueInspCert','expiry_date','navigation_area_id')
