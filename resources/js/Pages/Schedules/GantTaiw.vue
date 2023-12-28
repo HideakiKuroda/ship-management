@@ -6,7 +6,8 @@ import moment from 'moment'; //npm install moment でインストール要
 import { Head, Link,router } from '@inertiajs/vue3';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'  ;
 import UserSerch from '@/Components/UserSerch.vue';
-
+import axios from 'axios';
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 const props = defineProps({
   users : Array,
@@ -15,7 +16,7 @@ const props = defineProps({
   projects: Array,
   errors: Object,
   loginUser:  Object,
-  hasRole:  Object,
+  hasRole:  Boolean,
 })
 
 // reactive data
@@ -345,6 +346,20 @@ const editOpen = (id) => {
   }  
 }
 
+const createOpen = () => {
+  // router.get(route('projects.create'),{
+      
+    if (confirm('新規にドック予定のprojectを作成します。')) {
+    
+      router.get(route('projects.create'));
+           return true;
+    } else {
+      return false;
+    }
+  
+  };
+
+
 const windowSizeCheck = (event) => {
   let height = list1.value.length - position_id.value
   if (event.deltaY > 0 && height * calendarViewHeight.value > calendarViewHeight.value) {
@@ -650,16 +665,16 @@ defineExpose({ windowSizeCheck, displayTasks})
             <!-- 空の行（先頭行） -->
             <div class="absolute h-5" :style="{ top: `${bar.top}px` }"></div>
             <!-- Interim と Period のバー -->
-            <div :style="bar.interim1Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim1Style" @dblclick="handleBarClick(bar)">
+            <div :style="bar.interim1Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim1Style" @dblclick="createOpen">
               {{ bar.shipInfo.name}}&emsp;&emsp;中間①&emsp;{{formatDate(bar.interim1)}}～
             </div>
-            <div :style="bar.interim2Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim2Style" @dblclick="handleBarClick(bar)">
+            <div :style="bar.interim2Style" class="rounded-lg absolute h-5 bg-yellow-200 text-center text-xs" v-if="bar.interim2Style" @dblclick="createOpen">
               {{ bar.shipInfo.name}}&emsp;&emsp;中間②&emsp;{{formatDate(bar.interim2)}}～
             </div>
-            <div :style="bar.period1Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period1Style" @dblclick="handleBarClick(bar)">
+            <div :style="bar.period1Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period1Style" @dblclick="createOpen">
               {{ bar.shipInfo.name}}&emsp;&emsp;定期①&emsp;{{formatDate(bar.period1)}}～
             </div>
-            <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="handleBarClick(bar)">
+            <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="createOpen">
               {{ bar.shipInfo.name}}&emsp;&emsp;定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
             <!-- プロジェクトバー（複数） -->
