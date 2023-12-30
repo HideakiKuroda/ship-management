@@ -26,6 +26,8 @@ const props = defineProps({
     categories : Array,
     users :Array,
     errors: Object,
+    ship_id: Number,
+    category_id:Number,
 })
 
 const form = reactive({         //内容をreactiveにform変数に収める
@@ -68,9 +70,14 @@ const unassignUser = (userId) => {
     form.assignedUsersList = form.assignedUsersList.filter(user => user.id !== userId);
 };
 
+const getShipNameById = (id) => {
+    const ship = props.ships.find(ship => ship.id == id);
+    return ship ? ship.name : '';
+};
 //コンボボックス用の変数設定
 let query = ref('')
-let selectedShip = ref({id: null, name: ''})
+// let selectedShip = ref({id: null, name: ''})
+let selectedShip = ref({id: props?.ship_id, name: getShipNameById(props?.ship_id)})
 //船検索ComboboxのinputBoxで船名検索
 let filteredship = computed(() =>
   query.value === ''
@@ -92,11 +99,17 @@ const displayVesselData = (vessel) => {
   if (vessel.id === null) {
         return '選択なし';
     }
-  return `${vessel.name} 　[ ${vessel.yard} ${vessel.ship_no} ]`;
+  return `${vessel.name} [ ${vessel.yard} ${vessel.ship_no} ]`;
 }
 
+const getCategoryById = (id) => {
+    const category = props.categories.find(category => category.id == id);
+    return category ? category.name : '';
+};
+
 //カテゴリー検索ComboboxのinputBoxでカテゴリー検索
-let selectedCategory = ref({id: null, name: ''})
+let selectedCategory = ref({id: props?.category_id, name: getCategoryById(props?.category_id)})
+// let selectedCategory = ref({id: 2, name: '中間検査入渠'})
 
 let filteredCategory = computed(() =>
   query.value === ''
@@ -149,13 +162,13 @@ const storeproject = () => {
                                 
                                 <div class="flex flex-col p-2 ml-4">
                                   <div id="pro_name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                      <label> ◆　プロジェクト名 </label>
+                                      <label> ◆&emsp;プロジェクト名 </label>
                                         <div class="flex flex-wrap sm:flex-row sm:space-x-4">
                                           <input type="text" id="pro_name" name="pro_name" v-model="form.name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 ml-4 mr-6 leading-8 transition-colors duration-200 ease-in-out">                                    
                                         </div>
                                   </div>
                                   <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                        ◆　担当者
+                                        ◆&emsp;担当者
                                     <div class="flex flex-wrap sm:flex-row sm:space-x-0">
                                       <div class="h-32 w-44  overflow-auto">
                                         <div>

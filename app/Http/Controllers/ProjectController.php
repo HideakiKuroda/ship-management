@@ -89,8 +89,9 @@ class ProjectController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        // dd($request->categories);
         $user = auth()->user();
         $userId = (object)[
             'id' => $user->id,
@@ -107,6 +108,8 @@ class ProjectController extends Controller
 
         // dd($users);
         return Inertia::render('Projects/Create', [
+            'category_id' => $request->categories,
+            'ship_id' => $request->ship_id,
             'ships' => $ships,
             'currentUser' => $userId, 
             'categories' => $categories,
