@@ -282,10 +282,10 @@ const taskBars = computed(() => {
     let rowOffset;
           switch (project.category_id) {
             case 1:
-              rowOffset = 0.8; // period1Styleと同じ高さ
+              rowOffset = 0.7; // period1Styleと同じ高さ
               break;
             case 2:
-              rowOffset = -0.2; // interim1Styleと同じ高さ
+              rowOffset = -0.3; // interim1Styleと同じ高さ
               break;
             case 3:
             case 4:
@@ -677,12 +677,16 @@ defineExpose({ windowSizeCheck, displayTasks})
               {{ bar.shipInfo.name}}定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
             <!-- プロジェクトバー（複数） -->
-            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" 
+            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :data-tooltip-target="'tooltip-'+projectStyle.s_id+'-'+index"
             :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles"  @dblclick="editOpen(projectStyle.id)">
-              <div v-if="projectStyle.category_id == 1" >{{ projectStyle.name }}</div>
-              <div v-else-if="projectStyle.category_id == 2" >{{ projectStyle.name }}</div>
-              <div v-else-if="projectStyle.category_id == 3" >{{ projectStyle.name }}</div>
-              <div v-else-if="projectStyle.category_id == 4">{{ projectStyle.name }}</div>
+              <div :id="'tooltip-'+projectStyle.s_id+'-'+index" v-if="projectStyle.category_id == 1"  :style="[projectStyle.pstyle, { width: '150px' }]">
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
+              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 2" :style="[projectStyle.pstyle, { width: '150px' }]" >
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
+              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 3"  :style="[projectStyle.pstyle, { width: '150px' }]">
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
+              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 4" :style="[projectStyle.pstyle, { width: '150px' }]">
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
