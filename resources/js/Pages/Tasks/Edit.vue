@@ -17,7 +17,6 @@ import 'vue3-swatches/dist/style.css'
 
 // CSRFトークンを取得
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
 // AxiosのデフォルトヘッダにCSRFトークンをセット
 axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 

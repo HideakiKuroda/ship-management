@@ -5,10 +5,11 @@ import FlashMessage from '@/Components/FlashMessage.vue';
 import { toRefs, reactive,ref, computed,onMounted,watch } from 'vue';
 import UserSerch from '@/Components/UserSerch.vue';
 
-// CSRFトークンをメタタグから取得
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-// Axiosの設定
-axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+
 
 const props = defineProps({
     users: Array,

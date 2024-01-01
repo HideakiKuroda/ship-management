@@ -4,6 +4,8 @@ import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import { reactive } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
+// CSRFトークンをメタタグから取得
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 const props = defineProps({
     navigationAreas : Array,

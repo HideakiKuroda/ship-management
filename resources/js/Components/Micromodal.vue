@@ -1,11 +1,6 @@
 <script setup>
 import axios from 'axios';
 import { ref, onMounted } from 'vue'
-// CSRFトークンをメタタグから取得
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-// Axiosの設定
-axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
-
 
 onMounted(() => {
   axios.get('api/user')
