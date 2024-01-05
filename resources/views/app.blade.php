@@ -23,5 +23,6 @@
 </html>
 <script type="text/javascript">
     window.vueSpatiePermissions = {!! auth()->check() ? auth()->user()->getRolesPermissionsAsJson() : 0 !!}
+    src="../path/to/flowbite/dist/flowbite.min.js"
 </script>
 

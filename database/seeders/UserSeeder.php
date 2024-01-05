@@ -39,6 +39,7 @@ class UserSeeder extends Seeder
             [ 'name' => '田村 啓造' , 'email' => 'keizo.tamura@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
             [ 'name' => '清水 斉' , 'email' => 'h-shimizu@eikichikaiun.co.jp' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
             [ 'name' => '増田 数一' , 'email' => 'k-masuda@eikichikaiun.co.jp' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
+            [ 'name' => '大平 芳生' , 'email' => 'yoshio.ohira@nihon-eisen.com' ,  'password' => Hash::make('password123'),   'created_at' => '2023/08/10 12:00:00'  ] ,
         ]);
 
     }

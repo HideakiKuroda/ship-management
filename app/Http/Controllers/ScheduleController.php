@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use DateTime;
 use Exception;
 
+
 class ScheduleController extends Controller
 {
     public function index(Request $request)
@@ -44,7 +45,7 @@ class ScheduleController extends Controller
             $loginUser = Auth::user('id','name'); 
             $hasRole = Auth::user()->hasRole('admin');
                 // dd($role);
-            return Inertia::render('Schedules/GantTaiw',[
+            return inertia::render('Schedules/DockGant',[
                 'users' => $users,
                 'ships' => $ships,
                 'operatSections' => $operatSections,
@@ -72,7 +73,7 @@ class ScheduleController extends Controller
         return response()->json($filtered);
     }
 
-    public function update(UpdateShipRequest $request, Ship $ship)
+    public function update(Request $request, Ship $ship)
     {
         try {
             DB::transaction(function () use ($request, &$ship) {
