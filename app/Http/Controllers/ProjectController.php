@@ -307,7 +307,13 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        $project -> delete();
+
+        return to_route('projects.index')
+         ->with([
+             'message' => '削除しました。',
+             'status' => 'denger'
+         ]);
     }
 
     public function upload(Request $request, $id)

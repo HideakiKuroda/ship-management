@@ -240,6 +240,7 @@ class ShipController extends Controller
             }
 
             $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
+            // dd($userIds );
             $ship->users()->sync($userIds);
             //リクエストにないオーナーを削除
             $existingOwnerIds = collect($request->owners)->pluck('id')->filter()->all();
@@ -260,13 +261,13 @@ class ShipController extends Controller
             }
         });
         // dd($ownerData);
-        return redirect()->route('ships.show', $ship->id)->with([
+        return redirect()->back()->with([
             'message' => '更新しました。',
             'status' => 'success'
         ]);
     } catch (\Exception $e) {
         // トランザクション失敗時のリダイレクト
-        return redirect()->route('ships.show', $ship->id)->with([
+        return redirect()->back()->with([
             'message' => '更新に失敗しました',
             'status' => 'error'
         ]);

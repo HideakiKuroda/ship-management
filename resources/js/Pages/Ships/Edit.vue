@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link,router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import moment from 'moment';
 import { ref,onMounted,reactive, computed,onUnmounted  } from 'vue';
 import { VueCollapsiblePanelGroup, VueCollapsiblePanel,} from '@dafcoe/vue-collapsible-panel';
@@ -108,12 +108,11 @@ const formatDate = (date) => {
 //   if (!date) return "N/A";
   return moment(date).format('YYYY年MM月DD日');
 };
-
+//
 const updateShip = id => {
-  
   router.put(route('ships.update',{ ship:id }), form,{ 
-  onBefore: () => {
-    if (confirm('変更を更新します。OKでしょうか？')) {
+    onBefore: () => {
+    if (confirm('変更を更新します！。OKでしょうか？')) {
       freeListener();
       return true;
     } else {
