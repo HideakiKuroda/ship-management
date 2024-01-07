@@ -67,7 +67,7 @@ Route::post('/tasks/indexfilter/', [TaskController::class,'indexfilter'])->name(
 Route::get('getTask/indexfilter', [TaskController::class,'indexfilter'])->name('task.indexfilter')->middleware(['auth', 'verified']);
          
 //ガントチャートのルート設定
-Route::get('/schedules',[ScheduleController::class,'show'])->name('schedules.dock')->middleware(['auth', 'verified']);
+Route::get('/schedules/show',[ScheduleController::class,'show'])->name('schedules.dock')->middleware(['auth', 'verified']);
 
 
 Route::get('/', function () {

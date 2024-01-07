@@ -1,9 +1,15 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import { initFlowbite } from 'flowbite'
+
+
+onMounted(() => {
+  initFlowbite();
+})
 
 const test = async () => {
   try {

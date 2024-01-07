@@ -14,6 +14,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\Ship;
 use App\Models\Ship_attachment;
+use App\Models\Model_has_role;
 use SpatiePermissionVue\Traits\RolesPermissionsToVue;
 use App\Models\User_description;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -80,7 +81,10 @@ class User extends Authenticatable
         return $this->hasRole('admin'); // Spatie Permission パッケージの hasRole を使う場合
     }
 
-    
+    public function model_has_roles(): HasOne
+    {
+        return $this->hasOne(Model_has_role::class, 'model_id','id');
+    }
 }
 
 

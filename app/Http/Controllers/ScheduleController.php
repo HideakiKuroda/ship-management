@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\Navigation_area;
 use App\Models\Operat_section;
 use App\Models\Project;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Inertia\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +47,7 @@ class ScheduleController extends Controller
             $loginUser = Auth::user('id','name'); 
             $hasRole = Auth::user()->hasRole('admin');
                 // dd($role);
-            return inertia::render('Schedules/DockGant',[
+            return Inertia::render('Schedules/DockGant',[
                 'users' => $users,
                 'ships' => $ships,
                 'operatSections' => $operatSections,

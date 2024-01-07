@@ -9,6 +9,8 @@ export default {
         './resources/views/**/*.blade.php',
         './resources/js/**/*.vue',
         './node_modules/flowbite/**/*.js',
+        './index.html',
+        './src/**/*.{vue,js,ts,jsx,tsx}',
         
     ],
 

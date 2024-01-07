@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             Pro_assignmentSeeder::class,
-            Model_has_roles::class,
+            Model_has_rolesSeeder::class,
             Pro_descriptionSeeder::class,
             TaskSeeder::class,
             ScheduleSeeder::class,

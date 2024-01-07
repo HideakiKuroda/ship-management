@@ -8,7 +8,6 @@ import BreezeValidationErrors from '@/Components/ValidationErrors.vue'  ;
 import UserSerch from '@/Components/UserSerch.vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import { initFlowbite } from 'flowbite'
 
 const props = defineProps({
   users : Array,
@@ -534,7 +533,6 @@ onMounted(() => {
   getCalendar();
   getWindowSize();
   todayPosition();
-  initFlowbite();
   //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
   //スクロールの場合はwheelイベントを設定します。
    window.addEventListener('resize', getWindowSize);
@@ -693,25 +691,35 @@ defineExpose({ windowSizeCheck, displayTasks});
               {{ bar.shipInfo.name}}定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
             <!-- プロジェクトバー（複数） -->
-            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :data-tooltip-target="projectStyle.s_id+'-'+index"
-            :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles"  @dblclick="editOpen(projectStyle.id)">
-              <div :id="projectStyle.s_id+'-'+index" class="inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :id="projectStyle.pstyle.s_id+index"
+            :class="['rounded-lg absolute h-5 text-center text-xs has-tooltip inline-block',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles"  @dblclick="editOpen(projectStyle.id)">
+    
+            
+            <div :id="projectStyle.pstyle.s_id+index"  class="absolute z-10 inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
                v-if="projectStyle.category_id == 1"  :style="[projectStyle.pstyle, { width: '150px' }]">
-               {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
                 </div>
-              <div :id="projectStyle.s_id+'-'+index" class="inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+         
+                
+             <div :id="projectStyle.pstyle.s_id+index" class="absolute z-10 inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
                 v-else-if="projectStyle.category_id == 2" :style="[projectStyle.pstyle, { width: '150px' }]" >
                 {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
                 </div>
-              <div :id="projectStyle.s_id+'-'+index" class="inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+            
+
+             <div :id="projectStyle.pstyle.s_id+index" class="absolute z-10 inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
                 v-else-if="projectStyle.category_id == 3"  :style="[projectStyle.pstyle, { width: '150px' }]">
                 {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
                 </div>
-              <div :id="projectStyle.s_id+'-'+index" class="inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+            
+
+              <div :id="projectStyle.pstyle.s_id+index" class="absolute z-10 inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
                 v-else-if="projectStyle.category_id == 4" :style="[projectStyle.pstyle, { width: '150px' }]">
                 {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
                 </div>
-            </div>
+         
+         
+             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
         </div>
