@@ -8,7 +8,9 @@ import BreezeValidationErrors from '@/Components/ValidationErrors.vue'  ;
 import UserSerch from '@/Components/UserSerch.vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
-import { initFlowbite } from 'flowbite'
+import { initFlowbite } from 'flowbite';
+import { Inertia } from '@inertiajs/inertia'
+// import { useRouter } from 'vue-router';
 
 const props = defineProps({
   users : Array,
@@ -20,8 +22,10 @@ const props = defineProps({
   hasRole:  Boolean,
 })
 
+// const router = useRouter();
+
 // reactive data
-const start_month = ref(moment().subtract(2, 'years'));
+const start_month = ref(moment().subtract(1, 'years'));
 // const end_month = ref(lastDay);
 const end_month = ref(moment().add(11, 'years'));
 const block_size = ref(20);
@@ -58,7 +62,7 @@ const findEarliest = (list) => {
   const maxDate = new Date(Math.max(...dates));
   return maxDate;
 };
-// const lastDate =  new Date(moment(findEarliest(list2.value)));
+
 
 const getMonths = (year, block_number) => {
   let months = [];
@@ -79,11 +83,11 @@ const getCalendar = () => {
   let months;
   let start = moment(start_month.value);
   let end = moment(end_month.value);
-  let between_years = end.year() - start.year() + 1; // 年度の差を計算
+  let between_years = end.year() - start.year()-1; // 年度の差を計算
   for (let i = 0; i < between_years; i++) {
     months = getMonths(start.year(), block_number);
     calendars.value.push({
-      date: start.format('YYYY年度'), // 年度表示に変更
+      date: (start.month() < 3 ? start.year() - 1 : start.year()).toString() + '年度', // 年度表示を調整
       year: start.year(),
       start_block_number: block_number,
       calendar: months.length,
@@ -385,6 +389,9 @@ const windowSizeCheck = (event) => {
   } else if (event.deltaY < 0 && position_id.value !== 0) {
     position_id.value--
   }
+  // location.reload(); 
+  // window.location.reload();
+  // useRouter.go();
 }
 
 const mouseDownMove = (task, event) => {
@@ -535,7 +542,7 @@ onMounted(() => {
   getWindowSize();
   todayPosition();
   initFlowbite();
-  //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
+   //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
   //スクロールの場合はwheelイベントを設定します。
    window.addEventListener('resize', getWindowSize);
    window.addEventListener('wheel', windowSizeCheck);
