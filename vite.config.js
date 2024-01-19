@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import Vuetify from 'vuetify'
+
 
 export default defineConfig({
     plugins: [
@@ -16,7 +18,7 @@ export default defineConfig({
                 },
             },
         }),
-        vuetify({ autoImport: true }),
+        Vuetify({ autoImport: true }),
     ],
     //これを入れないとviteを起動したとき画面が真っ白！！
     server: {
