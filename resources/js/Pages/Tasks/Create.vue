@@ -4,7 +4,6 @@ import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import {onMounted, computed,reactive,ref,watch } from 'vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-import { initFlowbite } from 'flowbite'
 import { VSwatches } from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 
@@ -65,10 +64,6 @@ watch(form.color, (newValue, oldValue) => {
   console.log('colorCode:', oldValue);
   console.log('colorCode:', newValue);
 });
-
-onMounted(() => {
-    initFlowbite();
-})
 
 </script>
 

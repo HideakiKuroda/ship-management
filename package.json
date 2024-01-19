@@ -28,6 +28,8 @@
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@infectoone/vue-ganttastic": "^2.2.0",
+        "@material-tailwind/html": "^2.2.2",
+        "@mdi/font": "^7.4.47",
         "@vue-hero-icons/outline": "^1.7.2",
         "@vue-hero-icons/solid": "^1.7.2",
         "flowbite-vue": "^0.1.2",
@@ -38,6 +40,7 @@
         "v-pagination-3": "^0.1.7",
         "vue-i18n": "^9.3.0-beta.26",
         "vue-select-3": "^1.0.1",
-        "vue3-swatches": "^1.2.3"
+        "vue3-swatches": "^1.2.3",
+        "vuetify": "^3.4.11"
     }
 }

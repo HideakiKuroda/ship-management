@@ -16,6 +16,7 @@ export default defineConfig({
                 },
             },
         }),
+        vuetify({ autoImport: true }),
     ],
     //これを入れないとviteを起動したとき画面が真っ白！！
     server: {

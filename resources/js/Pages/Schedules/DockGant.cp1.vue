@@ -10,7 +10,6 @@ import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Inertia } from '@inertiajs/inertia'
 // import { useRouter } from 'vue-router';
-import { VTooltip } from 'vuetify/components';
 
 const props = defineProps({
   users : Array,
@@ -413,7 +412,6 @@ onMounted(() => {
   getCalendar();
   getWindowSize();
   todayPosition();
-  // initFlowbite();
    //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
   //スクロールの場合はwheelイベントを設定します。
    window.addEventListener('resize', getWindowSize);
@@ -571,17 +569,17 @@ defineExpose({ windowSizeCheck, displayTasks});
             <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="createOpen(bar,1)">
               {{ bar.shipInfo.name}}定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
-                <!-- プロジェクトバー（複数） -->
+            <!-- プロジェクトバー（複数） -->
             <div v-for="(projectStyle, index) in bar.projectStyles" :key="index">
-              <div v-if="bar.projectStyles" :style="projectStyle.pstyle"  
-                :class="['rounded-lg absolute h-5 text-center text-xs has-tooltip inline-block',getBarColor(projectStyle.category_id)]" @dblclick="editOpen(projectStyle.id)">
-                
-              <v-tooltip activator="parent" location="top"> 
+              <div v-if="bar.projectStyles" :style="projectStyle.pstyle" data-ripple-light="true"  :data-tooltip-target="'tooltip-top-'+projectStyle.s_id+'-'+index"
+                :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" @dblclick="editOpen(projectStyle.id)">
+              </div> 
+              <div v-if="bar.projectStyles" :data-tooltip="'tooltip-top-'+projectStyle.s_id+'-'+index" class="absolute z-50 whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 font-sans text-sm font-normal text-white focus:outline-none"
+                :style="[projectStyle.pstyle, { width: '150px' }]">
                 {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
-              </v-tooltip>
-            </div> 
+              </div>
             </div>
-            <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
+           <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
         </div>
         </div> <!--id="gantt-height"-->

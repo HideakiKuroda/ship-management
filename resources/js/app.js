@@ -54,10 +54,20 @@ import { createI18n } from 'vue-i18n';
 import ganttastic from '@infectoone/vue-ganttastic';
 import LaravelPermissionToVueJS from 'laravel-permission-to-vuejs'
 import PrimeVue from 'primevue/config';
-import 'flowbite';
 import VSwatches from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 
+import "vuetify/dist/vuetify.min.css";
+import "@mdi/font/css/materialdesignicons.css"; 
+import "vuetify/styles";
+import { createVuetify } from "vuetify";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
+
+const vuetify = createVuetify({
+    components,
+    directives,
+});
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -70,6 +80,7 @@ createInertiaApp({
         app.use(ZiggyVue, Ziggy);
         app.use(ganttastic);
         app.use(VSwatches);
+        app.use(vuetify);
         // LaravelPermissionToVueJS プラグインを追加
         app.use(LaravelPermissionToVueJS);
         // ここで i18n の設定も含めてあげる
