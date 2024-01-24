@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ShipController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
@@ -39,6 +40,14 @@ Route::middleware(['auth', 'verified'])
 });    
 Route::get('getship/shipfilter', [ShipController::class,'shipfilter'])->name('ships.shipfilter')->middleware(['auth', 'verified']);
 
+Route::middleware(['auth', 'verified'])
+->group(function () {
+    Route::resource('users', UserController::class);
+    Route::get('/users/showBoard', [ UserController::class, 'showBoard'])->name('adminboard')->middleware(['auth', 'verified']);
+
+});    
+
+
 // prpjects関連のルート設定
 Route::middleware(['auth', 'verified'])   
 ->group(function () {
@@ -56,7 +65,7 @@ Route::post('project', [ProjectController::class,'create'])->name('project.creat
 // tasks関連のルート設定
 Route::middleware(['auth', 'verified'])   
 ->group(function () {
-    Route::resource('tasks', TaskController::class);
+    Route::resource('tasks', TaskController::class);        
     Route::get('/tasks/{task}/subCreate/', [TaskController::class,'subCreate'])->name('task.subCreate');
     Route::post('/tasks/{id}/upload/', [TaskController::class,'upload'])->name('task.upload');
     Route::get('/tasks/{id}/downloadFile/', [TaskController::class,'downloadFile'])->name('task.downloadFile');

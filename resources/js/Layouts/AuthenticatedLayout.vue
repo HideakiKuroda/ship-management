@@ -6,8 +6,29 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link, router } from '@inertiajs/vue3';
+import axios from 'axios';
+// CSRFトークンを取得
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+// AxiosのデフォルトヘッダにCSRFトークンをセット
+axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
 const showingNavigationDropdown = ref(false);
+
+// const openItem = () => {
+//   axios.get(route('adminboard')) // LaravelのルートURLを指定
+//     .then(response => {
+//       // 応答に基づいてルーティングを実行
+//       router.get(route('adminboard'));
+//     })
+//     .catch(error => {
+//       // エラーハンドリング
+//       if (error.response && error.response.status === 403) {
+//         alert('申し訳ありません。この操作の権限がありません！');
+//       } else {
+//         alert('予期せぬエラーが発生しました！');
+//       }
+//     });
+// }
 
 </script>
 
@@ -42,8 +63,8 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('schedules.dock')" :active="route().current('schedules')">
                                     ドックスケジュール
                                 </NavLink>
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    管理者メニュー
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')"> 
+                                    設定・管理
                                 </NavLink>
                             </div>
                         </div>
@@ -138,7 +159,7 @@ const showingNavigationDropdown = ref(false);
                             ドックスケジュール
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            管理者メニュー
+                            設定・管理
                         </ResponsiveNavLink>
                     </div>
 

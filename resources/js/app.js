@@ -81,7 +81,7 @@ createInertiaApp({
         app.use(ganttastic);
         app.use(VSwatches);
         app.use(vuetify);
-        // LaravelPermissionToVueJS プラグインを追加
+          // LaravelPermissionToVueJS プラグインを追加
         app.use(LaravelPermissionToVueJS);
         // ここで i18n の設定も含めてあげる
         const messages = {
@@ -96,9 +96,7 @@ createInertiaApp({
         });
         app.use(PrimeVue);
         app.use(i18n);
-    
         app.mount(el);
-        
     },
     progress: {
         color: '#4B5563',

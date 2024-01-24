@@ -60,13 +60,19 @@ class ShipController extends Controller
         })
         ->select('id','name')
         ->get();
+        $user = Auth::user();
 
+        if ($user->hasRole('admin')) {
         // dd( $navigationAreas,$operatSections,$users);
-        return Inertia::render('Ships/Create',[
-            'navigationAreas'=>$navigationAreas,
-            'operatSections'=>$operatSections,
-            'users'=>$users,
-        ]);
+            return Inertia::render('Ships/Create',[
+                'navigationAreas'=>$navigationAreas,
+                'operatSections'=>$operatSections,
+                'users'=>$users,
+            ]);
+        } else {
+            // 権限がない場合の処理
+            return response()->json(['error' => '編集権限がありません。'], 403);
+        }
     }
 
     /**
@@ -145,12 +151,20 @@ class ShipController extends Controller
 
             $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments.users','schedules');
             //   dd($ship);
-            return Inertia::render('Ships/Edit',[
-                'ship' => $ship, 
-                'navigationAreas'=>$navigationAreas,
-                'operatSections'=>$operatSections,
-                'users'=>$users,
-            ]);
+            $user = Auth::user();
+
+            if ($user->hasRole('admin') || $ship->users->contains($user)) {
+                return Inertia::render('Ships/Edit',[
+                    'ship' => $ship, 
+                    'navigationAreas'=>$navigationAreas,
+                    'operatSections'=>$operatSections,
+                    'users'=>$users,
+                ]);
+            } else {
+                // 権限がない場合の処理
+                return response()->json(['error' => '編集権限がありません。'], 403);
+            }
+
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
             dd($e->getMessage());

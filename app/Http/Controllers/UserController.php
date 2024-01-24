@@ -2,21 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Model_has_roles;
-use App\Models\User;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $users = User::select('id', 'name','email','email_verified_at')->get();
+        $user = Auth::user();
+        
+        if ($user->hasRole('admin')) {
+            // 編集処理
+        } else {
+            
+            return redirect()->back()->with('error', '編集権限がありません。');
+        }
     }
 
     /**
@@ -38,24 +41,27 @@ class DashboardController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Model_has_roles $model_has_roles)
+    public function show(string $id)
     {
-        dd($model_has_roles);
-      
+        //
+    }
+    
+    public function showBoard()
+    {
         $user = Auth::user();
+        dd($user);
         if ($user->hasRole('admin')) {
         // dd( $navigationAreas,$operatSections,$users);
-            return Inertia::render('dashboard');
+            return Inertia::render('adminboards');
         } else {
             // 権限がない場合の処理
             return response()->json(['error' => '管理者権限が必要です。'], 403);
         }
     }
-
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Model_has_roles $model_has_roles)
+    public function edit(string $id)
     {
         //
     }
@@ -63,7 +69,7 @@ class DashboardController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Model_has_roles $model_has_roles)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -71,7 +77,7 @@ class DashboardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Model_has_roles $model_has_roles)
+    public function destroy(string $id)
     {
         //
     }

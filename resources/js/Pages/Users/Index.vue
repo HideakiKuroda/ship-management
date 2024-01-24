@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { toRefs, reactive,ref, computed,onMounted,watch } from 'vue';
 import UserSerch from '@/Components/UserSerch.vue';
@@ -44,21 +44,6 @@ const selectItem = async (userId) => {
   }
 };
 
-const createItem = () => {
-  axios.get(route('ships.create'))
-  .then(response => {
-    router.get(route('ships.create'))
-  })
-  .catch(error => {
-    if (error.response && error.response.status === 403) {
-      alert('申し訳ありません。この操作の権限がありません！');
-    } else {
-      alert('予期せぬエラーが発生しました！');
-    }
-  });
-}
-
-
 </script>
 
 <template>
@@ -80,9 +65,8 @@ const createItem = () => {
                            <FlashMessage /> 
                           <div class="flex flex-col pl-4 my-4 lg:w-2/3 w-full mx-auto">
                            <div class="mb-1 mt-1 flex-col md:flex-row">
-                             <button  @click="createItem"  class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</button>
-                             <!-- :href="route('ships.create')" -->
-                            </div>
+                             <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</Link>
+                           </div>
                             <!-- 担当者検索コンボボックス　ここから -->
                            <div class="mb-2 flex-col md:flex-row">
                             <UserSerch :userId="ship?.userId" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
