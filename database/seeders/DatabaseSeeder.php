@@ -31,12 +31,15 @@ class DatabaseSeeder extends Seeder
             ShipAssignmentSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
+            RoleHasPermissionSeeder::class,
             Pro_assignmentSeeder::class,
             Model_has_rolesSeeder::class,
             Pro_descriptionSeeder::class,
             TaskSeeder::class,
             ScheduleSeeder::class,
-        
+
+
+
             ]);
     }
 }
