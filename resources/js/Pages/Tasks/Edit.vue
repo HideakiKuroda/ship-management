@@ -41,15 +41,15 @@ const form = reactive({         //内容をreactiveにform変数に収める
     subtasks:           [...props.task.subtasks],
     attachments:        [...props.task.task_attachments],
     loginUser:          props.loginUser,
-    deletedMessageIds:  [],  
-    name:               props.task.name, 
+    deletedMessageIds:  [],
+    name:               props.task.name,
     end_date:           props.task.end_date,
     deadline:           props.task.deadline,
     priorityName:       null,
     priorityColor:      null,
-    priority:           props.task.priority, 
+    priority:           props.task.priority,
     color:              props.task.color_id,
-}); 
+});
 
 const cssCol = ref('')
 const color_id =  ref('')
@@ -67,15 +67,15 @@ else if(col =='#A463BF'){cssCol.value = 'bg-purple-500 text-slate-100'}
 else if(col =='#8E43AD'){cssCol.value = 'bg-purple-600 text-slate-100'}
 
 else if(col =='#3D556E'){cssCol.value = 'bg-cyan-800 text-slate-100'}
-else if(col =='#222F3D'){cssCol.value = 'bg-cyan-900 text-slate-100'}  
+else if(col =='#222F3D'){cssCol.value = 'bg-cyan-900 text-slate-100'}
 else if(col =='#F2C511'){cssCol.value = 'bg-yellow-300'}
 else if(col =='#F39C19'){cssCol.value = 'bg-amber-400'}
 
-else if(col =='#E84B3C'){cssCol.value = 'bg-red-400'} 
+else if(col =='#E84B3C'){cssCol.value = 'bg-red-400'}
 else if(col =='#C0382B'){cssCol.value = 'bg-red-600 text-slate-100'}
 else if(col =='#DDE6E8'){cssCol.value = 'bg-slate-100'}
-else if(col =='#BDC3C8'){cssCol.value = 'bg-slate-200'}; 
-} 
+else if(col =='#BDC3C8'){cssCol.value = 'bg-slate-200'};
+}
 
 watch(color_id,(newColor) =>{
   colToCss(newColor)
@@ -92,7 +92,7 @@ const handleChange = (event) => {
 };
 
 const onMntHandleChange = () => {
-    if(form.priority == 1){ 
+    if(form.priority == 1){
       form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
       form.priorityColor = 'bg-rose-100';
     }
@@ -117,7 +117,7 @@ const onMntHandleChange = () => {
 const updateTask = id =>{
   freeListener();
   form.color = color_id.value ;
-  router.put(route('tasks.update',{ task:id }), form,{ 
+  router.put(route('tasks.update',{ task:id }), form,{
         onBefore: () => confirm('変更を更新します。OKでしょうか？')
     })
 }
@@ -134,7 +134,7 @@ const assignMassage = () => {
     // name:form.loginUser.name,
     memo: newMessage.value.trim(),
   });
-  newMessage.value = ''; 
+  newMessage.value = '';
 };
 
 const unassignMassage = (id, userId) => {
@@ -143,7 +143,7 @@ const unassignMassage = (id, userId) => {
         alert('本人以外は削除できる権限がありません。');
         return;
     }
-    
+
     // ユーザーIDがログインユーザーのIDと一致する場合は削除を実行
     form.assignedMassagesList = form.assignedMassagesList.filter(message => message.id !== id);
     form.deletedMessageIds.push(id); // 削除されたメッセージのIDを保存
@@ -164,7 +164,7 @@ const handleFileChange = (inputName) => {
     files = fileInput1.value.files;
   } else if (inputName === 'file_upload2') {
     files = fileInput2.value.files;
-  }  
+  }
   // ファイルが選択されていなければ何もしない
   if (!files || files.length === 0) {
     return;
@@ -246,7 +246,7 @@ const deleteFile = (attachmentId) => {
         const index = form.attachments.findIndex(attachment => attachment.id === attachmentId);
         if (index !== -1) {
           form.attachments.splice(index, 1);
-        }        
+        }
       } else {
         alert(response.data.message);
       }
@@ -309,7 +309,7 @@ onMounted(() => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                    <BreezeValidationErrors :errors="errors" />  
+                    <BreezeValidationErrors :errors="errors" />
                      <section class="text-gray-600 body-font relative">
                         <div class="container px-5 pt-8 mx-auto">
                           <FlashMessage  />
@@ -339,8 +339,8 @@ onMounted(() => {
                                       </ul>
                                   </div>
                                 </div>
-                              </div> 
-                            </div> 
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -348,29 +348,29 @@ onMounted(() => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
                                   <div class="flex flex-wrap sm:flex-col">
-                                    <label v-if="props.task.parent_id == null" class="text-rose-600">Task No.{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}<br>(内容) :</label> 
-                                    <label v-else class="text-indigo-600">Sub Task No.&nbsp;{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}&nbsp;&nbsp;（親）Task No.{{ props.task.parent_id }}<br>(内容) :</label> 
-                                    <div class="flex flex-row p-2"> 
+                                    <label v-if="props.task.parent_id == null" class="text-rose-600">Task No.{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}<br>(内容) :</label>
+                                    <label v-else class="text-indigo-600">Sub Task No.&nbsp;{{ props.task.id }}&nbsp;&nbsp;作成日:{{formatDate(task.created_at) }}&nbsp;&nbsp;（親）Task No.{{ props.task.parent_id }}<br>(内容) :</label>
+                                    <div class="flex flex-row p-2">
                                       <input type="text" id="name" name="name" v-model="form.name" :class="['pl-2 w-full rounded',cssCol ]" >
-                                      <VSwatches v-model="color_id" /> 
+                                      <VSwatches v-model="color_id" />
                                     </div>
-                                  <div class="flex flex-col sm:flex-row p-2 ml-4"> 
+                                  <div class="flex flex-col sm:flex-row p-2 ml-4">
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
-                                      <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">
                                     </div>
-                                  
+
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎期限：</label>
-                                      <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">
                                     </div>
                                   </div>
                                   </div>
                                   <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
                                   >{{ form.priorityName }}</div>
 
-                                  
-                                  <button id="dropdownRadioHelperButton" data-dropdown-toggle="dropdownRadioHelper"  
+
+                                  <button id="dropdownRadioHelperButton" data-dropdown-toggle="dropdownRadioHelper"
                                   :class="['border border-gray-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  ml-6 text-center inline-flex items-center', form.priorityColor]"
                                   type="button"> 優先度を設定<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
@@ -494,39 +494,29 @@ onMounted(() => {
                               </div>
                             </template>
                             </vue-collapsible-panel>
-                   
+
                             <vue-collapsible-panel :expanded="true">
                               <template #title> 書類添付 </template>
-                            <template #content> 
-                              <div  class="content">
-                                <label class="visible md:invisible text-blue-600 underline">
-                                  ファイル選択
-                                  <input class="hidden" type="file" name="file_upload1" multiple ref="fileInput1"  @change="handleFileChange('file_upload1')"  />
-                                </label>
-                                <div v-if="uploading">
-                                  アップロード中... {{ uploadPercentage }}%
-                                </div>
-                                <div v-if="uploadComplete">
-                                  アップロードが完了しました。
-                                </div>                       
-                              <div>
-                                <div class="max-w-xl">
-                                  <label @dragover.prevent @drop.prevent="dropFiles" 
-                                      class=" invisible md:visible flex justify-center w-full h-0 md:h-32  px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
-                                      <span class="flex items-center space-x-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
-                                          stroke="currentColor" stroke-width="2">
-                                          <path stroke-linecap="round" stroke-linejoin="round"
-                                           d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <span class="font-medium text-gray-600">
-                                          ドラッグ＆ドロップでファイルをアップロード or 
-                                          <span class="text-blue-600 underline">ファイル選択</span>
+                            <template #content>
+
+                                <div class="content">
+                                <div>
+                                    <label @dragover.prevent @drop.prevent="dropFiles"
+                                    class="flex flex-col justify-center items-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                        <span class="text-gray-600 mt-2">
+                                            ドラッグ＆ドロップでファイルをアップロード
                                         </span>
-                                      </span>
-                                      <input type="file" name="file_upload2" class="hidden" multiple ref="fileInput2"  @change="handleFileChange('file_upload2')">
-                                  </label>
-                              </div>
+                                        <label class="text-blue-600 underline cursor-pointer">ファイル選択
+                                    <input type="file" name="file_upload2" class="hidden" multiple ref="fileInput2" @change="handleFileChange('file_upload2')">
+                                    </label>
+                                    </label>
+                                </div>
+
                                 <!-- Progress & Message -->
                                 <div v-if="uploading" class="md:block">
                                   アップロード中... {{ uploadPercentage }}%
@@ -535,8 +525,7 @@ onMounted(() => {
                                   アップロードが完了しました。
                                 </div>
                               </div>
-                            </div>
-                                                    
+
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -567,12 +556,12 @@ onMounted(() => {
                                 </div>
                               </div>
 
-                            </template>  
-                            </vue-collapsible-panel>  
+                            </template>
+                            </vue-collapsible-panel>
                             <div v-if="props.task.parent_id == null">
                             <vue-collapsible-panel :expanded="true" class="z-0">
                               <template #title > サブタスク一覧 </template>
-                              <template #content> 
+                              <template #content>
                                 <div class="flex flex-col overflow-hidden">
                                         <table class="min-w-full text-left text-sm font-light whitespace-no-wrap hidden sm:table">
                                           <thead>
@@ -584,7 +573,7 @@ onMounted(() => {
                                               <div>作成日</div>
                                               <div>期限</div>
                                               <div>完了日</div>
-                                              </div>  
+                                              </div>
                                               </th>
                                              </tr>
                                             </thead>
@@ -629,7 +618,7 @@ onMounted(() => {
 
 
                                       </div>
-                                      </div> 
+                                      </div>
                               <div class="flex justify-end">
                               <Link as="button" :href="route('task.subCreate', { id:form.id })" class="ml-32 mt-6 h-10 text-white bg-indigo-500 border-0 py-2 px-2 focus:outline-none hover:bg-indigo-600 rounded">サブタスク作成</Link>
                               </div>
@@ -644,7 +633,7 @@ onMounted(() => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="updateTask(form.id)" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>  
+                                  <button  @click="updateTask(form.id)" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">更新する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>
@@ -652,7 +641,7 @@ onMounted(() => {
                           </div>
                         </div>
 
-                        </section> 
+                        </section>
                     </div>
                 </div>
             </div>

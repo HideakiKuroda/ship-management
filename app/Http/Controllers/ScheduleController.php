@@ -25,7 +25,7 @@ class ScheduleController extends Controller
 {
     public function index(Request $request)
     {
-    
+
     }
 
     public function show()
@@ -40,12 +40,12 @@ class ScheduleController extends Controller
                 $query->select('ship_id', 'interim_start1', 'interim_dline1', 'Periodic_start1', 'Periodic_dline1', 'interim_start2', 'interim_dline2', 'Periodic_start2', 'Periodic_dline2')
                       ->withDefault(); // ここでデフォルト値を設定
             }])->get();
-            
+
             $projects = Project::whereHas('pro_categories', function ($query) {
-                $query->where('pro_categories.dock', 1);    
+                $query->where('pro_categories.dock', 1);
             })->with(['users:id'])->get();
-            $loginUser = Auth::user('id','name'); 
-            $hasRole = Auth::user()->hasRole('admin');
+            $loginUser = Auth::user('id','name');
+            $hasRole = Auth::user()->hasAnyRole('admin | developer');
                 // dd($role);
             return Inertia::render('Schedules/DockGant',[
                 'users' => $users,
@@ -59,9 +59,9 @@ class ScheduleController extends Controller
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
-        
+
     }
-   
+
     public function shipfilter(Request $request) {
         $userId =  $request->userId;
         $filtered = Ship::query()->select('id', 'name', 'delivered', 'issueInspCert','expiry_date','navigation_area_id')
@@ -71,7 +71,7 @@ class ScheduleController extends Controller
                   ->withDefault(); // ここでデフォルト値を設定
         }])
         ->UserShip($userId)->get();
-        
+
         return response()->json($filtered);
     }
 
@@ -82,7 +82,7 @@ class ScheduleController extends Controller
 
 
             });
-        
+
             return redirect()->back()->with([
             'message' => '更新しました。',
             'status' => 'success'

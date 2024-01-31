@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+
         ],
 
         'api' => [
@@ -66,9 +67,11 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
     ];
 
     protected $routeMiddleware = [
         'checkRole' => \App\Http\Middleware\CheckRole::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
     ];
 }

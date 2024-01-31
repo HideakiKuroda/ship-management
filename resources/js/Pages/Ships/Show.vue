@@ -109,12 +109,12 @@ const downloadFile = async (attachmentId,dp) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                      <section class="text-gray-600 body-font relative">
-                    
+
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <FlashMessage  />
                              <div class="m-2">
-                                
+
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         ◆　{{ ship.name }}　『{{ ship.yard }}　No. {{ ship.ship_no }}』
@@ -122,8 +122,8 @@ const downloadFile = async (attachmentId,dp) => {
                                 </div>
 
                             </div></div></div>
-  
-                        
+
+
                         <div class="container px-5 py-0 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
@@ -132,8 +132,8 @@ const downloadFile = async (attachmentId,dp) => {
                               <vue-collapsible-panel-group>
                                <vue-collapsible-panel>
                                 <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
-                                <template #content> 
-     
+                                <template #content>
+
                                   <div class="flex flex-wrap sm:flex-row">
                                     <div v-if="ship.ex_name" class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●船名（前）：</label>
@@ -148,7 +148,7 @@ const downloadFile = async (attachmentId,dp) => {
                                             {{ ship.former_name }}
                                       </div>
                                     </div>
-                                  
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎竣工：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -161,7 +161,7 @@ const downloadFile = async (attachmentId,dp) => {
                                             {{ ship.gross_tonn }}㌧
                                       </div>
                                     </div>
-                                  
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎運航地域：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -174,7 +174,7 @@ const downloadFile = async (attachmentId,dp) => {
                                           {{ props.ship.navigation_areas?.name }}<a v-if="props.ship.navigation_areas?.name"> 区域</a>
                                       </div>
                                     </div>
-                                
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶記号：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -187,7 +187,7 @@ const downloadFile = async (attachmentId,dp) => {
                                         {{ props.ship.summaries.signal_code }}
                                       </div>
                                     </div>
-                                  
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎国際トン数：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -200,34 +200,34 @@ const downloadFile = async (attachmentId,dp) => {
                                         {{ props.ship.summary2s.passenger_capacity }}
                                       </div>
                                     </div>
-                                  
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎船舶保険（種類）：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             {{ props.ship.summary2s.insurance_type }}
                                       </div>
                                     </div>
-                                    
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎定期検査完了：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             {{ formatDate(props.ship.issueInspCert) }}
                                       </div>
-                                    </div> 
+                                    </div>
 
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎定期検査期限：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                             {{ formatDate(props.ship.expiry_date) }}
                                       </div>
-                                    </div> 
+                                    </div>
                                   </div>
                                 </template>
                               </vue-collapsible-panel>
-                            
+
                             <vue-collapsible-panel  :expanded="false">
                             <template #title> 機関仕様その他 </template>
-                            <template #content> 
+                            <template #content>
                               <div class="flex flex-wrap sm:flex-row">
                                   <div class="p-2 ml-4">
                                     <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎馬力：</label>
@@ -397,7 +397,7 @@ const downloadFile = async (attachmentId,dp) => {
 
                             <vue-collapsible-panel :expanded="false">
                             <template #title> 試運転記録等 </template>
-                            <template #content> 
+                            <template #content>
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -441,7 +441,7 @@ const downloadFile = async (attachmentId,dp) => {
                             </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="false">
                             <template #title> 船舶関係者 </template>
-                            <template #content> 
+                            <template #content>
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -474,12 +474,12 @@ const downloadFile = async (attachmentId,dp) => {
                                   </div>
                                 </div>
                               </div>
-                            </template> 
+                            </template>
                             </vue-collapsible-panel>
-                   
+
                             <vue-collapsible-panel :expanded="false">
                             <template #title> 船舶所有者 </template>
-                            <template #content> 
+                            <template #content>
                               <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -506,7 +506,7 @@ const downloadFile = async (attachmentId,dp) => {
                             </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="false">
                             <template #title> 書類添付 </template>
-                            <template #content> 
+                            <template #content>
                                <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -536,11 +536,11 @@ const downloadFile = async (attachmentId,dp) => {
                                 </div>
                               </div>
 
-                            </template>  
-                            </vue-collapsible-panel>  
+                            </template>
+                            </vue-collapsible-panel>
 
                             </vue-collapsible-panel-group>
-                        </div>                        
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -548,14 +548,14 @@ const downloadFile = async (attachmentId,dp) => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                <Link as="button" @click="editItem(ship.id)" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</Link>
+                                <button @click="editItem(props.ship.id)" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(ship.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->
                                 </div>
                             </div></div></div>
 
-                        </section>                
+                        </section>
                     </div>
                 </div>
             </div>

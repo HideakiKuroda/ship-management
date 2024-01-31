@@ -50,8 +50,8 @@ class RegisteredUserController extends Controller
         return redirect(RouteServiceProvider::HOME);
     }
 
-    public function __construct()
-    {
-        $this->middleware([ 'checkRole:admin']); // admin はミドルウェアのキー
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('checkRole:developer'); // admin はミドルウェアのキー
+    // }
 }

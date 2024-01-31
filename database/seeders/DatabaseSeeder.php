@@ -37,9 +37,6 @@ class DatabaseSeeder extends Seeder
             Pro_descriptionSeeder::class,
             TaskSeeder::class,
             ScheduleSeeder::class,
-
-
-
             ]);
     }
 }

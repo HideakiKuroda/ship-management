@@ -22,11 +22,21 @@ use Illuminate\Support\Facades\DB;
 use DateTime;
 use Exception;
 
+
+
 class ShipController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('permission:view_ship')->only('index', 'show');
+        $this->middleware('permission:create_ship')->only('create', 'store');
+        // $this->middleware('checkrole')->only('edit', 'update');
+        $this->middleware('permission:create_ship')->only('destroy');
+    }
+
     public function index(Request $request)
     {
         $users = User::with('ships')->has('ships')->get();
@@ -42,7 +52,7 @@ class ShipController extends Controller
         $userId =  $request->userId;
         $filtered = Ship::query()->with(['users:id,name'])->select('id', 'name', 'yard', 'ship_no')
         ->UserShip($userId)->get();
-        
+
         return response()->json($filtered);
     }
 
@@ -53,7 +63,7 @@ class ShipController extends Controller
     {
         $navigationAreas = Navigation_area::select('id', 'name')->get();
         $operatSections = Operat_section::select('id', 'section')->get();
-        
+
         $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
         $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
             $query->whereIn('departments.id', $departmentIds);
@@ -62,17 +72,17 @@ class ShipController extends Controller
         ->get();
         $user = Auth::user();
 
-        if ($user->hasRole('admin')) {
+        // if ($user->hasAnyRole(['admin', 'developer'])) {
         // dd( $navigationAreas,$operatSections,$users);
             return Inertia::render('Ships/Create',[
                 'navigationAreas'=>$navigationAreas,
                 'operatSections'=>$operatSections,
                 'users'=>$users,
             ]);
-        } else {
-            // 権限がない場合の処理
-            return response()->json(['error' => '編集権限がありません。'], 403);
-        }
+        // } else {
+        //     // 権限がない場合の処理
+        //     return response()->json(['error' => '編集権限がありません。'], 403);
+        // }
     }
 
     /**
@@ -95,7 +105,7 @@ class ShipController extends Controller
                 'ship_no' => $request->input('ship_no'),
                 'yard' => $request->input('yard'),
             ]);
-            
+
             $ship->summaries()->create();
             $ship->summary2s()->create();
             $ship->concerneds()->create();
@@ -103,11 +113,11 @@ class ShipController extends Controller
             $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
             $ship->users()->sync($userIds);
         });
-        
+
         return redirect()->route('ships.show', $ship->id)->with([
             'message' => '新しい船「' . $ship->name . '」を登録しました',
             'status' => 'success'
-        ]);    
+        ]);
         } catch (\Exception $e) {
             // トランザクション失敗時のリダイレクト
             return redirect()->route('ships.index')->with([
@@ -130,7 +140,7 @@ class ShipController extends Controller
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
-        
+
     }
 
     /**
@@ -141,7 +151,7 @@ class ShipController extends Controller
         try {
             $navigationAreas = Navigation_area::select('id', 'name')->get();
             $operatSections = Operat_section::select('id', 'section')->get();
-            
+
             $departmentIds = [4, 16];  // 抽出したいdepartmentsのIDを配列で指定
             $users = User::whereHas('user_descriptions.departments', function ($query) use ($departmentIds) {
                 $query->whereIn('departments.id', $departmentIds);
@@ -151,14 +161,17 @@ class ShipController extends Controller
 
             $ship->load('summaries', 'summary2s', 'concerneds','ship_owners','operat_sections','navigation_areas','users','ship_attachments.users','schedules');
             //   dd($ship);
-            $user = Auth::user();
-
-            if ($user->hasRole('admin') || $ship->users->contains($user)) {
+            $userAuth = Auth::user();
+            $permissions = Auth::user()->getAllPermissions()->pluck('name');
+            // ($userAuth->can('edit_ship') &&
+            if ($userAuth->hasAnyRole(['admin', 'developer']) || $userAuth->can('assign_ship') || $ship->users->contains($userAuth)) {
                 return Inertia::render('Ships/Edit',[
-                    'ship' => $ship, 
+                    'ship' => $ship,
                     'navigationAreas'=>$navigationAreas,
                     'operatSections'=>$operatSections,
                     'users'=>$users,
+                    'permissions'=>$permissions,
+                    'userAuth'=>$userAuth,
                 ]);
             } else {
                 // 権限がない場合の処理
@@ -169,7 +182,7 @@ class ShipController extends Controller
             Log::error($e->getMessage());
             dd($e->getMessage());
         }
-        
+
     }
     /**
      * Update the specified resource in storage.
@@ -193,7 +206,7 @@ class ShipController extends Controller
                 'issueInspCert' => $request->input('issueInspCert'),
                 'expiry_date' => $request->input('expiry_date'),
             ]);
-        
+
             // summariesテーブルの更新
             $ship->summaries->update([
                 'aux_engine' => $request->input('aux_engine'),
@@ -311,7 +324,7 @@ class ShipController extends Controller
         $today=now();
         // dd($files);
         foreach ($files as $file) {
-         
+
             $originalName = $file->getClientOriginalName();
             $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
             // dd($filetype);
@@ -342,7 +355,7 @@ class ShipController extends Controller
             ]);
             // $uploadedFiles 配列に追加する前に user_name と created_at を追加
             $newFile->users->name = $users->name;
-            $newFile->created_at = $today->toDateTimeString(); 
+            $newFile->created_at = $today->toDateTimeString();
             $newFile->title = '';
             $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
             }
@@ -361,7 +374,7 @@ class ShipController extends Controller
         if ($attachment) {
             // データベースからレコードを削除
             Ship_attachment::where('id', $attachData)->delete();
-            
+
             // ストレージからファイルを削除
             Storage::delete($attachment->filename);
 
@@ -413,48 +426,48 @@ class ShipController extends Controller
                 $baseDate = $ship->expiry_date;
                 $dates = new DateTime($baseDate);
                 $inspectionPeriods = [];
-        if($baseDate!= null && $shipType!= null ){ 
-             
+        if($baseDate!= null && $shipType!= null ){
+
             if ($shipType == 1) {
                 $dates->modify('-72 months')->format('Y-m-d');
                 $inspectionPeriods['midterm1'] = [
                     'start' => $dates->modify('+33 months')->format('Y-m-d'),
                     'end' => $dates->modify('+6 months')->format('Y-m-d'),
                 ];
-        
+
                 $inspectionPeriods['regular1'] = [
                     'end' => $dates->modify('+33 months')->format('Y-m-d'),
                     'start' => $dates->modify('-3 months')->format('Y-m-d'),
                 ];
-        
+
                 $inspectionPeriods['midterm2'] = [
                     'start' => $dates->modify('+36 months')->format('Y-m-d'),
                     'end' => $dates->modify('+6 months')->format('Y-m-d'),
                 ];
-        
+
                 $inspectionPeriods['regular2'] = [
                     'end' => $dates->modify('+33 months')->format('Y-m-d'),
                     'start' => $dates->modify('-3 months')->format('Y-m-d'),
                 ];
-        
+
             } elseif ($shipType !== 1) {
                 $dates->modify('-60 months')->format('Y-m-d');
                 $inspectionPeriods['midterm1'] = [
                     'start' => $dates->modify('+21 months')->format('Y-m-d'),
                     'end' => $dates->modify('+18 months')->format('Y-m-d'),
                 ];
-        
+
                 $inspectionPeriods['regular1'] = [
                     'end' => $dates->modify('+21 months')->format('Y-m-d'),
                     'start' => $dates->modify('-3 months')->format('Y-m-d'),
                 ];
-        
-                   
+
+
                 $inspectionPeriods['midterm2'] = [
                     'start' => $dates->modify('+24 months')->format('Y-m-d'),
                     'end' => $dates->modify('+18 months')->format('Y-m-d'),
                 ];
-        
+
                 $inspectionPeriods['regular2'] = [
                     'end' => $dates->modify('+21 months')->format('Y-m-d'),
                     'start' => $dates->modify('-3 months')->format('Y-m-d'),
@@ -472,14 +485,14 @@ class ShipController extends Controller
                     'Periodic_start2' => $inspectionPeriods['regular2']['start'],
                     'Periodic_dline2' => $inspectionPeriods['regular2']['end'],
                 ]);
-             } 
+             }
             });
             // dd($ownerData);
             return redirect()->back()->with([
                 'message' => '更新しました。',
                 'status' => 'success'
             ]);
-        
+
         } catch (\Exception $e) {
             // トランザクション失敗時のリダイレクト
             return redirect()->back()->with([

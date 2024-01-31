@@ -3,6 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use DateTime;
+use Exception;
+
 
 class UserController extends Controller
 {
@@ -13,11 +23,11 @@ class UserController extends Controller
     {
         $users = User::select('id', 'name','email','email_verified_at')->get();
         $user = Auth::user();
-        
+
         if ($user->hasRole('admin')) {
             // 編集処理
         } else {
-            
+
             return redirect()->back()->with('error', '編集権限がありません。');
         }
     }
@@ -45,7 +55,7 @@ class UserController extends Controller
     {
         //
     }
-    
+
     public function showBoard()
     {
         $user = Auth::user();
@@ -80,5 +90,13 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getRolesWithPermissions()
+    {
+        // dd('role');
+        $roles = Role::with('permissions')->get();
+        // dd(role);
+        return response()->json($roles);
     }
 }

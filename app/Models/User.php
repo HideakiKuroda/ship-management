@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, RolesPermissionsToVue;
-    
-    
+
+
     /**
      * The attributes that are mass assignable.
      *
@@ -76,15 +76,15 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Department::class, 'dept_assignments','user_description_id');
     }
-    public function isAdmin()
-    {
-        return $this->hasRole('admin'); // Spatie Permission パッケージの hasRole を使う場合
-    }
+    // public function isAdmin()
+    // {
+    //     return $this->hasRole('admin'); // Spatie Permission パッケージの hasRole を使う場合
+    // }
 
-    public function model_has_roles(): HasOne
-    {
-        return $this->hasOne(Model_has_role::class, 'model_id','id');
-    }
+    // public function model_has_roles(): HasOne
+    // {
+    //     return $this->hasOne(Model_has_role::class, 'model_id','id');
+    // }
 }
 
 
