@@ -11,11 +11,13 @@ import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import { nl2br } from '@/nl2br';
+import { initFlowbite } from 'flowbite'  //優先度設定に使用
 import { VSwatches } from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 
 // CSRFトークンを取得
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 // AxiosのデフォルトヘッダにCSRFトークンをセット
 axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
@@ -113,6 +115,10 @@ const onMntHandleChange = () => {
        form.priorityColor = 'bg-gray-50';
       };
 };
+
+// onMounted(() => {
+//     initFlowbite();  最下部に移動記載
+// })
 
 const updateTask = id =>{
   freeListener();
@@ -285,6 +291,7 @@ onMounted(() => {
   color_id.value = form.color;
   colToCss(form.color);
   onMntHandleChange();
+  initFlowbite();
   originalData.value = JSON.stringify(form);
   window.addEventListener("beforeunload", confirmSave);
   moveConfirm = router.on('before', (event) => {
@@ -648,4 +655,3 @@ onMounted(() => {
         </div>
     </AuthenticatedLayout>
 </template>
-
