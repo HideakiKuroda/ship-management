@@ -22,6 +22,8 @@ const props = defineProps({
   hasRole:  Boolean,
 })
 
+// const VTooltip = defineAsyncComponent(() => import('vuetify/components').then(c => c.VTooltip));
+
 // const router = useRouter();
 
 // reactive data
@@ -38,9 +40,9 @@ const task_height = ref('');
 const taskElement = ref(null);
 const today = ref(moment());   // moment()はデフォルト: 現在時刻
 const start_date = ref(moment(start_month.value));
-const calendar = ref(null); 
-const position_id = ref(0); 
-const dragging = ref(false); 
+const calendar = ref(null);
+const position_id = ref(0);
+const dragging = ref(false);
 const pageX = ref('');
 const element = ref(null);
 const left = ref('');
@@ -104,7 +106,7 @@ const getWindowSize = () => {       //ref="taskElement" をタグ内に設定し
   inner_width.value = window.innerWidth;
   inner_height.value = window.innerHeight;
   if(taskElement.value) {
-    task_width.value = taskElement.value.offsetWidth; 
+    task_width.value = taskElement.value.offsetWidth;
     task_height.value = taskElement.value.offsetHeight;
   }
 }
@@ -227,13 +229,13 @@ const list3 = computed(() => {
 
   return projectsByShipId;
 });
- 
+
 
 const combinedData = computed(() => {
   return list1.value.map(ship => {
     const schedule = list2.value.find(s => s.id === ship.id) || {};
-    const projects = list3.value.get(ship.id) || []; 
-   
+    const projects = list3.value.get(ship.id) || [];
+
 
     return {
       // list1 からのデータ
@@ -270,7 +272,7 @@ const taskBars = computed(() => {
         width: `${block_size.value * between}px`,
       };
     };
-    
+
     // 1行目: interim バー 中間検査
     const interim1Style = data.schedule.interim1_start ? createStyle(data.schedule.interim1_start, data.schedule.interim1_end, 0) : null;
     const interim2Style = data.schedule.interim2_start ? createStyle(data.schedule.interim2_start, data.schedule.interim2_end, 0) : null;
@@ -300,7 +302,7 @@ const taskBars = computed(() => {
             default:
               rowOffset = -1; // 既定値
           }
-      
+
           const pstyle = createStyle(project.start_date, project.end_date, rowOffset);
           return {
             pstyle,
@@ -357,12 +359,12 @@ const shipUserIds = (shipId) => {
 
 const editOpen = (id) => {
   if (getUserIds(id).some(userId => userId === props.loginUser.id || props.hasRole == true)) {
-    
+
     router.get(route('projects.edit', { project:id }));
   } else {
     alert('編集は担当者とシステム管理者のみです参照ページを開きます');
     router.get(route('projects.show', { project:id }));
-  }  
+  }
 }
 
 const createOpen = (bar,p) => {
@@ -379,7 +381,7 @@ const createOpen = (bar,p) => {
     }
   } else {
     alert('Projectの作成は担当者とシステム管理者のみです');
-  }  
+  }
   };
 
 const windowSizeCheck = (event) => {
@@ -389,7 +391,7 @@ const windowSizeCheck = (event) => {
   } else if (event.deltaY < 0 && position_id.value !== 0) {
     position_id.value--
   }
-  // location.reload(); 
+  // location.reload();
   // window.location.reload();
   // useRouter.go();
 }
@@ -421,7 +423,7 @@ onMounted(() => {
   // window.addEventListener('mousemove', mouseMove);
   // window.addEventListener('mouseup', stopDrag);
   // window.addEventListener('mousemove', mouseResize);
-  
+
   // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
   // console.log('ドックデータ',combinedData.value)
   // console.log('運航地域',props.ships.operat_sections)
@@ -454,7 +456,7 @@ defineExpose({ windowSizeCheck, displayTasks});
       <div class=" flex flex-row">
         <UserSerch :userId="user_id" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
       </div>
-    
+
       <!-- 担当者検索コンボボックス　ここまで -->
       <!-- 運航地域の絞込み　ここから -->
       <div class="flex flex-col">
@@ -467,7 +469,7 @@ defineExpose({ windowSizeCheck, displayTasks});
             {{ operatSection.section || '全地域'  }}
             </option>
         </select>
-      </div>  
+      </div>
       </div>
     </div>
       <!-- 運航地域の絞込み　ここまで -->
@@ -476,14 +478,14 @@ defineExpose({ windowSizeCheck, displayTasks});
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                <BreezeValidationErrors :errors="errors" />  
+                <BreezeValidationErrors :errors="errors" />
                 <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                  <section class="text-gray-600 body-font relative">
 
 
    <div id="gantt-content" class="flex">
     <!-- ガントチャートのタスク領域 -->
-    <div id="gantt-task">  
+    <div id="gantt-task">
       <div id="gantt-task-title" class="flex items-center bg-indigo-400 text-white h-16" ref="taskElement">
         <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-60 h-full">
         船名&emsp;＆&emsp;基本情報
@@ -491,7 +493,7 @@ defineExpose({ windowSizeCheck, displayTasks});
           </div>
     <!-- ガントチャートのタスク領域 -->
     <div id="gantt-task-list" class="overflow-y-hidden" :style="`height:${calendarViewHeight}px`">
-      <div v-for="(item,index) in displayTasks" :key="index" class="flex flex-col h-36 border-b"> 
+      <div v-for="(item,index) in displayTasks" :key="index" class="flex flex-col h-36 border-b">
       <!-- <div v-for="(task,index) in list1" :style="taskBars.value && taskBars.value[index] ? { top: `${taskBars.value[index].top}px` } : {}" class="flex flex-col  h-32 border-b"> -->
   <!-- タスクの情報を表示するコード -->
         <!-- @dragstart="dragTask" @dragoverr.prevent="dragTaskOver(task)" draggable="true"> -->
@@ -515,15 +517,15 @@ defineExpose({ windowSizeCheck, displayTasks});
     </div> <!-- id="gantt-task"  -->
 
     <!-- ガントチャートのカレンダー領域 -->
-    <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l" 
-          :style="`width:${calendarViewWidth}px`" 
+    <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l"
+          :style="`width:${calendarViewWidth}px`"
            ref="calendar">
       <div id="gantt-date" class="h-16">
         <!-- ここから　カレンダーの年数 -->
         <div id="gantt-year-month" class="relative h-8">
           <div v-for="(calendar,index) in calendars" :key="index">
-            <div class="bg-indigo-700 text-white border-b border-r border-t h-8 absolute font-bold text-sm 
-            flex items-center justify-center" 
+            <div class="bg-indigo-700 text-white border-b border-r border-t h-8 absolute font-bold text-sm
+            flex items-center justify-center"
             :style="`width:${calendar.calendar*block_size}px;left:${calendar.start_block_number*block_size}px`">
               {{calendar.date}}
             </div>
@@ -547,7 +549,7 @@ defineExpose({ windowSizeCheck, displayTasks});
         <!-- //カレンダーの縦線 -->
           <div v-for="(calendar,index) in calendars" :key="index">
             <div v-for="(month,index) in calendar.months" :key="index">
-              <div class="border-r border-b absolute" 
+              <div class="border-r border-b absolute"
               :class="{'bg-blue-100': month.month === 4, 'bg-red-100': month.month === 3}"
               :style="`width:${block_size}px;left:${month.block_number*block_size}px;height:${calendarViewHeight}px`">
               </div>
@@ -573,13 +575,13 @@ defineExpose({ windowSizeCheck, displayTasks});
             </div>
                 <!-- プロジェクトバー（複数） -->
             <div v-for="(projectStyle, index) in bar.projectStyles" :key="index">
-              <div v-if="bar.projectStyles" :style="projectStyle.pstyle"  
+              <div v-if="bar.projectStyles" :style="projectStyle.pstyle"
                 :class="['rounded-lg absolute h-5 text-center text-xs has-tooltip inline-block',getBarColor(projectStyle.category_id)]" @dblclick="editOpen(projectStyle.id)">
-                
-              <v-tooltip activator="parent" location="top"> 
+
+              <v-tooltip activator="parent" location="top">
                 {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
               </v-tooltip>
-            </div> 
+            </div>
             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
@@ -589,11 +591,11 @@ defineExpose({ windowSizeCheck, displayTasks});
     </div>   <!-- id="gantt-calendar" -->
   </div>    <!-- id="gantt-content" カレンダーとタスクの両方 -->
 
-</section> 
+</section>
                     </div>
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
-  
+
 </template>

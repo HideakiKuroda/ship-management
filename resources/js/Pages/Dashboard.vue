@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,defineAsyncComponent } from 'vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { VBtn } from 'vuetify/components';
@@ -16,7 +16,7 @@ const test = async () => {
   }
 };
 
-// const VBtn = () => import('vuetify/components/VBtn')
+// const VBtn = defineAsyncComponent(() => import('vuetify/components/VBtn').then(c => c.VBtn));
 
 </script>
 
