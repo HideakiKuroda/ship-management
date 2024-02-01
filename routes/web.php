@@ -80,19 +80,19 @@ Route::get('getTask/indexfilter', [TaskController::class,'indexfilter'])->name('
 Route::get('/schedules/show',[ScheduleController::class,'show'])->name('schedules.dock')->middleware(['auth', 'verified']);
 
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => auth()->user() && auth()->user()->hasRole('developer'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => auth()->user() && auth()->user()->hasRole('developer'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
 
-Route::get('register', [RegisteredUserController::class, 'create'])->name('user.register');
-// ->middleware('checkRole:developer');
-Route::post('register', [RegisteredUserController::class, 'store'])->name('register');
-// ->middleware('checkRole:developer');
+Route::get('register', [RegisteredUserController::class, 'create'])->name('user.register')
+->middleware('checkRole:developer');
+Route::post('register', [RegisteredUserController::class, 'store'])->name('register')
+->middleware('checkRole:developer');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -118,4 +118,4 @@ Route::post('/', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 
 require __DIR__.'/auth.php';
-// require __DIR__.'/admin.php';
+require __DIR__.'/admin.php';

@@ -41,7 +41,7 @@ class ShipController extends Controller
     {
         $users = User::with('ships')->has('ships')->get();
         $ships = Ship::query()->with(['users:id,name'])->select('id', 'name', 'yard', 'ship_no')->get();
-        // dd($ships);
+        // dd($users);
         // Log::info('Ship with users loaded.');
         return Inertia::render('Ships/Index', [
             'users' => $users,

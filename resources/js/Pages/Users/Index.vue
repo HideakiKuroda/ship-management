@@ -33,7 +33,7 @@ const selectItem = async (userId) => {
   try {
     const response = await axios.get('/getship/shipfilter', {
       params: {
-        userId: userId, 
+        userId: userId,
       }
     });
     // console.log("selectCategoryId:", index.EndOrNo)
@@ -43,6 +43,10 @@ const selectItem = async (userId) => {
     console.error("Error fetching data:", error);
   }
 };
+
+onMounted(() => {
+  console.log('users:', ship.users);
+});
 
 </script>
 
@@ -62,7 +66,7 @@ const selectItem = async (userId) => {
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
                         <div class="container px-5 py-8 mx-auto">
-                           <FlashMessage /> 
+                           <FlashMessage />
                           <div class="flex flex-col pl-4 my-4 lg:w-2/3 w-full mx-auto">
                            <div class="mb-1 mt-1 flex-col md:flex-row">
                              <Link as="button" :href="route('ships.create')" class="flex ml-auto h-10 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded justify-end">新規船登録</Link>
@@ -91,19 +95,19 @@ const selectItem = async (userId) => {
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.yard }}</td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ ship.ship_no }}</td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                    <div v-for="user in ship.users">
+                                    <div v-for="user in ship.users" :key="user.id">
                                         {{ user.name }}
                                     </div>
                                     </td>
-        
+
                                  </tr>
                                 </tbody>
                             </table>
                            </div>
                           <!-- PC用のテーブル表示はここまで -->
-                         </div> 
+                         </div>
                         </div>  <!-- Flashメッセージ・検索・テーブルのコンテナ -->
-             
+
                     <!-- スマホ表示: 縦並び -->
                      <div class="container ml-8 px-4">
                        <div v-for="ship in ship.ships" :key="ship.id" class="block sm:hidden">
@@ -127,7 +131,7 @@ const selectItem = async (userId) => {
                         </div>
                      </div>
                      <!-- スマホ表示: 縦並び -->
-      
+
                         <!-- <Pagination :data="customers"/> -->
                         <!-- <Pagination :links="customers.links"></Pagination> -->
                         <!-- <Pagination :data="customers" :search="search"></Pagination> -->

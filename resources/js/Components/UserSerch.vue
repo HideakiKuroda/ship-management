@@ -1,5 +1,6 @@
 <script setup>
 
+
 /*
 
 const props = defineProps({
@@ -16,10 +17,9 @@ const handleUserId = (currentUser) =>{
   selectItem(XXXX.userId)    ==>> ユーザーを選んだ時のメソッド
 }
 
- <UserSerch :userId="XXXX.userId" :users="props.users" @update:currentUser="handleUserId"/> 
- 
- */
+ <UserSerch :userId="XXXX.userId" :users="props.users" @update:currentUser="handleUserId"/>
 
+ */
 
 
 import { ref, computed,watch } from 'vue';
@@ -41,8 +41,8 @@ const props = defineProps({
 
 const emit = defineEmits([
   'update:currentUser',
- 
-]) 
+
+])
 
 //コンボボックス用の変数設定
 const user = props.users
@@ -86,7 +86,7 @@ const options = computed(() => {
 watch(selectedUser, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
     emit('update:currentUser', newValue.id);
-    // console.log('id:',newValue.id) 
+    // console.log('id:',newValue.id)
   }
 })
 
@@ -102,12 +102,12 @@ watch(selectedUser, (newValue, oldValue) => {
                 <div
                 class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
                 >
-                <ComboboxInput 
+                <ComboboxInput
                     class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
                     :displayValue="(person) => person.name"
                     @change="query = $event.target.value"
-                    
-                                                        
+
+
                 />
                 <ComboboxButton
                     class="absolute inset-y-0 right-0 flex items-center pr-2 opacity-100 z-10"
@@ -125,7 +125,7 @@ watch(selectedUser, (newValue, oldValue) => {
                 @after-leave="query = ''"
                     >
                 <ComboboxOptions
-                    class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    class="absolute mt-1 max-h-60 w-40 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                 >
                     <div
                     v-if="filteredUser.length === 0 && query !== ''"
@@ -133,21 +133,21 @@ watch(selectedUser, (newValue, oldValue) => {
                     >
                     名前が見つかりません.
                     </div>
-                    
-                    <ComboboxOption 
+
+                    <ComboboxOption
                     v-for="person in options"
                     as="template"
                     :key="person.id"
                     :value="person"
                     v-slot="{ selected, active }"
-                                                                                                                                            
+
                     >
                     <li
                         class="relative cursor-default select-none py-2 pl-10 pr-4"
                         :class="{
                         'bg-teal-600 text-white': active,
                         'text-gray-900': !active,
-                        }" 
+                        }"
                     >
                         <span
                         class="block truncate"
@@ -156,16 +156,16 @@ watch(selectedUser, (newValue, oldValue) => {
                         {{ person.name  || '・・・'  }}
                         </span>
                         <span
-                        v-if="selected" 
+                        v-if="selected"
                         class="absolute inset-y-0 left-0 flex items-center pl-3"
                         :class="{ 'text-white': active, 'text-teal-600': !active }"
-                            
+
                         >
                         <CheckIcon class="h-5 w-5" aria-hidden="true" />
                         </span>
                     </li>
                     </ComboboxOption>
-                
+
                 </ComboboxOptions>
                 </TransitionRoot>
             </div>
@@ -174,4 +174,3 @@ watch(selectedUser, (newValue, oldValue) => {
     </div>
 </div>
 </template>
-

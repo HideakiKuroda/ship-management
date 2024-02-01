@@ -58,7 +58,7 @@ import VSwatches from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 
 import "vuetify/dist/vuetify.min.css";
-import "@mdi/font/css/materialdesignicons.css"; 
+// import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";

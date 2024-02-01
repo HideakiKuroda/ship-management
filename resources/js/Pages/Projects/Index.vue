@@ -84,7 +84,7 @@ const addDaysToDate = (dateString, daysToAdd) => {
     }
     else {date.setDate(date.getDate() + 30);
     }
-          
+
     // 日付を 'yyyy-mm-dd' 形式の文字列に変換して返す
     let month = '' + (date.getMonth() + 1),
         day = '' + date.getDate(),
@@ -94,19 +94,19 @@ const addDaysToDate = (dateString, daysToAdd) => {
     if (day.length < 2) day = '0' + day;
 
     return [year, month, day].join('-');
-} 
+}
 
-//船と担当者の絞込み     
+//船と担当者の絞込み
 const selectItem = async (userId, shipId,$uOrS, page = 1) => {
   if ($uOrS == 1){          //1で担当者検索　2で船の検索
     index.userId = userId;
   } else if($uOrS == 2) {
     index.shipId = shipId;
-  } 
+  }
   const daysToAdd = safeParseInt(index.crtAddDate);
   // console.log("Parsed daysToAdd:", daysToAdd);
   let newDate = null;
-  let newendDate = null; 
+  let newendDate = null;
   if (index.crtDate && index.EndOrNo !== 1){
     newDate = addDaysToDate(index.crtDate, daysToAdd);
     index.crtDate;
@@ -119,24 +119,24 @@ const selectItem = async (userId, shipId,$uOrS, page = 1) => {
     }else if(index.endDate == null){
     newendDate = null;
     }
-  // console.log("newDate:", index.crtDate, newDate);    
-  // console.log("endDate:", index.endDate, newendDate);    
+  // console.log("newDate:", index.crtDate, newDate);
+  // console.log("endDate:", index.endDate, newendDate);
   try {
-    const response = await axios.post('/projects/indexfilter', { 
-      userId: index.userId, 
+    const response = await axios.post('/projects/indexfilter', {
+      userId: index.userId,
       shipId: index.shipId,
       EndOrNo: index.EndOrNo,
       crtDate: index.crtDate,
       endDate: index.endDate,
-      crtAddDate:newDate, 
+      crtAddDate:newDate,
       endAddDate :newendDate,
-      page: page 
+      page: page
     });
     // console.log("credateSerch:", index.EndOrNo,index.crtDate,newDate)
     // console.log("enddateSerch:", index.EndOrNo,index.endDate,newendDate)
     index.projects = response.data;
     pagination.value = index.projects;
-   
+
   } catch (error) {
     console.error('Error:', error);
   }
@@ -189,10 +189,10 @@ const changePage = async (page) => {
   try {
     const response = await axios.get('/getindex/indexfilter', {
       params: {
-        userId: index.userId, 
+        userId: index.userId,
         shipId: index.shipId,
         EndOrNo: index.EndOrNo,
-        page: page 
+        page: page
       }
     });
     // console.log("selectCategoryId:", index.EndOrNo)
@@ -241,7 +241,7 @@ const shipOptions = computed(() => {
 //船検索Comboboxでリストから選んだ時の動作
 watch(selectedShip, (newValue, oldValue) => {
   if (newValue && newValue !== oldValue) {
-    selectItem(index.userId, newValue.id,2) 
+    selectItem(index.userId, newValue.id,2)
   }
 })
 
@@ -276,7 +276,7 @@ const displayVesselData = (vessel) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                       <section class="text-gray-600 body-font">
-                        
+
                     <div class="container lg:px-5 py-8 mx-auto">
                       <FlashMessage />
                       <div class="flex justify-end  lg:w-2/3">
@@ -295,7 +295,7 @@ const displayVesselData = (vessel) => {
                                   <div
                                   class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
                                   >
-                                    <ComboboxInput 
+                                    <ComboboxInput
                                       class="w-36 py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 rounded-lg bg-gray-100 focus:bg-white"
                                       :displayValue="(vessel) => vessel.name"
                                       @change="query = $event.target.value"
@@ -316,7 +316,7 @@ const displayVesselData = (vessel) => {
                                     @after-leave="query = ''"
                                   >
                                     <ComboboxOptions
-                                      class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                      class="absolute mt-1 max-h-60 w-52 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                                     >
                                       <div
                                         v-if="filteredship.length === 0 && query !== ''"
@@ -330,8 +330,8 @@ const displayVesselData = (vessel) => {
                                         as="template"
                                         :key="vessel.id"
                                         :value="vessel"
-                                        v-slot="{ selected, active }" 
-                                       
+                                        v-slot="{ selected, active }"
+
                                       >
                                         <li
                                           class="relative cursor-default select-none py-2 pl-10 pr-4"
@@ -365,15 +365,15 @@ const displayVesselData = (vessel) => {
 
                             <!-- 日付の検索　ここから -->
                             <!-- categoryId,serchDate,termD -->
-                            <DateSerch 
+                            <DateSerch
                             @update:categoryId="handleCategoryId"
                             @update:serchDate="handleSerchDate"
                             @update:termD="handleTermD"
                             class="z-0"></DateSerch>
 
                             <!-- 日付の検索　ここまで -->
-                             
-                            
+
+
                            </div>
                           <div class="lg:w-3/4 w-full mx-auto overflow-auto">
                             <table class="table-auto w-full text-left whitespace-no-wrap hidden sm:table ">
@@ -396,10 +396,10 @@ const displayVesselData = (vessel) => {
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
                                         <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(project.created_at) }}</td>
-                                    
+
                                     <!-- 担当者（ユーザー）列 -->
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                    <div v-for="user in project.users">
+                                    <div v-for="user in project.users" :key="user.id">
                                         {{ user.name }}
                                     </div>
                                     </td>
@@ -428,7 +428,7 @@ const displayVesselData = (vessel) => {
                               <div class="flex flex-col justify-end">
                                 <div  v-for="user in project.users" :key="user.id" class="block">{{ user.name }}</div>
                               </div>
-    
+
                             </div>
                           </div>
                           <div class="mb-4 border-b-2 border-gray-200">
@@ -436,19 +436,19 @@ const displayVesselData = (vessel) => {
 
                           <span class="block">{{ formatDate(project.created_at) }}&emsp;&emsp;&emsp;
                           {{ formatDate(project.completion)  }}</span>
-    
+
                         </div>
                        </div>
                       </div>
-                        <!-- スマホ用のリストここまで  -->    
+                        <!-- スマホ用のリストここまで  -->
                       </div>
                         <!-- <Pagination  -->
                           <div class="lg:w-3/4 mx-auto sm:px-6 lg:px-8 justify-center gap-x-1.5 rounded-md bg-white py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         <div class="card">
-                            <Paginator 
+                            <Paginator
                             v-model:first="first"
                             :rows="20"
-                            :totalRecords="pagination.total" 
+                            :totalRecords="pagination.total"
                             @page="changePage($event.page+1)"></Paginator>
                         </div>
                         <div class="text-center text-base font-mono">

@@ -15,6 +15,9 @@ const test = async () => {
     console.error('Error:', error);
   }
 };
+
+// const VBtn = () => import('vuetify/components/VBtn')
+
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
-// import vuetify from 'vite-plugin-vuetify'
 import { visualizer } from 'rollup-plugin-visualizer';
+import { splitVendorChunkPlugin } from 'vite'
 
 export default defineConfig({
     plugins: [
@@ -18,12 +18,12 @@ export default defineConfig({
                 },
             },
         }),
-        visualizer({
-            open: true,  // 分析結果をビルド後に自動的に開くかどうか
-            gzipSize: true,  // gzip圧縮後のサイズも表示
-            brotliSize: true, // Brotli圧縮後のサイズも表示
-          }),
-        // vuetify({ autoImport: true }),
+        // visualizer({
+        //     open: true,  // 分析結果をビルド後に自動的に開くかどうか
+        //     gzipSize: true,  // gzip圧縮後のサイズも表示
+        //     brotliSize: true, // Brotli圧縮後のサイズも表示
+        //   }),
+        splitVendorChunkPlugin(),
     ],
     //これを入れないとviteを起動したとき画面が真っ白！！
     server: {
@@ -32,4 +32,11 @@ export default defineConfig({
             host: 'localhost'
         }
     },
+    build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
 });
