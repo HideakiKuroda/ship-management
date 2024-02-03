@@ -415,7 +415,6 @@ onMounted(() => {
   getCalendar();
   getWindowSize();
   todayPosition();
-  // initFlowbite();
    //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
   //スクロールの場合はwheelイベントを設定します。
    window.addEventListener('resize', getWindowSize);

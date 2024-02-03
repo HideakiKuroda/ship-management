@@ -11,9 +11,9 @@ import FlashMessage from '@/Components/FlashMessage.vue';
 import axios from 'axios';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import { nl2br } from '@/nl2br';
-import { initFlowbite } from 'flowbite'  //優先度設定に使用
 import { VSwatches } from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
+import { VMenu } from 'vuetify/components';
 
 // CSRFトークンを取得
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -116,9 +116,6 @@ const onMntHandleChange = () => {
       };
 };
 
-// onMounted(() => {
-//     initFlowbite();  最下部に移動記載
-// })
 
 const updateTask = id =>{
   freeListener();
@@ -291,7 +288,6 @@ onMounted(() => {
   color_id.value = form.color;
   colToCss(form.color);
   onMntHandleChange();
-  initFlowbite();
   originalData.value = JSON.stringify(form);
   window.addEventListener("beforeunload", confirmSave);
   moveConfirm = router.on('before', (event) => {
@@ -376,18 +372,20 @@ onMounted(() => {
                                   <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
                                   >{{ form.priorityName }}</div>
 
-
-                                  <button id="dropdownRadioHelperButton" data-dropdown-toggle="dropdownRadioHelper"
-                                  :class="['border border-gray-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  ml-6 text-center inline-flex items-center', form.priorityColor]"
-                                  type="button"> 優先度を設定<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                                  </svg>
-                                  </button>
+                                  <v-menu
+                                    open-on-hover
+                                    >
+                                    <template v-slot:activator="{ props }">
+                                  <v-btn type="button"
+                                   v-bind="props"
+                                   prepend-icon="mdi-check-circle"
+                                   > 優先度を設定
+                                </v-btn> </template>
 
                                   <!-- Dropdown menu -->
-                                  <div id="dropdownRadioHelper" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-60 dark:bg-gray-700 dark:divide-gray-600">
-                                      <ul  class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioHelperButton">
-                                        <li>
+                                  <v-list>
+                                <v-list-item>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-rose-200 bg-rose-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-1" name="helper-radio" type="radio" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -401,8 +399,8 @@ onMounted(() => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-yellow-200 bg-yellow-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-2" name="helper-radio" type="radio" value="2" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -416,8 +414,8 @@ onMounted(() => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-green-200 bg-green-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-3" name="helper-radio" type="radio" value="3" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -431,8 +429,8 @@ onMounted(() => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-blue-200 bg-blue-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-4" name="helper-radio" type="radio" value="4" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -446,8 +444,8 @@ onMounted(() => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-gray-100 bg-gray-50">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-5" name="helper-radio" type="radio" value="5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -461,9 +459,10 @@ onMounted(() => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                      </ul>
-                                  </div>
+                                        </v-list-item-title>
+                                </v-list-item>
+                                </v-list>
+                                </v-menu>
                                    <!-- End Dropdown menu -->
                             </div>
                           </div>

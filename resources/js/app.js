@@ -61,13 +61,14 @@ import "vuetify/dist/vuetify.min.css";
 // import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
-import { VBtn,VTooltip} from "vuetify/components";
+import { VBtn,VTooltip,VMenu} from "vuetify/components";
 // import * as directives from "vuetify/directives";
 
 const vuetify = createVuetify({
     components:{
         VBtn,
-        VTooltip
+        VTooltip,
+        VMenu
     }
 
 });
