@@ -163,8 +163,8 @@ class ShipController extends Controller
             //   dd($ship);
             $userAuth = Auth::user();
             $permissions = Auth::user()->getAllPermissions()->pluck('name');
-            // ($userAuth->can('edit_ship') &&
-            if ($userAuth->hasAnyRole(['admin', 'developer']) || $userAuth->can('assign_ship') || $ship->users->contains($userAuth)) {
+            // ($userAuth->can('edit_ship') && $userAuth->can('assign_ship')
+            if ($userAuth->hasAnyRole(['admin', 'developer']) || $ship->users->contains($userAuth)) {
                 return Inertia::render('Ships/Edit',[
                     'ship' => $ship,
                     'navigationAreas'=>$navigationAreas,
@@ -177,7 +177,6 @@ class ShipController extends Controller
                 // 権限がない場合の処理
                 return response()->json(['error' => '編集権限がありません。'], 403);
             }
-
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
             dd($e->getMessage());

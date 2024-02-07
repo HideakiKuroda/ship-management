@@ -71,6 +71,7 @@ const props = defineProps({
   categories : Array,
   loginUser :  Object,
   errors: Object,
+  permissions : Array,
 })
 
 const form = reactive({

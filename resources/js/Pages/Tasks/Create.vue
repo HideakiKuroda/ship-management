@@ -3,9 +3,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link,router } from '@inertiajs/vue3';
 import moment from 'moment';
 import {onMounted, computed,reactive,ref,watch } from 'vue';
-import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-import { VSwatches } from 'vue3-swatches'
-import 'vue3-swatches/dist/style.css'
+import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
+import { VSwatches } from 'vue3-swatches';
+import 'vue3-swatches/dist/style.css';
+import { VMenu } from 'vuetify/components';
+import { mdiCheckCircle } from '@mdi/js'
 
 const props = defineProps({
     task  : Object,
@@ -25,7 +27,7 @@ const form = reactive({         //内容をreactiveにform変数に収める
     priorityName:       null,
     priorityColor:      null,
     priority:           5,
-}); 
+});
 
 const formatDate = (date) => {
    if (!date) return "";
@@ -33,12 +35,12 @@ const formatDate = (date) => {
 };
 
 const storetask = () => {
-  router.post(route('tasks.store'), form) 
+  router.post(route('tasks.store'), form)
 };
 
 const handleChange = (event) => {
   form.priority = event.target.value;
-    if(event.target.value == 1){ 
+    if(event.target.value == 1){
       form.priorityName = '優先度:① ※緊急度―大 ※重要度-大';
       form.priorityColor = 'bg-rose-100';
     }
@@ -79,7 +81,7 @@ watch(form.color, (newValue, oldValue) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                    <BreezeValidationErrors :errors="errors" />  
+                    <BreezeValidationErrors :errors="errors" />
                      <section class="text-gray-600 body-font relative">
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="md:flex lg:w-2/3 md:w-2/3 mx-auto">
@@ -99,8 +101,8 @@ watch(form.color, (newValue, oldValue) => {
                                             </ul>
                                         </div>
                                       </div>
-                                    </div> 
-                                  </div> 
+                                    </div>
+                                  </div>
                           </div>
                         </div>
 
@@ -108,37 +110,37 @@ watch(form.color, (newValue, oldValue) => {
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <div class="m-2">
                                   <div class="flex flex-wrap sm:flex-col">
-                                    <label>Task(内容):</label> 
-                                    <div class="flex flex-row p-2"> 
-                                      <input type="text" id="name" name="name" v-model="form.name" class="pl-2 w-full rounded" >
+                                    <label>Task(内容):</label>
+                                    <div class="flex flex-row p-2">
+                                      <input type="text" id="name" name="name" v-model="form.name" class="pl-2 bg-slate-100 w-full rounded" >
                                     </div>
-                                  <div class="flex flex-col sm:flex-row p-2 ml-4"> 
+                                  <div class="flex flex-col sm:flex-row p-2 ml-4">
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎終了予定日：</label>
-                                      <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <input type="date" id="end" name="end" v-model="form.end_date" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">
                                     </div>
-                                  
+
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="end" class="rounded  w-28 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎期限：</label>
-                                      <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">                                    
+                                      <input type="date" id="end" name="end" v-model="form.deadline" class="w-30  bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700  mt-1  leading-tight transition-colors duration-200 ease-in-out">
                                     </div>
                                   </div>
                                   </div>
                                   <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
                                   >{{ form.priorityName }}</div>
-
-                                  
-                                  <button id="dropdownRadioHelperButton" data-dropdown-toggle="dropdownRadioHelper"  
-                                  :class="['border border-gray-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  ml-6 text-center inline-flex items-center', form.priorityColor]"
-                                  type="button"> 優先度を設定<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                                  </svg>
-                                  </button>
+                                  <v-menu>
+                                    <!-- open-on-hover -->
+                                    <template v-slot:activator="{ props }">
+                                  <v-btn type="button" class="mt-1"
+                                   v-bind="props"
+                                   :prepend-icon="mdiCheckCircle"
+                                   > 優先度を設定
+                                </v-btn> </template>
 
                                   <!-- Dropdown menu -->
-                                  <div id="dropdownRadioHelper" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-60 dark:bg-gray-700 dark:divide-gray-600">
-                                      <ul  class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioHelperButton">
-                                        <li>
+                                  <v-list>
+                                <v-list-item>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-rose-200 bg-rose-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-1" name="helper-radio" type="radio" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -152,8 +154,8 @@ watch(form.color, (newValue, oldValue) => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-yellow-200 bg-yellow-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-2" name="helper-radio" type="radio" value="2" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -167,8 +169,8 @@ watch(form.color, (newValue, oldValue) => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-green-200 bg-green-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-3" name="helper-radio" type="radio" value="3" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -182,8 +184,8 @@ watch(form.color, (newValue, oldValue) => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-blue-200 bg-blue-100">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-4" name="helper-radio" type="radio" value="4" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -197,8 +199,8 @@ watch(form.color, (newValue, oldValue) => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                        <li>
+                                        </v-list-item-title>
+                                        <v-list-item-title>
                                           <div class="flex p-2 rounded hover:bg-gray-100 bg-gray-50">
                                             <div class="flex items-center h-5">
                                                 <input id="helper-radio-5" name="helper-radio" type="radio" value="5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300
@@ -212,9 +214,16 @@ watch(form.color, (newValue, oldValue) => {
                                                 </label>
                                             </div>
                                           </div>
-                                        </li>
-                                      </ul>
-                                  </div>
+                                        </v-list-item-title>
+                                </v-list-item>
+                                </v-list>
+                                </v-menu>
+                                   <!-- End Dropdown menu -->
+
+
+
+
+
                             </div>
                       </div>
                     </div>
@@ -222,7 +231,7 @@ watch(form.color, (newValue, oldValue) => {
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="storetask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>  
+                                  <button  @click="storetask" class="flex mx-auto text-white bg-indigo-500 border-0 mb-10 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">登録する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 </div>
@@ -230,7 +239,7 @@ watch(form.color, (newValue, oldValue) => {
                           </div>
                         </div>
 
-                        </section> 
+                        </section>
                     </div>
                 </div>
             </div>

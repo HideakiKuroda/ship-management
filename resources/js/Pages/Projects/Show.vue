@@ -29,7 +29,7 @@ const props = defineProps({
 
 const priorityColor = (priority) => {
   let color = '';
-    if(priority == 1){ 
+    if(priority == 1){
       color = 'bg-rose-100';
     }
     else if(priority == 2){
@@ -102,12 +102,26 @@ const downloadFile = async (attachmentId,dp) => {
     }
 };
 
-const editOpen = () => {
-  if (props.project.users.some(user => user.id === props.loginUser.id)) {
-    router.get(route('projects.edit', { project:props.project.id }));
-  } else {
-    alert('編集は担当者のみ可能です');
-  }  
+// const editOpen = (id) => {
+//   if (props.project.users.some(user => user.id === props.loginUser.id )) {
+//     router.get(route('projects.edit', { project:id }));
+//   } else {
+//     alert('編集は担当者のみ可能です');
+//   }
+// }
+const editOpen = (id) => {
+    axios.get(route('projects.edit', { project:id }))
+    .then(response => {
+        // console.log('ユーザー:',id);
+    router.get(route('projects.edit', { project:id }))
+  })
+  .catch(error => {
+    if (error.response && error.response.status === 403) {
+      alert('申し訳ありません。編集は担当者か権限者のみです！');
+    } else {
+      alert('予期せぬエラーが発生しました！');
+    }
+  });
 }
 
 const editTask = (id) => {
@@ -116,13 +130,13 @@ const editTask = (id) => {
     router.get(route('tasks.edit', { task:id }));
   } else {
     alert('編集は担当者のみ可能です');
-  }  
+  }
 }
 
 
 onMounted(() =>{
-   console.log('これ:',props.project.users);
-   console.log('は:',props.loginUser);
+//    console.log('これ:',props.project.users);
+//    console.log('は:',props.loginUser);
 })
 
 </script>
@@ -141,13 +155,13 @@ onMounted(() =>{
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                      <section class="text-gray-600 body-font relative">
-                    
+
                         <div class="container px-5 pt-8 mx-auto">
                           <div class="lg:w-2/3 md:w-2/3 mx-auto">
                             <FlashMessage  />
-                            
+
                              <div class="m-2">
-                                
+
                                 <div class="p-2">
                                     <div id="name" class="w-full  bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                                         <span>◆</span><span class="pl-5">Project No.: {{ props.project.id }}</span><span class="pl-5" v-if="props.project.ships.id!==null">Ship:【 {{ props.project.ships.name }} 】</span><br>
@@ -156,8 +170,8 @@ onMounted(() =>{
                                 </div>
 
                             </div></div></div>
-  
-                        
+
+
                         <div class="container px-5 py-0 mx-auto">
                           <div class="lg:w-3/4 md:w-full mx-auto">
                             <div class="m-2">
@@ -165,9 +179,9 @@ onMounted(() =>{
                               <div>
                                <vue-collapsible-panel-group>
                                <vue-collapsible-panel>
-                                <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
-                                <template #content> 
-     
+                                <template #title > 基本情報 </template>
+                                <template #content>
+
                                   <div class="flex flex-wrap sm:flex-row">
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">●区分：</label>
@@ -175,16 +189,16 @@ onMounted(() =>{
                                             {{ props.project.pro_categories.name }}
                                       </div>
                                     </div>
-                                    
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1 leading-7 text-sm text-gray-600">◎担当：</label>
                                       <div id="name" class="w-48 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                       <div v-for="user in props.project.users" >
+                                       <div v-for="user in props.project.users" :key="user.id">
                                         <div >{{ user.name }}</div>
                                        </div>
                                       </div>
                                     </div>
-                                    
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class="rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎作成日：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -197,7 +211,7 @@ onMounted(() =>{
                                             {{ formatDate(props.project.end_date)}}
                                       </div>
                                     </div>
-                                  
+
                                     <div class="p-2 ml-4">
                                       <label for="name" class=" rounded  border border-indigo-300 px-1  leading-7 text-sm text-gray-600">◎完了日：</label>
                                       <div id="name" class="w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
@@ -210,13 +224,13 @@ onMounted(() =>{
                                           {{ formatDate(props.project.date_of_issue) }}
                                       </div>
                                     </div>
-                                
+
                                  </div>
                                 </template>
                               </vue-collapsible-panel>
 
                               <vue-collapsible-panel :expanded="true">
-                              <template #title> メモ一覧 </template> 
+                              <template #title> メモ一覧 </template>
                               <!-- props.project.pro_descriptions -->
                               <template #content>
                               <div class="flex flex-col">
@@ -236,10 +250,10 @@ onMounted(() =>{
                               </div>
                             </template>
                             </vue-collapsible-panel>
-                   
+
                             <vue-collapsible-panel :expanded="true">
                             <template #title> 書類添付 </template>
-                            <template #content> 
+                            <template #content>
                                <div class="flex flex-col">
                                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                                   <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -269,12 +283,12 @@ onMounted(() =>{
                                   </div>
                                 </div>
                               </div>
-                            </template>  
-                            </vue-collapsible-panel>  
+                            </template>
+                            </vue-collapsible-panel>
                             <vue-collapsible-panel :expanded="true">
                               <template #title> タスク一覧 </template>
-                              <template #content> 
-                                <div class="overflow-auto w-full text-sm font-light hidden sm:table">     
+                              <template #content>
+                                <div class="overflow-auto w-full text-sm font-light hidden sm:table">
                                   <div class="flex flex-row w-full h-12 overflow-x-auto py-2 border-b bg-gray-200 font-medium dark:border-neutral-500 dark:bg-neutral-900">
                                         <div class="w-1/8 px-4 py-3 text-center">#</div>
                                         <div class="w-3/8 px-4 py-3 text-center">タスク名</div>
@@ -310,7 +324,7 @@ onMounted(() =>{
                                     </div>
                                    </div>
                                   </div>
-                                </div>   
+                                </div>
                                            <!-- スマホ用のリストここから  -->
                                       <div class="container ml-2 px-4">
                                       <div v-for="task in props.project.tasks" :key="task.id" :class="priorityColor(task.priority)" class="block sm:hidden">
@@ -352,15 +366,15 @@ onMounted(() =>{
 
                                         </div>
                                       </div>
-                                      </div> 
                                       </div>
-                                      </div> 
+                                      </div>
+                                      </div>
 
                               </template>
                               </vue-collapsible-panel>
 
                             </vue-collapsible-panel-group>
-                        </div>                        
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -368,14 +382,14 @@ onMounted(() =>{
                           <div class="lg:w-1/2 md:w-2/3 mx-auto">
                             <div class="m-2">
                                 <div class="p-0 w-full">
-                                  <button  @click="editOpen" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
+                                  <button  @click="editOpen(props.project.id)" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">編集する</button>
                                 </div>
                                 <div class="p-0 w-full">
                                 <!-- <button @click="deleteItem(project.id)" class="flex mx-auto text-white bg-red-500 border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded text-lg">削除する</button> -->
                                 </div>
                             </div></div></div>
 
-                        </section>                
+                        </section>
                     </div>
                 </div>
             </div>

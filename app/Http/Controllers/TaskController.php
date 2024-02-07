@@ -24,6 +24,14 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('permission:view_project')->only('index', 'show');
+        $this->middleware('permission:create_project')->only('create', 'store');
+        // $this->middleware('permission:edit_project')->only('edit', 'update');
+        $this->middleware('permission:create_project')->only('destroy');
+    }
+
     public function index(Task $task)
     {
         $userId = auth()->id();
@@ -49,15 +57,15 @@ class TaskController extends Controller
         ->DateEndTask($endDate,$endAddDate)
         ->UserTask($userId)
         ->latest();
-        // Log::info($queryAll->toSql()); 
-        
+        // Log::info($queryAll->toSql());
+
         $tasks = $queryAll->paginate(12)
         ->withQueryString();
 
-        
+
         return Inertia::render('Tasks/Index', [
             'ships' => $ships,
-            'currentUser' => $userId, 
+            'currentUser' => $userId,
             'users' => $users,
             'tasks' => $tasks
         ]);
@@ -81,9 +89,9 @@ class TaskController extends Controller
         //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
         //  Log::info('endDate value:', ['value' => $endDate]);
         //  Log::info('endAddDate value:', ['value' => $endAddDate]);
-        //  Log::info($query->toSql()); 
-        $filtered = $query->Paginate(12);    
-       
+        //  Log::info($query->toSql());
+        $filtered = $query->Paginate(12);
+
         // ->withQueryString();
         return response()->json($filtered);
     }
@@ -97,11 +105,11 @@ class TaskController extends Controller
        try {
             $projectId = $request->query('project_id');
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
-            
-            $loginUser = Auth::user('id','name'); 
+
+            $loginUser = Auth::user('id','name');
             return Inertia::render('Tasks/Create', [
-                'project' => $project, 
-                
+                'project' => $project,
+
             ]);
             } catch (\Throwable $e) {
             Log::error($e->getMessage());
@@ -115,9 +123,9 @@ class TaskController extends Controller
             $projectId = $task->project_id;
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($projectId);
 
-            $loginUser = Auth::user('id','name'); 
+            $loginUser = Auth::user('id','name');
             return Inertia::render('Tasks/Create', [
-                'project' => $project, 
+                'project' => $project,
                 'task' => $task,
             ]);
             } catch (\Throwable $e) {
@@ -148,7 +156,7 @@ class TaskController extends Controller
         return redirect()->route('tasks.edit', $task->id)->with([
             'message' => '新しいtask「' . $task->name . '」を登録しました',
             'status' => 'success'
-        ]);   
+        ]);
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()->back()->with([
@@ -175,7 +183,7 @@ class TaskController extends Controller
         try {
             $task->load('subtasks','task_attachments.users','task_descriptions.users','projects');
             $project = Project::select('id', 'name','ship_id')->with(['ships:id,name','users:id,name'])->find($task->project_id);
-            $loginUser = Auth::user('id','name'); 
+            $loginUser = Auth::user('id','name');
             return Inertia::render('Tasks/Edit',[
                 'task'=>$task,
                 'loginUser'=>$loginUser,
@@ -192,7 +200,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        
+
     try {
         $task = Task::findOrFail($task->id);
         DB::transaction(function () use ($request, &$task) {
@@ -202,7 +210,7 @@ class TaskController extends Controller
             'end_date' => $request->input('end_date'),
             'deadline' => $request->input('deadline'),
             'priority' => $request->input('priority'),
-        ]);    
+        ]);
         foreach ($request->attachments ?? [] as $attachData) {
         Task_attachment::where('id', $attachData['id'])
             ->where('task_id', $task->id)
@@ -219,7 +227,7 @@ class TaskController extends Controller
         if ($request->has('assignedMassagesList')) {
             $assignedMassagesList = $request->input('assignedMassagesList');
             foreach ($assignedMassagesList as $messageData) {
-                // メモの更新または作成 
+                // メモの更新または作成
                 $task->task_descriptions()->updateOrCreate(
                     ['id' => $messageData['id'] ?? null],
                     [
@@ -230,7 +238,7 @@ class TaskController extends Controller
                 );
             }
         }
-        
+
     });
     return redirect()->back()->withInput()->with([
         'message' => '更新しました。',
@@ -291,7 +299,7 @@ class TaskController extends Controller
         ]);
         // $uploadedFiles 配列に追加する前に user_name と created_at を追加
         $newFile->users->name = $users->name;
-        $newFile->created_at = $today->toDateTimeString(); 
+        $newFile->created_at = $today->toDateTimeString();
         $newFile->title = '';
         $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
         }

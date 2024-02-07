@@ -30,16 +30,16 @@ class Project extends Model
         'start_date',
         'end_date',
         'completion',
-        'date_of_issue', 
+        'date_of_issue',
    ];
 
     protected $dates = ['deleted_at'];
 
     public function users():BelongsToMany
     {
-    return $this->belongsToMany(User::class, 'pro_assignments');
+    return $this->belongsToMany(User::class, 'pro_assignments','project_id');
     }
-   
+
     public function pro_attachments():HasMany
     {
         return $this->hasMany(Pro_attachment::class);
@@ -54,7 +54,7 @@ class Project extends Model
     {
         return $this->hasMany(Task::class)->whereNull('parent_id');
     }
-    
+
     public function pro_categories():BelongsTo
     {
         return $this->belongsTo(Pro_category::class, 'pro_category_id');
@@ -85,9 +85,9 @@ class Project extends Model
            return $query->where('ship_id','=',$shipId);
         }
         return $query;
-    }  
+    }
     //完了・未完了の設定
-    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了 2:全体  
+    public function scopeEndOrNoProject($query,$EndOrNo=0) //0:未完了　1:完了 2:全体
      {
         if($EndOrNo == 0){
            return $query->whereNull('completion');
@@ -97,9 +97,9 @@ class Project extends Model
          }
          elseif ($EndOrNo == 2) {
             return $query;
-        } 
+        }
         return $query;
-    }  
+    }
     //作成日の日付範囲で検索
     public function scopeDateCreateProject($query,$crtDate,$crtAddDate)
     {
@@ -107,7 +107,7 @@ class Project extends Model
            return $query->whereBetween("created_at",[$crtDate,$crtAddDate]);
         }
         return $query;
-    
+
     }
     //完了日日付範囲で検索
     public function scopeDateEndProject($query,$endDate,$endAddDate)
@@ -118,7 +118,7 @@ class Project extends Model
         return $query;
     }
 
-        
+
 }
 
 

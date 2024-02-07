@@ -102,6 +102,7 @@ const downloadFile = async (attachmentId,dp) => {
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">船舶の詳細</h2>
+            <Link :href="route('ships.index')" class="text-blue-600 text-sm italic underline underline-offset-1" >・・一覧に戻る</Link>
         </template>
 
         <div class="py-12">
@@ -131,7 +132,8 @@ const downloadFile = async (attachmentId,dp) => {
                              <div>
                               <vue-collapsible-panel-group>
                                <vue-collapsible-panel>
-                                <template #title class="w-full rounded  border border-indigo-300 px-1"> 基本情報 </template>
+                                <template #title
+                                > 基本情報 </template>
                                 <template #content>
 
                                   <div class="flex flex-wrap sm:flex-row">
@@ -492,7 +494,7 @@ const downloadFile = async (attachmentId,dp) => {
                                           </tr>
                                         </thead>
                                         <tbody>
-                                          <tr v-for="shipOwner in props.ship.ship_owners" class="border-b dark:border-neutral-500">
+                                          <tr v-for="shipOwner in props.ship.ship_owners" :key="shipOwner.id" class="border-b dark:border-neutral-500">
                                             <td class="whitespace-nowrap px-12 py-4 text-center">{{ shipOwner.owner_name }}</td>
                                             <td class="whitespace-nowrap pr-36 py-4 text-right">{{ shipOwner.ratio }}</td>
                                           </tr>

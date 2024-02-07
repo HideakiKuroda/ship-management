@@ -317,7 +317,7 @@ onUnmounted(() => {
 onMounted(() => {
   originalData.value = JSON.stringify(form);
   onListener();
-  console.log(props.permissions);
+//   console.log(props.permissions);
 });
 
 
@@ -354,6 +354,7 @@ const deleteFile = (attachmentId) => {
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">船舶の詳細編集</h2>
+            <Link class="text-blue-600 text-sm italic underline underline-offset-1" :href="route('ships.show', { ship:form.id })">・・詳細に戻る </Link>
         </template>
 
         <div class="py-12">

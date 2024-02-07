@@ -27,6 +27,14 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('permission:view_project')->only('index', 'show');
+        $this->middleware('permission:create_project')->only('create', 'store');
+        // $this->middleware('permission:edit_project')->only('edit', 'update');
+        $this->middleware('permission:create_project')->only('destroy');
+    }
+
     public function index(Project $project)
     {
         $userId = auth()->id();
@@ -48,15 +56,14 @@ class ProjectController extends Controller
         ->DateEndProject($endDate,$endAddDate)
         ->UserProject($userId)
         ->latest();
-        // Log::info($queryAll->toSql()); 
-        
+        // Log::info($queryAll->toSql());
+
         $projects = $queryAll->paginate(12)
         ->withQueryString();
 
-        
         return Inertia::render('Projects/Index', [
             'ships' => $ships,
-            'currentUser' => $userId, 
+            'currentUser' => $userId,
             'users' => $users,
             'projects' => $projects,
         ]);
@@ -80,9 +87,9 @@ class ProjectController extends Controller
         //  Log::info('crtAddDate value:', ['value' => $crtAddDate]);
         //  Log::info('endDate value:', ['value' => $endDate]);
         //  Log::info('endAddDate value:', ['value' => $endAddDate]);
-        //  Log::info($query->toSql()); 
-        $filtered = $query->Paginate(12);    
-       
+        //  Log::info($query->toSql());
+        $filtered = $query->Paginate(12);
+
         // ->withQueryString();
         return response()->json($filtered);
     }
@@ -111,12 +118,12 @@ class ProjectController extends Controller
             'category_id' => $request->categories,
             'ship_id' => $request->ship_id,
             'ships' => $ships,
-            'currentUser' => $userId, 
+            'currentUser' => $userId,
             'categories' => $categories,
             'users'=>$users,
         ]);
 
-        
+
     }
 
     /**
@@ -136,17 +143,17 @@ class ProjectController extends Controller
                 'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
             ]);
-            
+
             // assignedUsersList から user_id を取り出して、$userIds に配列として格納
             $userIds = collect($request->input('assignedUsersList'))->pluck('id')->all();
             // syncメソッドは、多対多リレーションシップを同期するためのメソッドです。
-            //これにより、与えられたIDのリスト$userIdsに基づいて中間テーブルのレコードが更新されます。            
+            //これにより、与えられたIDのリスト$userIdsに基づいて中間テーブルのレコードが更新されます。
             $project->users()->sync($userIds);
         });
         return redirect()->route('projects.show', $project->id)->with([
             'message' => '新しいproject「' . $project->name . '」を登録しました',
             'status' => 'success'
-        ]);   
+        ]);
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()->back()->with([
@@ -163,7 +170,7 @@ class ProjectController extends Controller
     {
         try {
             $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
-            $loginUser = Auth::user('id','name'); 
+            $loginUser = Auth::user('id','name');
             // dd($project);
             return Inertia::render('Projects/Show',['project' => $project,'loginUser'=>$loginUser]);
         } catch (\Throwable $e) {
@@ -188,8 +195,9 @@ class ProjectController extends Controller
             $categories = Pro_category::select('id','name')->get();
             $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
                 // dd($project);
-            $loginUser = Auth::user('id','name');  
-            // dd($loginUser);  
+            $loginUser = Auth::user('id','name');
+            if ($loginUser->hasAnyRole(['admin', 'developer']) || $project->users->contains($loginUser)) {
+            // dd($loginUser);
             return Inertia::render('Projects/Edit',[
                 'project' => $project,
                 'users' => $users,
@@ -197,6 +205,10 @@ class ProjectController extends Controller
                 'categories'=>$categories,
                 'loginUser'=>$loginUser
             ]);
+            } else {
+                // 権限がない場合の処理
+                return response()->json(['error' => '編集権限がありません。'], 403);
+            }
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
            // dd($e->getMessage());
@@ -216,8 +228,8 @@ class ProjectController extends Controller
     //         $categories = Pro_category::select('id','name')->get();
     //         $project->load('users','pro_attachments.users','tasks.subtasks','pro_categories','ships','pro_descriptions.users');
     //             // dd($project);
-    //         $loginUser = Auth::user('id','name');  
-    //         // dd($loginUser);  
+    //         $loginUser = Auth::user('id','name');
+    //         // dd($loginUser);
     //         $editUrl = route('Projects/Edit', ['project' => $project->id]);
     //         $projectdata = [
     //             'project' => $project,
@@ -245,17 +257,17 @@ class ProjectController extends Controller
             //    dd($request);
         $project = Project::findOrFail($project->id);
         DB::transaction(function () use ($request, &$project) {
-        
+
         $project->update([
             'name'=>$request->input('name'),
             'pro_category_id'=>$request->input('pro_category_id'),
             'start_date'=>$request->input('start_date'),
             'end_date'=>$request->input('end_date'),
             'completion'=>$request->input('completion'),
-            'date_of_issue'=>$request->input('date_of_issue'),  
-            
-        ]);    
-            
+            'date_of_issue'=>$request->input('date_of_issue'),
+
+        ]);
+
         foreach ($request->attachments ?? [] as $attachData) {
         Pro_attachment::where('id', $attachData['id'])
             ->where('project_id', $project->id)
@@ -275,7 +287,7 @@ class ProjectController extends Controller
         if ($request->has('assignedMassagesList')) {
             $assignedMassagesList = $request->input('assignedMassagesList');
             foreach ($assignedMassagesList as $messageData) {
-                // メモの更新または作成 
+                // メモの更新または作成
                 $project->pro_descriptions()->updateOrCreate(
                     ['id' => $messageData['id'] ?? null],
                     [
@@ -286,7 +298,7 @@ class ProjectController extends Controller
                 );
             }
         }
-        
+
     });
     return redirect()->back()->withInput()->with([
         'message' => '更新しました。',
@@ -322,10 +334,10 @@ class ProjectController extends Controller
         $files = $request->file('files');
         $uploadedFiles = [];
         $today=now();
-        
+
         //  dd($files);
         foreach ($files as $file) {
-         
+
         $originalName = $file->getClientOriginalName();
         $filetype = pathinfo($originalName, PATHINFO_EXTENSION);
         // dd($filetype);
@@ -356,7 +368,7 @@ class ProjectController extends Controller
         ]);
         // $uploadedFiles 配列に追加する前に user_name と created_at を追加
         $newFile->users->name = $users->name;
-        $newFile->created_at = $today->toDateTimeString(); 
+        $newFile->created_at = $today->toDateTimeString();
         $newFile->title = '';
         $uploadedFiles[] = $newFile; // データベースに保存された新しいファイルの情報を配列に追加
         }
@@ -403,9 +415,9 @@ class ProjectController extends Controller
             ];
             return response()->file($filePath, $headers);
             // return response()->download($filePath, $attachment->originname);
-            
+
         }
-        
+
         return response()->json(['message' => 'File not found'], 404);
     }
     //ダウンロードファイルの名前の取得

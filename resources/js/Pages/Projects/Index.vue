@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { reactive,computed,ref,watch, onMounted } from 'vue';
 import moment from 'moment';
@@ -250,7 +250,23 @@ const displayVesselData = (vessel) => {
   if (vessel.id === null) {
         return '全船';
     }
-  return `${vessel.name} 　[ ${vessel.yard} ${vessel.ship_no} ]`;
+  return `${vessel.name} [ ${vessel.yard} ${vessel.ship_no} ]`;
+}
+
+const editOpen = (id) => {
+    axios.get(route('projects.edit', { project:id }))
+    .then(response => {
+        // console.log('ユーザー:',id);
+    router.get(route('projects.edit', { project:id }))
+  })
+  .catch(error => {
+    if (error.response && error.response.status === 403) {
+      router.get(route('projects.show', { project:id }));
+    //   alert('申し訳ありません。編集は担当者か権限者のみです！');
+    } else {
+      alert('予期せぬエラーが発生しました！');
+    }
+  });
 }
 
 // onMounted(() => {
@@ -390,11 +406,11 @@ const displayVesselData = (vessel) => {
                                 <tbody>
                                  <tr  v-for="project in index.projects.data" :key="project.id" >
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })"> {{ project.id }} </Link></td>
+                                        <button class="text-blue-600"  @click="editOpen(project.id)"> {{ project.id }} </button></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.ships.name }} </Link></td>
+                                        <button class="text-blue-600"  @click="editOpen(project.id)">{{ project.ships.name }} </button></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">
-                                        <Link class="text-blue-600" :href="route('projects.show', { project:project.id })">{{ project.name }} </Link></td>
+                                        <button class="text-blue-600"  @click="editOpen(project.id)">{{ project.name }} </button></td>
                                     <td class="border-b-2 border-gray-200 px-4 py-3">{{ formatDate(project.created_at) }}</td>
 
                                     <!-- 担当者（ユーザー）列 -->

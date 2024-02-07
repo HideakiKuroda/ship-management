@@ -62,15 +62,21 @@ import "vuetify/dist/vuetify.min.css";
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import { VBtn,VTooltip,VMenu} from "vuetify/components";
-// import * as directives from "vuetify/directives";
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 
 const vuetify = createVuetify({
     components:{
         VBtn,
         VTooltip,
         VMenu
-    }
-
+    },
+    icons: {
+        defaultSet: 'mdi',
+        aliases,
+        sets: {
+          mdi,
+        },
+      },
 });
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';

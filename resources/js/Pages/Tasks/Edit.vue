@@ -14,6 +14,7 @@ import { nl2br } from '@/nl2br';
 import { VSwatches } from 'vue3-swatches'
 import 'vue3-swatches/dist/style.css'
 import { VMenu } from 'vuetify/components';
+import { mdiCheckCircle } from '@mdi/js'
 
 // CSRFトークンを取得
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -57,7 +58,7 @@ const cssCol = ref('')
 const color_id =  ref('')
 
 const colToCss = (col) => {
-if(col ==''){cssCol.value = ''}
+if(col ==''){cssCol.value = 'bg-slate-100'}
 else if(col =='#1FBC9C'){cssCol.value = 'bg-emerald-300'}
 else if(col =='#1CA085'){cssCol.value = 'bg-emerald-500 text-slate-100'}
 else if(col =='#2ECC70'){cssCol.value = 'bg-green-300'}
@@ -372,15 +373,14 @@ onMounted(() => {
                                   <div :class="['font-medium rounded-lg text-sm px-5 py-2.5 mb-1', form.priorityColor]"
                                   >{{ form.priorityName }}</div>
 
-                                  <v-menu
-                                    open-on-hover
-                                    >
+                                <v-menu>
+                                    <!-- open-on-hover -->
                                     <template v-slot:activator="{ props }">
-                                  <v-btn type="button"
+                                  <v-btn type="button" class="mt-1"
                                    v-bind="props"
-                                   prepend-icon="mdi-check-circle"
+                                   :prepend-icon="mdiCheckCircle"
                                    > 優先度を設定
-                                </v-btn> </template>
+                                  </v-btn> </template>
 
                                   <!-- Dropdown menu -->
                                   <v-list>
