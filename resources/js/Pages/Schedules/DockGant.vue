@@ -25,11 +25,24 @@ const props = defineProps({
 // const VTooltip = defineAsyncComponent(() => import('vuetify/components').then(c => c.VTooltip));
 
 // const router = useRouter();
+const getPreviousFiscalYearStart = () => {
+  const today1 = moment();
+  const currentYear = today1.year();
+  const currentMonth = today1.month() + 1; // moment.jsは月を0から数えるため、+1する
+  let fiscalYearStartYear = currentYear - 1;
+
+  // 現在が4月以前であれば、前年度の始まりをさらに1年遡らせる
+  if (currentMonth < 4) {
+    fiscalYearStartYear -= 1;
+  }
+
+  return moment(`${fiscalYearStartYear}-04-01`);
+};
 
 // reactive data
-const start_month = ref(moment().subtract(1, 'years'));
+const start_month = ref(getPreviousFiscalYearStart());//カレンダーのはじめ
 // const end_month = ref(lastDay);
-const end_month = ref(moment().add(11, 'years'));
+const end_month = ref(moment().add(11, 'years'));//カレンダーの終わり
 const block_size = ref(20);
 // const block_number = ref(0);
 const calendars = ref([]);
@@ -54,6 +67,12 @@ const task = ref('');
 const user_id = ref();
 const slectedOperatSection = ref();
 
+ // 4月以前ならば前の年を、それ以外ならばその年を返す
+const adjustYearForFiscalYear = (todayMoment) => {
+  return todayMoment.month() < 3 ? todayMoment.year() - 1 : todayMoment.year();
+};
+const adjustedYear = adjustYearForFiscalYear(today.value);
+
 const handleUserId = (currentUser) =>{
   user_id.value = currentUser
    console.log("handleUserId:", currentUser)
@@ -66,16 +85,32 @@ const findEarliest = (list) => {
 };
 
 
+// const getMonths = (year, block_number) => {
+//   let months = [];
+//   let date = moment(`${year}-04-01`); // 年度開始を4月に設定
+//   for (let i = 0; i < 12; i++) {
+//     months.push({
+//       month: (date.month()) % 12 + 1, // 月の値を4月開始に調整
+//       block_number
+//     });
+//     date.add(1, 'month');
+//     block_number++;
+//   }
+//   return months;
+// };
 const getMonths = (year, block_number) => {
   let months = [];
-  let date = moment(`${year}-04-01`); // 年度開始を4月に設定
   for (let i = 0; i < 12; i++) {
+    // 月を計算する際、4月から始める。4月以降はそのまま、12月以降は翌年の1月から3月に対応
+    let month = i + 4; // 4月から数え始める
+    if (month > 12) { // 13月以降を1月から3月に変換
+      month -= 12;
+    }
+
     months.push({
-      month: (date.month()) % 12 + 1, // 月の値を4月開始に調整
-      block_number
+      month: month,
+      block_number: block_number + i // 各月に一意のブロック番号を割り当て
     });
-    date.add(1, 'month');
-    block_number++;
   }
   return months;
 };
@@ -85,11 +120,11 @@ const getCalendar = () => {
   let months;
   let start = moment(start_month.value);
   let end = moment(end_month.value);
-  let between_years = end.year() - start.year()-1; // 年度の差を計算
+  let between_years = end.year() - start.year();
   for (let i = 0; i < between_years; i++) {
     months = getMonths(start.year(), block_number);
     calendars.value.push({
-      date: (start.month() < 3 ? start.year() - 1 : start.year()).toString() + '年度', // 年度表示を調整
+      date:  (start.month() < 3 ? start.year() - 1 : start.year()).toString() + '年度', // 年度表示を調整
       year: start.year(),
       start_block_number: block_number,
       calendar: months.length,
@@ -268,7 +303,7 @@ const taskBars = computed(() => {
 
       return {
         top: `${top}px`,
-        left: `${left+180}px`,
+        left: `${left}px`,//タスクバーの「スタート位置を調整？？+180 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         width: `${block_size.value * between}px`,
       };
     };
@@ -423,7 +458,7 @@ onMounted(() => {
   // window.addEventListener('mouseup', stopDrag);
   // window.addEventListener('mousemove', mouseResize);
 
-  // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
+  console.log('年度初め',today.value.format('yyyymmdd'));
   // console.log('ドックデータ',combinedData.value)
   // console.log('運航地域',props.ships.operat_sections)
   // nextTick().then(() => {
@@ -536,7 +571,7 @@ defineExpose({ windowSizeCheck, displayTasks});
             <div v-for="(month,index) in calendar.months" :key="index">
               <div class="border-r border-b h-8 absolute flex items-center justify-center flex-col font-bold text-xs"
                 :class="{'bg-blue-100': month.month === 4, 'bg-red-100': month.month === 3,
-                'bg-red-600 text-white': calendar.year===  today.year() && month.month === today.month() + 1}"
+                'bg-red-600 text-white': calendar.year===  adjustedYear && month.month === today.month() + 1}"
                 :style="`width:${block_size}px;left:${month.block_number*block_size}px`">
                 <span>{{ month.month }}</span> <!-- monthは0から始まるため1を加えます -->
               </div>

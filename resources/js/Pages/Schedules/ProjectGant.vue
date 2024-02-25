@@ -1,13 +1,16 @@
 <script setup>
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { ref, onMounted,computed, onUnmounted } from 'vue';
+import { ref, onMounted,computed, onUnmounted,onBeforeMount } from 'vue';
 import moment from 'moment'; //npm install moment でインストール要
 import { Head, Link,router } from '@inertiajs/vue3';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'  ;
 import UserSerch from '@/Components/UserSerch.vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import { Inertia } from '@inertiajs/inertia'
+// import { useRouter } from 'vue-router';
+import { VTooltip } from 'vuetify/components';
 
 const props = defineProps({
   users : Array,
@@ -20,7 +23,7 @@ const props = defineProps({
 })
 
 // reactive data
-const start_month = ref(moment().subtract(2, 'years'));
+const start_month = ref(moment().subtract(1, 'years'));
 // const end_month = ref(lastDay);
 const end_month = ref(moment().add(11, 'years'));
 const block_size = ref(20);
@@ -33,9 +36,9 @@ const task_height = ref('');
 const taskElement = ref(null);
 const today = ref(moment());   // moment()はデフォルト: 現在時刻
 const start_date = ref(moment(start_month.value));
-const calendar = ref(null); 
-const position_id = ref(0); 
-const dragging = ref(false); 
+const calendar = ref(null);
+const position_id = ref(0);
+const dragging = ref(false);
 const pageX = ref('');
 const element = ref(null);
 const left = ref('');
@@ -57,7 +60,7 @@ const findEarliest = (list) => {
   const maxDate = new Date(Math.max(...dates));
   return maxDate;
 };
-// const lastDate =  new Date(moment(findEarliest(list2.value)));
+
 
 const getMonths = (year, block_number) => {
   let months = [];
@@ -78,11 +81,11 @@ const getCalendar = () => {
   let months;
   let start = moment(start_month.value);
   let end = moment(end_month.value);
-  let between_years = end.year() - start.year() + 1; // 年度の差を計算
+  let between_years = end.year() - start.year()-1; // 年度の差を計算
   for (let i = 0; i < between_years; i++) {
     months = getMonths(start.year(), block_number);
     calendars.value.push({
-      date: start.format('YYYY年度'), // 年度表示に変更
+      date: (start.month() < 3 ? start.year() - 1 : start.year()).toString() + '年度', // 年度表示を調整
       year: start.year(),
       start_block_number: block_number,
       calendar: months.length,
@@ -99,7 +102,7 @@ const getWindowSize = () => {       //ref="taskElement" をタグ内に設定し
   inner_width.value = window.innerWidth;
   inner_height.value = window.innerHeight;
   if(taskElement.value) {
-    task_width.value = taskElement.value.offsetWidth; 
+    task_width.value = taskElement.value.offsetWidth;
     task_height.value = taskElement.value.offsetHeight;
   }
 }
@@ -222,13 +225,13 @@ const list3 = computed(() => {
 
   return projectsByShipId;
 });
- 
+
 
 const combinedData = computed(() => {
   return list1.value.map(ship => {
     const schedule = list2.value.find(s => s.id === ship.id) || {};
-    const projects = list3.value.get(ship.id) || []; 
-   
+    const projects = list3.value.get(ship.id) || [];
+
 
     return {
       // list1 からのデータ
@@ -253,11 +256,11 @@ const taskBars = computed(() => {
 
   return displayTasks.value.map((data, index) => {    //スクロールに合わせた位置でタスクバー表示を変更dataにマップっされる
       const createStyle = (start, end, rowOffset) => {
-      const date_from = moment(start);
-      const date_to = moment(end);
-      const between = date_to.diff(date_from, 'months') + 1;
-      const left = date_from.diff(start_date.value, 'months') * block_size.value;
-      const top = baseTop + (index * rowHeight) + (rowOffset * rowHeight);
+        let date_from = moment(start);
+        let date_to = moment(end);
+        let between = date_to.diff(date_from, 'months') + 1;
+        let left = date_from.diff(start_date.value, 'months') * block_size.value;
+        let top = baseTop + (index * rowHeight) + (rowOffset * rowHeight);
 
       return {
         top: `${top}px`,
@@ -265,6 +268,7 @@ const taskBars = computed(() => {
         width: `${block_size.value * between}px`,
       };
     };
+
     // 1行目: interim バー 中間検査
     const interim1Style = data.schedule.interim1_start ? createStyle(data.schedule.interim1_start, data.schedule.interim1_end, 0) : null;
     const interim2Style = data.schedule.interim2_start ? createStyle(data.schedule.interim2_start, data.schedule.interim2_end, 0) : null;
@@ -294,6 +298,7 @@ const taskBars = computed(() => {
             default:
               rowOffset = -1; // 既定値
           }
+
           const pstyle = createStyle(project.start_date, project.end_date, rowOffset);
           return {
             pstyle,
@@ -337,26 +342,42 @@ const getUserIds = (projectId) => {
   return [];
 };
 
+const shipUserIds = (shipId) => {
+  // 特定のSHIPを見つける
+  const ship = props.ships.find(s => s.id === shipId);
+  // SHIPが見つかった場合、関連するユーザーのIDリストを返す
+  if (ship && ship.users) {
+    return ship.users.map(user => user.id);
+  }
+  // 関連するユーザーがいないか、プロジェクトが見つからない場合は空の配列を返す
+  return [];
+};
+
 const editOpen = (id) => {
   if (getUserIds(id).some(userId => userId === props.loginUser.id || props.hasRole == true)) {
-    
+
     router.get(route('projects.edit', { project:id }));
   } else {
-    alert('編集は担当者とシステム管理者のみ可能です');
-  }  
+    alert('編集は担当者とシステム管理者のみです参照ページを開きます');
+    router.get(route('projects.show', { project:id }));
+  }
 }
 
 const createOpen = (bar,p) => {
-  // console.log("クリックされたバーのデータ:", bar);
+  if (shipUserIds(bar.shipInfo.id).some(userId => userId === props.loginUser.id || props.hasRole == true)) {
+  // console.log("クリックされたバーのデータ:", shipUserIds(bar.shipInfo.id) );
   if (confirm('新規にドック予定のprojectを作成します。')) {
-     router.post(route('project.create'),{
+     router.get(route('projects.create'),{
       ship_id:bar.shipInfo.id,
       categories:p,
-  });
+      });
       return true;
     } else {
       return false;
     }
+  } else {
+    alert('Projectの作成は担当者とシステム管理者のみです');
+  }
   };
 
 const windowSizeCheck = (event) => {
@@ -366,136 +387,11 @@ const windowSizeCheck = (event) => {
   } else if (event.deltaY < 0 && position_id.value !== 0) {
     position_id.value--
   }
+  // location.reload();
+  // window.location.reload();
+  // useRouter.go();
 }
 
-const mouseDownMove = (task, event) => {
-  if(event.button !== 0) return; // Ensure only the left mouse button initiates the drag.
-  dragging.value = true;
-  pageX.value = event.pageX;
-  element.value = event.target;
-  left.value = event.target.style.left;
-  task_id.value = task.id;
-}
-const mouseMove = (event) => {
-  if (dragging.value) {
-    let diff = pageX.value - event.pageX;
-    element.value.style.left = `${parseInt(left.value.replace('px', '')) - diff}px`;
-  }
-}
-
-const stopDrag = (event) => {
-  if (dragging.value) {
-    let diff = pageX.value - event.pageX;
-    let months = Math.ceil(diff / block_size.value);
-    if (months !== 0) {
-      console.log(months);
-      let task = tasks.value.find(task => task.id === task_id.value);
-      let start_date = moment(task.start_date).add(-months, 'months');
-      let end_date = moment(task.end_date).add(-months, 'months');
-      task['start_date'] = start_date.format('YYYY-MM');
-      task['end_date'] = end_date.format('YYYY-MM');
-    } else {
-      element.value.style.left = `${left.value.replace('px', '')}px`;
-    }
-  }
-  if (leftResizing.value) {
-    let diff = pageX.value - event.pageX;
-    let months = Math.ceil(diff / block_size.value);
-    if (months !== 0) {
-      let task = tasks.value.find(task => task.id === task_id.value);
-      let start_date = moment(task.start_date).add(-months, 'months');
-      let end_date = moment(task.end_date);
-      if (end_date.diff(start_date, 'months') <= 0) {
-        task['start_date'] = end_date.format('YYYY-MM');
-      } else {
-        task['start_date'] = start_date.format('YYYY-MM');
-      }
-    } else {
-      element.value.style.width = width.value;
-      element.value.style.left = `${left.value.replace('px', '')}px`;
-    }
-  }
-  if (rightResizing.value) {
-    let diff = pageX.value - event.pageX;
-    let months = Math.ceil(diff / block_size.value);
-    let task = tasks.value.find(task => task.id === task_id.value);
-    let end_date, start_date;
-    if (months === 1) {
-      task.element.style.width = `${parseInt(task.width.replace('px', ''))}px`;
-    } else if (months <= 2) {
-      months--;
-      end_date = moment(task.end_date).add(-months, 'months');
-      task['end_date'] = end_date.format('YYYY-MM');
-    } else {
-      start_date = moment(task.start_date);
-      end_date = moment(task.end_date).add(-months, 'months');
-      if (end_date.diff(start_date, 'months') < 0) {
-        task['end_date'] = start_date.format('YYYY-MM');
-      } else {
-        task['end_date'] = end_date.format('YYYY-MM');
-      }
-    }
-  }
-  dragging.value = false;
-  leftResizing.value = false;
-  rightResizing.value = false;
-}
-
-const mouseDownResize = (task, direction, event) => {
-  if (direction === 'left') {
-    leftResizing.value = true;
-  } else {
-    rightResizing.value = true;
-  }
-  pageX.value = event.pageX;
-  width.value = event.target.parentElement.style.width;
-  left.value = event.target.parentElement.style.left;
-  element.value = event.target.parentElement;
-  task_id.value = task.id;
-}
-
-const mouseResize = (event) => {
-  if (leftResizing.value) {
-    let diff = pageX.value - event.pageX;
-    if (parseInt(width.value.toString().replace('px', '')) + diff > block_size.value) {
-      element.value.style.width = `${parseInt(width.value.replace('px', '')) + diff}px`;
-      element.value.style.left = `${parseInt(left.value.replace('px', '')) - diff}px`;
-    }
-  }
-  if (rightResizing.value) {
-    let diff = event.pageX - pageX.value ;
-    if (parseInt(width.value.replace('px', '')) + diff > block_size.value) {
-      element.value.style.width = `${parseInt(width.value.replace('px', '')) + diff}px`;
-    }
-  }
-}
-
-const dragTask = (dragTask) => {
-  task.value = dragTask;
-}
-
-const handleBarClick = (bar) => {
-  console.log("クリックされたバーのデータ:", bar);
-}
-
-const dragTaskOver = (overTask) => {
-  let deleteIndex;
-  let addIndex;
-  if (task.value.cat !== 'category') {
-    if (overTask.cat === 'category') {
-      let updateTask = tasks.value.find(task => task.id === task.value.id);
-      updateTask['category_id'] = overTask['id'];
-    } else {
-      if (overTask.id !== task.value.id) {
-        tasks.value.map((task, index) => { if (task.id === task.value.id) deleteIndex = index; });
-        tasks.value.map((task, index) => { if (task.id === overTask.id) addIndex = index; });
-        tasks.value.splice(deleteIndex, 1);
-        task.value['category_id'] = overTask['category_id'];
-        tasks.value.splice(addIndex, 0, task.value);
-      }
-    }
-  }
-}
 
 const  getBarColor = (categoryId) => {
   switch (categoryId) {
@@ -515,16 +411,13 @@ onMounted(() => {
   getCalendar();
   getWindowSize();
   todayPosition();
-  window.addEventListener('resize', getWindowSize);
-  window.addEventListener('wheel', windowSizeCheck);
-  window.addEventListener('mousemove', mouseMove);
-  window.addEventListener('mouseup', stopDrag);
-  window.addEventListener('mousemove', mouseResize);
-
-//   taskBars.value.forEach((task, index) => {
-//   console.log(`projectStyles for task ${index}:`, task.projectStyles);
-// });
-
+   //ブラウザのウィンドウサイズの変化の検知にresizeイベントのイベントリスナーを設定しましたが、
+  //スクロールの場合はwheelイベントを設定します。
+   window.addEventListener('resize', getWindowSize);
+   window.addEventListener('wheel', windowSizeCheck);
+  // window.addEventListener('mousemove', mouseMove);
+  // window.addEventListener('mouseup', stopDrag);
+  // window.addEventListener('mousemove', mouseResize);
 
   // console.log('検査最終',moment(findEarliest(list2.value)).format('YYYY-MM-DD'));
   // console.log('ドックデータ',combinedData.value)
@@ -535,15 +428,14 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', getWindowSize);
-  window.removeEventListener('wheel', windowSizeCheck);
-  window.removeEventListener('mousemove', mouseMove);
-  window.removeEventListener('mouseup', stopDrag);
-  window.removeEventListener('mousemove', mouseResize);
+   window.removeEventListener('resize', getWindowSize);
+   window.removeEventListener('wheel', windowSizeCheck);
+  // window.removeEventListener('mousemove', mouseMove);
+  // window.removeEventListener('mouseup', stopDrag);
+  // window.removeEventListener('mousemove', mouseResize);
 });
 
-defineExpose({ windowSizeCheck, displayTasks})
-
+defineExpose({ windowSizeCheck, displayTasks});
 
 </script>
 
@@ -559,20 +451,20 @@ defineExpose({ windowSizeCheck, displayTasks})
       <div class=" flex flex-row">
         <UserSerch :userId="user_id" :users="props.users" @update:currentUser="handleUserId" class="justify-start opacity-100 z-10"/>
       </div>
-    
+
       <!-- 担当者検索コンボボックス　ここまで -->
       <!-- 運航地域の絞込み　ここから -->
       <div class="flex flex-col">
-        <label for="section" class="ml-4 w-28 leading-tight  text-justify text-sm text-gray-600">運航地域</label>
-        <div id="section" class=" w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" >
+        <label for="section" class="ml-4 w-28 leading-tight text-justify text-sm text-gray-600">運航地域</label>
+        <div class=" w-48  text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" >
         <!-- ユーザー選択ドロップダウン -->
-        <select class="rounded-lg  border border-indigo-300 h-10 w-40" v-model="slectedOperatSection">
+        <select id="section" class="rounded-lg  border border-indigo-300 h-10 w-40" v-model="slectedOperatSection">
           <option  :value="null">※ 全地域 ※</option>
           <option v-for="operatSection in props.operatSections" :key="operatSection.id" :value="operatSection.id">
             {{ operatSection.section || '全地域'  }}
             </option>
         </select>
-      </div>  
+      </div>
       </div>
     </div>
       <!-- 運航地域の絞込み　ここまで -->
@@ -581,14 +473,14 @@ defineExpose({ windowSizeCheck, displayTasks})
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                <BreezeValidationErrors :errors="errors" />  
+                <BreezeValidationErrors :errors="errors" />
                 <!-- <form @submit.prevent="updateShip(form.id)" >   -->
                  <section class="text-gray-600 body-font relative">
 
 
    <div id="gantt-content" class="flex">
     <!-- ガントチャートのタスク領域 -->
-    <div id="gantt-task">  
+    <div id="gantt-task">
       <div id="gantt-task-title" class="flex items-center bg-indigo-400 text-white h-16" ref="taskElement">
         <div class="border-t border-r border-b flex items-center justify-center font-bold text-xs w-60 h-full">
         船名&emsp;＆&emsp;基本情報
@@ -596,7 +488,7 @@ defineExpose({ windowSizeCheck, displayTasks})
           </div>
     <!-- ガントチャートのタスク領域 -->
     <div id="gantt-task-list" class="overflow-y-hidden" :style="`height:${calendarViewHeight}px`">
-      <div v-for="(item,index) in displayTasks" :key="index" class="flex flex-col h-36 border-b"> 
+      <div v-for="(item,index) in displayTasks" :key="index" class="flex flex-col h-36 border-b">
       <!-- <div v-for="(task,index) in list1" :style="taskBars.value && taskBars.value[index] ? { top: `${taskBars.value[index].top}px` } : {}" class="flex flex-col  h-32 border-b"> -->
   <!-- タスクの情報を表示するコード -->
         <!-- @dragstart="dragTask" @dragoverr.prevent="dragTaskOver(task)" draggable="true"> -->
@@ -620,15 +512,15 @@ defineExpose({ windowSizeCheck, displayTasks})
     </div> <!-- id="gantt-task"  -->
 
     <!-- ガントチャートのカレンダー領域 -->
-    <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l" 
-          :style="`width:${calendarViewWidth}px`" 
+    <div id="gantt-calendar" class="overflow-x-scroll  overflow-y-hidden border-l"
+          :style="`width:${calendarViewWidth}px`"
            ref="calendar">
       <div id="gantt-date" class="h-16">
         <!-- ここから　カレンダーの年数 -->
         <div id="gantt-year-month" class="relative h-8">
           <div v-for="(calendar,index) in calendars" :key="index">
-            <div class="bg-indigo-700 text-white border-b border-r border-t h-8 absolute font-bold text-sm 
-            flex items-center justify-center" 
+            <div class="bg-indigo-700 text-white border-b border-r border-t h-8 absolute font-bold text-sm
+            flex items-center justify-center"
             :style="`width:${calendar.calendar*block_size}px;left:${calendar.start_block_number*block_size}px`">
               {{calendar.date}}
             </div>
@@ -652,7 +544,7 @@ defineExpose({ windowSizeCheck, displayTasks})
         <!-- //カレンダーの縦線 -->
           <div v-for="(calendar,index) in calendars" :key="index">
             <div v-for="(month,index) in calendar.months" :key="index">
-              <div class="border-r border-b absolute" 
+              <div class="border-r border-b absolute"
               :class="{'bg-blue-100': month.month === 4, 'bg-red-100': month.month === 3}"
               :style="`width:${block_size}px;left:${month.block_number*block_size}px;height:${calendarViewHeight}px`">
               </div>
@@ -676,17 +568,15 @@ defineExpose({ windowSizeCheck, displayTasks})
             <div :style="bar.period2Style" class="rounded-lg absolute h-5 bg-red-200 text-center text-xs" v-if="bar.period2Style" @dblclick="createOpen(bar,1)">
               {{ bar.shipInfo.name}}定期②&emsp;{{formatDate(bar.period2)}}～
             </div>
-            <!-- プロジェクトバー（複数） -->
-            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index" :style="projectStyle.pstyle" :data-tooltip-target="'tooltip-'+projectStyle.s_id+'-'+index"
-            :class="['rounded-lg absolute h-5 text-center text-xs',getBarColor(projectStyle.category_id)]" v-if="bar.projectStyles"  @dblclick="editOpen(projectStyle.id)">
-              <div :id="'tooltip-'+projectStyle.s_id+'-'+index" v-if="projectStyle.category_id == 1"  :style="[projectStyle.pstyle, { width: '150px' }]">
-                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
-              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 2" :style="[projectStyle.pstyle, { width: '150px' }]" >
-                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
-              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 3"  :style="[projectStyle.pstyle, { width: '150px' }]">
-                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
-              <div :id="'tooltip-'+projectStyle.s_id+'-'+index"  v-else-if="projectStyle.category_id == 4" :style="[projectStyle.pstyle, { width: '150px' }]">
-                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}</div>
+                <!-- プロジェクトバー（複数） -->
+            <div v-for="(projectStyle, index) in bar.projectStyles" :key="index">
+              <div v-if="bar.projectStyles" :style="projectStyle.pstyle"
+                :class="['rounded-lg absolute h-5 text-center text-xs has-tooltip inline-block',getBarColor(projectStyle.category_id)]" @dblclick="editOpen(projectStyle.id)">
+
+              <v-tooltip activator="parent" location="top">
+                {{ projectStyle.name }}{{ formatDate(projectStyle.start_date) }}～{{ formatDate(projectStyle.end_date) }}
+              </v-tooltip>
+            </div>
             </div>
             <div :style="`width:${calendarViewWidth*3}px`" class="h-full border-b "></div>
           </div>
@@ -696,11 +586,11 @@ defineExpose({ windowSizeCheck, displayTasks})
     </div>   <!-- id="gantt-calendar" -->
   </div>    <!-- id="gantt-content" カレンダーとタスクの両方 -->
 
-</section> 
+</section>
                     </div>
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
-  
+
 </template>
