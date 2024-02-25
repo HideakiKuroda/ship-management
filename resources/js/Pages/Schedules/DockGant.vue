@@ -9,7 +9,6 @@ import UserSerch from '@/Components/UserSerch.vue';
 import axios from 'axios';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Inertia } from '@inertiajs/inertia'
-// import { useRouter } from 'vue-router';
 import { VTooltip } from 'vuetify/components';
 
 const props = defineProps({
@@ -21,8 +20,6 @@ const props = defineProps({
   loginUser:  Object,
   hasRole:  Boolean,
 })
-
-// const VTooltip = defineAsyncComponent(() => import('vuetify/components').then(c => c.VTooltip));
 
 // const router = useRouter();
 const getPreviousFiscalYearStart = () => {
@@ -106,7 +103,6 @@ const getMonths = (year, block_number) => {
     if (month > 12) { // 13月以降を1月から3月に変換
       month -= 12;
     }
-
     months.push({
       month: month,
       block_number: block_number + i // 各月に一意のブロック番号を割り当て

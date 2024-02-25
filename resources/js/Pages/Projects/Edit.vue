@@ -354,6 +354,10 @@ onMounted(() => {
   });
 });
 
+const showDropdown = ref(false);
+const toggleDropdown=()=> {
+  showDropdown.value = !showDropdown.value;
+}
 
 </script>
 
@@ -400,7 +404,7 @@ onMounted(() => {
                                     <div class="flex flex-col p-2 ml-4">
                                       <label for="typeSerch" class="rounded  w-30 leading-tight border border-indigo-300 text-justify text-sm text-gray-600">◎プロジェクト区分：</label>
                                       <!-- Category検索コンボボックス　ここから -->
-                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 z-0">
+                                      <Combobox v-model="selectedCategory" id="typeSerch" name="typeSerch" class=" opacity-100 dropdown z-50" >
                                             <div  class="relative mt-1" >
                                               <div
                                               class="relative w-full cursor-default  rounded bg-white text-left border-gray-300 focus:ring-2 sm:text-sm"
@@ -411,7 +415,7 @@ onMounted(() => {
                                                   @change="query = $event.target.value"
                                                 />
                                                 <ComboboxButton
-                                                  class="absolute inset-y-0 right-0 flex items-center pr-2 "
+                                                  class="absolute inset-y-0 right-0 flex items-center pr-2"
                                                 >
                                                   <ChevronUpDownIcon
                                                     class="h-5 w-5 text-gray-400"
@@ -426,7 +430,7 @@ onMounted(() => {
                                                 @after-leave="query = ''"
                                               >
                                                 <ComboboxOptions
-                                                  class="absolute mt-1 max-h-60 w-50 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                                                  class="absolute mt-1 max-h-60 w-40 z-10 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50"
                                                 >
                                                   <div
                                                     v-if="filteredCategory.length === 0 && query !== ''"
@@ -498,9 +502,7 @@ onMounted(() => {
                                     </div>
                                  </div>
 
-                                </template>
-                              </vue-collapsible-panel>
-                              <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                              <div id="name" class="w-full lg:h-44 bg-blue-50 rounded border focus:bg-white focus:ring-2 text-base outline-none text-black py-1 px-3 leading-8 transition-colors duration-200 ease-in-out z-0">
                                         ◆　担当者
                                     <div class="flex flex-wrap sm:flex-row sm:space-x-0">
                                       <div class="h-32 w-44  overflow-auto">
@@ -515,10 +517,12 @@ onMounted(() => {
                                       </div>
                                       <div class="flex flex-wrap sm:flex-row w-80">
                                         <button class="mr-4 mt-8 h-8 w-14 px-1.5 py-0 text-xs bg-blue-400  text-white font-semibold rounded hover:bg-blue-500" @click="assignUser">⇐追加</button>
-                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-40 w-40 z-10"/>
+                                        <UserSerch ref="userSearch" :userId="null" :users="props.users" @update:currentUser="handleUserId" class="mt-0 mb-2 w-40 z-10"/>
                                       </div>
                                     </div>
                                   </div>
+                                </template>
+                              </vue-collapsible-panel>
 
 
                             <vue-collapsible-panel :expanded="true">
@@ -614,7 +618,7 @@ onMounted(() => {
 
                             </template>
                             </vue-collapsible-panel>
-                            <vue-collapsible-panel :expanded="true" class="z-0">
+                            <vue-collapsible-panel :expanded="true" class="z-10">
                               <template #title > タスク一覧 </template>
                               <template #content>
                                 <div class="overflow-auto w-full text-sm font-light hidden sm:table">
